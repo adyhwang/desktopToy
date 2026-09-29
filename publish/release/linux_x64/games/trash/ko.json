@@ -1,0 +1,8 @@
+{
+	"game.name": "쓰레기 버리기",
+	"ui.close": "닫기",
+	"ui.records_empty": "아직 기록이 없습니다",
+	"ui.your_score": "점수: %d",
+	"ui.top10": "톱 10",
+	"hud.combo": "콤보×%d"
+}

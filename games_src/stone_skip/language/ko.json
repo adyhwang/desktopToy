@@ -1,0 +1,20 @@
+{
+	"game.name": "물멎이기",
+	"hud.skips": "튕김",
+	"ui.select_title": "던질 물체 선택",
+	"ui.tip_aim": "마우스 상하: 높이 · 좌우: 회전",
+	"ui.tip_charge": "왼쪽 버튼을 길게 눌러 힘을 모으세요",
+	"ui.lb_title": "순위표",
+	"ui.lb_skips": "최다 튕김",
+	"ui.lb_dist": "최장 거리",
+	"ui.round_result": "이번 라운드: %d회 튕김 · %.1f m",
+	"ui.new_record": "신기록!",
+	"ui.close": "닫기",
+	"ui.records_empty": "아직 기록이 없습니다",
+	"stone.pebble": "자갈",
+	"stone.ceramic": "도기 파편",
+	"stone.book": "책",
+	"stone.glass": "창유리 파편",
+	"stone.coin": "동전",
+	"stone.phone": "휴대폰"
+}

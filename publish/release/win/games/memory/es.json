@@ -1,0 +1,10 @@
+{
+	"game.name": "Memoria",
+	"ui.close": "Cerrar",
+	"ui.records_empty": "Aún no hay récords",
+	"ui.your_score": "Tu puntuación: %d",
+	"lb.title": "Top 10",
+	"hud.pairs": "Parejas %d",
+	"tip.combo": "Combo×%d",
+	"tip.level_up": "¡Nivel superado! +5"
+}

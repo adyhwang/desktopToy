@@ -1,0 +1,9 @@
+{
+	"game.name": "Basketball",
+	"ui.close": "Schließen",
+	"ui.records_empty": "Noch keine Rekorde",
+	"ui.your_score": "Deine Punkte: %d",
+	"lb.title": "Top 10",
+	"pop.combo": "Combo×%d",
+	"pop.swish": "SWISH! +1"
+}

@@ -1,0 +1,9 @@
+{
+	"game.name": "投篮",
+	"ui.close": "关闭",
+	"ui.records_empty": "暂无纪录",
+	"ui.your_score": "你的分数：%d",
+	"lb.title": "前十名",
+	"pop.combo": "连击×%d",
+	"pop.swish": "空心！ +1"
+}

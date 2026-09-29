@@ -1,0 +1,7 @@
+{
+	"id": "fish_hook",
+	"name": "Fish Hook",
+	"icon": "assets/icon.png",
+	"entry": "scenes/entry.tscn",
+	"version": "1.0.0"
+}

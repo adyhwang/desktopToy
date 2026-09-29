@@ -1,0 +1,17 @@
+{
+	"game.name": "다트",
+	"ui.close": "닫기",
+	"ui.records_empty": "아직 기록이 없습니다",
+	"ui.your_score": "점수: %d",
+	"ui.target_score": "목표 점수",
+	"board.title": "기록",
+	"board.pts": "%d점",
+	"board.darts": "%d다트",
+	"hud.wind_speed": "%.1f m/s",
+	"pop.wind": "바람! %.1f m/s",
+	"pop.no_score": "득점 없음",
+	"pop.miss": "빗나감",
+	"pop.bust": "버스트! %d",
+	"pop.bull": "불! -50",
+	"pop.win": "승리! %d다트"
+}

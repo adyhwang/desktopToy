@@ -1,0 +1,7 @@
+{
+	"id": "trash",
+	"name": "Trash Toss",
+	"icon": "assets/icon.png",
+	"entry": "scenes/entry.tscn",
+	"version": "1.0.0"
+}

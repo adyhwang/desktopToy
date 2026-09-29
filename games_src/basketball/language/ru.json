@@ -1,0 +1,9 @@
+{
+	"game.name": "Баскетбол",
+	"ui.close": "Закрыть",
+	"ui.records_empty": "Записей пока нет",
+	"ui.your_score": "Ваш счёт: %d",
+	"lb.title": "Топ 10",
+	"pop.combo": "Комбо×%d",
+	"pop.swish": "ЧИСТЫЙ БРОСОК! +1"
+}

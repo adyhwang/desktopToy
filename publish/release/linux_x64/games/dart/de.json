@@ -1,0 +1,17 @@
+{
+	"game.name": "Darts",
+	"ui.close": "Schließen",
+	"ui.records_empty": "Noch keine Rekorde",
+	"ui.your_score": "Deine Punkte: %d",
+	"ui.target_score": "Zielpunktzahl",
+	"board.title": "Rekorde",
+	"board.pts": "%d Pkt.",
+	"board.darts": "%d Pfeile",
+	"hud.wind_speed": "%.1f m/s",
+	"pop.wind": "Wind! %.1f m/s",
+	"pop.no_score": "Keine Punkte",
+	"pop.miss": "Daneben",
+	"pop.bust": "BUST! %d",
+	"pop.bull": "BULL! -50",
+	"pop.win": "Gewonnen! %d Pfeile"
+}

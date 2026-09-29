@@ -1,0 +1,10 @@
+{
+	"game.name": "Найди пару",
+	"ui.close": "Закрыть",
+	"ui.records_empty": "Записей пока нет",
+	"ui.your_score": "Ваш счёт: %d",
+	"lb.title": "Топ 10",
+	"hud.pairs": "Пар %d",
+	"tip.combo": "Комбо×%d",
+	"tip.level_up": "Новый уровень! +5"
+}

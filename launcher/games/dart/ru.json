@@ -1,0 +1,17 @@
+{
+	"game.name": "Дартс",
+	"ui.close": "Закрыть",
+	"ui.records_empty": "Записей пока нет",
+	"ui.your_score": "Ваш счёт: %d",
+	"ui.target_score": "Целевой счёт",
+	"board.title": "Рекорды",
+	"board.pts": "%d очк.",
+	"board.darts": "%d дротиков",
+	"hud.wind_speed": "%.1f м/с",
+	"pop.wind": "Ветер! %.1f м/с",
+	"pop.no_score": "Без очков",
+	"pop.miss": "Мимо",
+	"pop.bust": "ПЕРЕБОР! %d",
+	"pop.bull": "БЫК! -50",
+	"pop.win": "Победа! %d дротиков"
+}

@@ -1,0 +1,20 @@
+{
+	"game.name": "Cabrillas",
+	"hud.skips": "Brincos",
+	"ui.select_title": "Elige tu lanzador",
+	"ui.tip_aim": "Ratón arriba/abajo: altura · izq/der: giro",
+	"ui.tip_charge": "Mantén el botón izquierdo para cargar",
+	"ui.lb_title": "Clasificación",
+	"ui.lb_skips": "Más brincos",
+	"ui.lb_dist": "Mayor distancia",
+	"ui.round_result": "Ronda: %d brincos · %.1f m",
+	"ui.new_record": "¡Nuevo récord!",
+	"ui.close": "Cerrar",
+	"ui.records_empty": "Aún no hay registros",
+	"stone.pebble": "Guijarro",
+	"stone.ceramic": "Fragmento de cerámica",
+	"stone.book": "Libro",
+	"stone.glass": "Fragmento de cristal",
+	"stone.coin": "Moneda",
+	"stone.phone": "Móvil"
+}

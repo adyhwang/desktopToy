@@ -1,0 +1,17 @@
+{
+	"game.name": "Darts",
+	"ui.close": "Close",
+	"ui.records_empty": "No records yet",
+	"ui.your_score": "Your score: %d",
+	"ui.target_score": "Target Score",
+	"board.title": "Records",
+	"board.pts": "%d pts",
+	"board.darts": "%d darts",
+	"hud.wind_speed": "%.1f m/s",
+	"pop.wind": "Wind! %.1f m/s",
+	"pop.no_score": "No Score",
+	"pop.miss": "Miss",
+	"pop.bust": "BUST! %d",
+	"pop.bull": "BULL! -50",
+	"pop.win": "You Win! %d Darts"
+}

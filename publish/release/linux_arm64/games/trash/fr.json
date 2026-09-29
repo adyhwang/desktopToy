@@ -1,0 +1,8 @@
+{
+	"game.name": "Jette les Déchets",
+	"ui.close": "Fermer",
+	"ui.records_empty": "Aucun record",
+	"ui.your_score": "Votre score : %d",
+	"ui.top10": "Top 10",
+	"hud.combo": "combo×%d"
+}

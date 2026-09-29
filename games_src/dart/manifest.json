@@ -1,0 +1,7 @@
+{
+	"id": "dart",
+	"name": "Darts",
+	"icon": "assets/icon.png",
+	"entry": "scenes/entry.tscn",
+	"version": "1.0.0"
+}

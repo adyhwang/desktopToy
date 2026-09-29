@@ -1,0 +1,20 @@
+{
+	"game.name": "Steinehüpfen",
+	"hud.skips": "Hüpfer",
+	"ui.select_title": "Wähle deinen Wurf",
+	"ui.tip_aim": "Maus auf/ab: Höhe · links/rechts: Drehung",
+	"ui.tip_charge": "Linke Maustaste halten zum Aufladen",
+	"ui.lb_title": "Bestenliste",
+	"ui.lb_skips": "Meiste Hüpfer",
+	"ui.lb_dist": "Weiteste Distanz",
+	"ui.round_result": "Runde: %d Hüpfer · %.1f m",
+	"ui.new_record": "Neuer Rekord!",
+	"ui.close": "Schließen",
+	"ui.records_empty": "Noch keine Einträge",
+	"stone.pebble": "Kieselstein",
+	"stone.ceramic": "Keramikscherbe",
+	"stone.book": "Buch",
+	"stone.glass": "Fensterscherbe",
+	"stone.coin": "Münze",
+	"stone.phone": "Handy"
+}

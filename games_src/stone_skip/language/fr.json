@@ -1,0 +1,20 @@
+{
+	"game.name": "Ricochets",
+	"hud.skips": "Ricochets",
+	"ui.select_title": "Choisissez votre projectile",
+	"ui.tip_aim": "Souris haut/bas : hauteur · gauche/droite : rotation",
+	"ui.tip_charge": "Maintenez le clic gauche pour charger",
+	"ui.lb_title": "Classement",
+	"ui.lb_skips": "Plus de ricochets",
+	"ui.lb_dist": "Plus longue distance",
+	"ui.round_result": "Manche : %d ricochets · %.1f m",
+	"ui.new_record": "Nouveau record !",
+	"ui.close": "Fermer",
+	"ui.records_empty": "Aucun record pour l'instant",
+	"stone.pebble": "Galet",
+	"stone.ceramic": "Éclat de céramique",
+	"stone.book": "Livre",
+	"stone.glass": "Éclat de vitre",
+	"stone.coin": "Pièce",
+	"stone.phone": "Téléphone"
+}

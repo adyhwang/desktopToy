@@ -1,0 +1,56 @@
+[gd_scene format=3 uid="uid://cnfbvv2jyed0e"]
+
+[ext_resource type="Script" uid="uid://ca26r7wahpxvk" path="res://scripts/basketball.gd" id="1_main"]
+[ext_resource type="Script" uid="uid://c77bhext60dlu" path="res://scripts/hoop.gd" id="2_hoop"]
+[ext_resource type="Script" uid="uid://b7wru3vg585hu" path="res://scripts/hands.gd" id="3_hands"]
+[ext_resource type="Script" uid="uid://slcte4de0l7l" path="res://scripts/ball.gd" id="4_ball"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hun0w"]
+bg_color = Color(0.5411765, 0.62352943, 0.5921569, 0.7607843)
+
+[node name="BasketballGame" type="Node2D" unique_id=647411373]
+script = ExtResource("1_main")
+
+[node name="HudBar" type="HBoxContainer" parent="."]
+offset_top = 14.0
+offset_bottom = 70.0
+theme_override_constants/separation = 20
+
+[node name="ScoreBoard" type="Label" parent="HudBar" unique_id=1543262066]
+custom_minimum_size = Vector2(380, 55)
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 40
+theme_override_styles/normal = SubResource("StyleBoxFlat_hun0w")
+text = "0"
+horizontal_alignment = 1
+
+[node name="ExitButton" type="Button" parent="." unique_id=1856761763]
+offset_left = 1848.0
+offset_top = 14.0
+offset_right = 1904.0
+offset_bottom = 70.0
+theme_override_colors/font_color = Color(1, 1, 1, 0.75)
+theme_override_font_sizes/font_size = 26
+text = "✕"
+flat = true
+
+[node name="HoopBack" type="Node2D" parent="." unique_id=626028427]
+script = ExtResource("2_hoop")
+
+[node name="Trail" type="Line2D" parent="." unique_id=987057342]
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+
+[node name="Ball" type="Node2D" parent="." unique_id=311712111]
+script = ExtResource("4_ball")
+
+[node name="HoopFront" type="Node2D" parent="."]
+script = ExtResource("2_hoop")
+
+[node name="Hands" type="Node2D" parent="." unique_id=2056760362]
+script = ExtResource("3_hands")
+
+[connection signal="pressed" from="ExitButton" to="." method="_exit_button_pressed"]

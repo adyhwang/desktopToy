@@ -1,0 +1,10 @@
+{
+	"game.name": "記憶合わせ",
+	"ui.close": "閉じる",
+	"ui.records_empty": "記録はまだありません",
+	"ui.your_score": "スコア：%d",
+	"lb.title": "トップ10",
+	"hud.pairs": "残り %d",
+	"tip.combo": "コンボ×%d",
+	"tip.level_up": "レベルアップ！+5"
+}

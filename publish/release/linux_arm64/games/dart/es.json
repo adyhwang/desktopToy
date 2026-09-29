@@ -1,0 +1,17 @@
+{
+	"game.name": "Dardos",
+	"ui.close": "Cerrar",
+	"ui.records_empty": "Aún no hay récords",
+	"ui.your_score": "Tu puntuación: %d",
+	"ui.target_score": "Puntuación objetivo",
+	"board.title": "Récords",
+	"board.pts": "%d pts",
+	"board.darts": "%d dardos",
+	"hud.wind_speed": "%.1f m/s",
+	"pop.wind": "¡Viento! %.1f m/s",
+	"pop.no_score": "Sin puntos",
+	"pop.miss": "Fallo",
+	"pop.bust": "¡PASADO! %d",
+	"pop.bull": "¡DIANA! -50",
+	"pop.win": "¡Ganaste! %d dardos"
+}

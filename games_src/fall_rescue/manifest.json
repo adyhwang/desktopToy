@@ -1,0 +1,7 @@
+{
+	"id": "fall_rescue",
+	"name": "Fall Rescue",
+	"icon": "assets/icon.png",
+	"entry": "scenes/entry.tscn",
+	"version": "1.0.0"
+}

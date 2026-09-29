@@ -1,0 +1,17 @@
+{
+	"game.name": "Fléchettes",
+	"ui.close": "Fermer",
+	"ui.records_empty": "Aucun record pour le moment",
+	"ui.your_score": "Votre score : %d",
+	"ui.target_score": "Score cible",
+	"board.title": "Records",
+	"board.pts": "%d pts",
+	"board.darts": "%d fléchettes",
+	"hud.wind_speed": "%.1f m/s",
+	"pop.wind": "Vent ! %.1f m/s",
+	"pop.no_score": "Aucun point",
+	"pop.miss": "Raté",
+	"pop.bust": "BUST ! %d",
+	"pop.bull": "BULL ! -50",
+	"pop.win": "Gagné ! %d fléchettes"
+}

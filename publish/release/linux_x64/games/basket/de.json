@@ -1,0 +1,8 @@
+{
+	"game.name": "Obstfang",
+	"ui.close": "Schließen",
+	"ui.records_empty": "Noch keine Rekorde",
+	"ui.your_score": "Deine Punkte: %d",
+	"ui.top10": "Top 10",
+	"hud.combo": "Combo×%d"
+}

@@ -1,0 +1,8 @@
+{
+	"game.name": "Бросай мусор",
+	"ui.close": "Закрыть",
+	"ui.records_empty": "Пока нет рекордов",
+	"ui.your_score": "Ваш результат: %d",
+	"ui.top10": "Топ-10",
+	"hud.combo": "комбо×%d"
+}

@@ -1,0 +1,10 @@
+{
+	"game.name": "Memory",
+	"ui.close": "Schließen",
+	"ui.records_empty": "Noch keine Rekorde",
+	"ui.your_score": "Deine Punkte: %d",
+	"lb.title": "Top 10",
+	"hud.pairs": "Paare %d",
+	"tip.combo": "Combo×%d",
+	"tip.level_up": "Level geschafft! +5"
+}

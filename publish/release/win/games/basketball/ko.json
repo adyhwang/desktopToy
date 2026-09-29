@@ -1,0 +1,9 @@
+{
+	"game.name": "농구",
+	"ui.close": "닫기",
+	"ui.records_empty": "기록이 아직 없습니다",
+	"ui.your_score": "점수: %d",
+	"lb.title": "톱 10",
+	"pop.combo": "콤보×%d",
+	"pop.swish": "스위시! +1"
+}

@@ -1,0 +1,17 @@
+{
+	"game.name": "ダーツ",
+	"ui.close": "閉じる",
+	"ui.records_empty": "まだ記録がありません",
+	"ui.your_score": "スコア：%d",
+	"ui.target_score": "目標スコア",
+	"board.title": "記録",
+	"board.pts": "%d 点",
+	"board.darts": "%d 投",
+	"hud.wind_speed": "%.1f m/s",
+	"pop.wind": "風！%.1f m/s",
+	"pop.no_score": "得点なし",
+	"pop.miss": "ミス",
+	"pop.bust": "バスト！%d",
+	"pop.bull": "ブル！-50",
+	"pop.win": "勝利！%d 投"
+}

@@ -1,0 +1,51 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://scripts/trash.gd" id="1_main"]
+[ext_resource type="Script" path="res://scripts/hand.gd" id="2_hand"]
+[ext_resource type="Script" path="res://scripts/trash_item.gd" id="3_item"]
+[ext_resource type="Script" path="res://scripts/bin.gd" id="4_bin"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_score"]
+bg_color = Color(0.5411765, 0.62352943, 0.5921569, 0.7607843)
+
+[node name="TrashGame" type="Node2D"]
+script = ExtResource("1_main")
+
+[node name="HudBar" type="HBoxContainer" parent="."]
+offset_top = 14.0
+offset_bottom = 70.0
+theme_override_constants/separation = 20
+
+[node name="ScoreBoard" type="Label" parent="HudBar"]
+custom_minimum_size = Vector2(175, 55)
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 40
+theme_override_styles/normal = SubResource("StyleBoxFlat_score")
+text = "0"
+horizontal_alignment = 1
+
+[node name="ExitButton" type="Button" parent="."]
+offset_left = 1848.0
+offset_top = 14.0
+offset_right = 1904.0
+offset_bottom = 70.0
+theme_override_colors/font_color = Color(1, 1, 1, 0.75)
+theme_override_font_sizes/font_size = 26
+text = "✕"
+flat = true
+
+[node name="Hand" type="Node2D" parent="."]
+script = ExtResource("2_hand")
+
+[node name="BinBack" type="Node2D" parent="."]
+script = ExtResource("4_bin")
+
+[node name="TrashItem" type="Node2D" parent="."]
+script = ExtResource("3_item")
+
+[node name="BinFront" type="Node2D" parent="."]
+script = ExtResource("4_bin")
+
+[connection signal="pressed" from="ExitButton" to="." method="_exit_button_pressed"]

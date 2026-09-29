@@ -1,0 +1,9 @@
+{
+	"game.name": "バスケット",
+	"ui.close": "閉じる",
+	"ui.records_empty": "記録はまだありません",
+	"ui.your_score": "スコア：%d",
+	"lb.title": "トップ10",
+	"pop.combo": "コンボ×%d",
+	"pop.swish": "スウィッシュ！ +1"
+}

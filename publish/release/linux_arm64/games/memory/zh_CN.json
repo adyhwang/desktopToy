@@ -1,0 +1,10 @@
+{
+	"game.name": "记忆配对",
+	"ui.close": "关闭",
+	"ui.records_empty": "暂无纪录",
+	"ui.your_score": "你的分数：%d",
+	"lb.title": "排行榜",
+	"hud.pairs": "剩余 %d",
+	"tip.combo": "连击×%d",
+	"tip.level_up": "过关！+5"
+}

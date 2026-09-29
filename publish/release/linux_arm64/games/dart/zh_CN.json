@@ -1,0 +1,17 @@
+{
+	"game.name": "飞镖",
+	"ui.close": "关闭",
+	"ui.records_empty": "暂无纪录",
+	"ui.your_score": "你的分数：%d",
+	"ui.target_score": "目标分数",
+	"board.title": "纪录",
+	"board.pts": "%d 分",
+	"board.darts": "%d 镖",
+	"hud.wind_speed": "%.1f m/s",
+	"pop.wind": "起风了！%.1f m/s",
+	"pop.no_score": "不得分",
+	"pop.miss": "脱靶",
+	"pop.bust": "爆分！%d",
+	"pop.bull": "红心！-50",
+	"pop.win": "获胜！%d 镖"
+}

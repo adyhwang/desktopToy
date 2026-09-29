@@ -1,0 +1,10 @@
+{
+	"game.name": "기억 맞추기",
+	"ui.close": "닫기",
+	"ui.records_empty": "기록이 없습니다",
+	"ui.your_score": "점수: %d",
+	"lb.title": "TOP 10",
+	"hud.pairs": "남은 쌍 %d",
+	"tip.combo": "콤보×%d",
+	"tip.level_up": "레벨 업! +5"
+}

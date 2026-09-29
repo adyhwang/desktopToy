@@ -1,0 +1,20 @@
+{
+	"game.name": "打水漂",
+	"hud.skips": "打漂",
+	"ui.select_title": "选择打漂物",
+	"ui.tip_aim": "鼠标上下：高度 · 左右：自旋",
+	"ui.tip_charge": "按住左键蓄力，蓄满自动丢出",
+	"ui.lb_title": "排行榜",
+	"ui.lb_skips": "打漂次数",
+	"ui.lb_dist": "最远距离",
+	"ui.round_result": "本轮：%d 次打漂 · %.1f 米",
+	"ui.new_record": "新纪录！",
+	"ui.close": "关闭",
+	"ui.records_empty": "暂无纪录",
+	"stone.pebble": "鹅卵石",
+	"stone.ceramic": "陶瓷碎片",
+	"stone.book": "书本",
+	"stone.glass": "玻璃窗碎片",
+	"stone.coin": "硬币",
+	"stone.phone": "手机"
+}

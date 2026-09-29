@@ -1,0 +1,20 @@
+{
+	"game.name": "水切り",
+	"hud.skips": "跳ね",
+	"ui.select_title": "投げる石を選ぶ",
+	"ui.tip_aim": "マウス上下：高さ · 左右：回転",
+	"ui.tip_charge": "左クリック長押しで溜める（満タンで自動投擲）",
+	"ui.lb_title": "ランキング",
+	"ui.lb_skips": "跳ね回数",
+	"ui.lb_dist": "最長距離",
+	"ui.round_result": "結果：%d 回跳ね · %.1f m",
+	"ui.new_record": "新記録！",
+	"ui.close": "閉じる",
+	"ui.records_empty": "記録はまだありません",
+	"stone.pebble": "小石",
+	"stone.ceramic": "陶器の破片",
+	"stone.book": "本",
+	"stone.glass": "窓ガラスの破片",
+	"stone.coin": "コイン",
+	"stone.phone": "スマホ"
+}

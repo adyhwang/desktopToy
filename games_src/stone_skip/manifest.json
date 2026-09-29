@@ -1,0 +1,7 @@
+{
+	"id": "stone_skip",
+	"name": "Stone Skip",
+	"icon": "assets/icon.png",
+	"entry": "scenes/entry.tscn",
+	"version": "1.0.0"
+}

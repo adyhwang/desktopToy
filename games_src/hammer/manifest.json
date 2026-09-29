@@ -1,0 +1,7 @@
+{
+	"id": "hammer",
+	"name": "Pest Smash",
+	"icon": "assets/icon.png",
+	"entry": "scenes/entry.tscn",
+	"version": "1.0.0"
+}

@@ -1,0 +1,8 @@
+{
+	"game.name": "Trash Toss",
+	"ui.close": "Close",
+	"ui.records_empty": "No records yet",
+	"ui.your_score": "Your score: %d",
+	"ui.top10": "Top 10",
+	"hud.combo": "combo×%d"
+}

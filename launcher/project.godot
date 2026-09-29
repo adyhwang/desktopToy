@@ -1,0 +1,42 @@
+; Engine configuration file.
+; It's best edited using the editor UI and not directly,
+; since the parameters that go here are not all obvious.
+;
+; Format:
+;   [section] ; section goes between []
+;   param=value ; assign values to parameters
+
+config_version=5
+
+[application]
+
+config/name="DesktopToy"
+config/description="跨平台桌面小游戏合集主程序"
+run/main_scene="res://scenes/main.tscn"
+config/features=PackedStringArray("4.7")
+config/icon="res://icon_app.png"
+boot_splash/bg_color=Color(0.05, 0.05, 0.07, 1)
+boot_splash/show_image=false
+
+[autoload]
+
+L10n="*res://scripts/l10n.gd"
+
+[debug]
+
+file_logging/enable_file_logging=true
+
+[display]
+
+window/size/viewport_width=1920
+window/size/viewport_height=1080
+window/size/mode=1
+window/size/initial_position_type=2
+window/size/initial_position=Vector2i(-32000, -32000)
+window/size/borderless=true
+window/size/always_on_top=true
+
+[rendering]
+
+renderer/rendering_method="gl_compatibility"
+renderer/rendering_method.mobile="gl_compatibility"

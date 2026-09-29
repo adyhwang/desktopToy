@@ -1,0 +1,7 @@
+{
+	"id": "desk_wreck",
+	"name": "Desk Wreck",
+	"icon": "assets/icon.png",
+	"entry": "scenes/entry.tscn",
+	"version": "1.0.0"
+}

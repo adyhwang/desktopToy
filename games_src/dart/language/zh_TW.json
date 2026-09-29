@@ -1,0 +1,17 @@
+{
+	"game.name": "飛鏢",
+	"ui.close": "關閉",
+	"ui.records_empty": "暫無紀錄",
+	"ui.your_score": "你的分數：%d",
+	"ui.target_score": "目標分數",
+	"board.title": "紀錄",
+	"board.pts": "%d 分",
+	"board.darts": "%d 鏢",
+	"hud.wind_speed": "%.1f m/s",
+	"pop.wind": "起風了！%.1f m/s",
+	"pop.no_score": "不得分",
+	"pop.miss": "脫靶",
+	"pop.bust": "爆分！%d",
+	"pop.bull": "紅心！-50",
+	"pop.win": "獲勝！%d 鏢"
+}

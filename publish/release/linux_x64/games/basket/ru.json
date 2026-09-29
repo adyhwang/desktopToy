@@ -1,0 +1,8 @@
+{
+	"game.name": "Ловец фруктов",
+	"ui.close": "Закрыть",
+	"ui.records_empty": "Записей пока нет",
+	"ui.your_score": "Ваш счёт: %d",
+	"ui.top10": "Топ-10",
+	"hud.combo": "комбо×%d"
+}
