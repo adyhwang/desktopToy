@@ -31,7 +31,7 @@ jobs:
       # 2. 生成 _headers 响应头文件（核心修复：pck路径加仓库名前缀）
       - name: Generate _headers file
         run: |
-          cat > ./web/_headers << 'EOF'
+          cat > ./publish/release/web/_headers << 'EOF'
           /*
             Cross-Origin-Embedder-Policy: require-corp
             Cross-Origin-Opener-Policy: same-origin
