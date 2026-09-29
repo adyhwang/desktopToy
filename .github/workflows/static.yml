@@ -1,0 +1,57 @@
+name: Deploy Web to GitHub Pages
+
+# 触发条件：main 分支提交时自动部署，支持手动触发
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+# 部署必需权限
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# 避免并发部署冲突
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      # 1. 拉取仓库代码
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      # 2. 生成 _headers 响应头文件（核心修复：pck路径加仓库名前缀）
+      - name: Generate _headers file
+        run: |
+          cat > ./web/_headers << 'EOF'
+          /*
+            Cross-Origin-Embedder-Policy: require-corp
+            Cross-Origin-Opener-Policy: same-origin
+            Cross-Origin-Resource-Policy: same-origin
+
+          /你的仓库名/games/*.pck
+            Content-Type: application/octet-stream
+          EOF
+
+      # 3. 配置 GitHub Pages 环境
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      # 4. 上传 web 目录为部署包
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./publish/release/web/
+
+      # 5. 正式部署到 GitHub Pages
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
