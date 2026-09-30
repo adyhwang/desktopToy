@@ -15,6 +15,8 @@ var cell_px := 64.0            # 当前格子像素
 var hinted := false            # 提示高亮中
 var _texs: Array = []          # 4 旋转态贴图
 var _pressed := false
+var _last_tap_ms := -10000     # 上次按下时刻（自实现双击判定：触摸屏系统 double_click 不可靠）
+var _last_tap_pos := Vector2.ZERO
 
 
 func setup(id: String, pcolor: Color, base_cells: Array, pcell: float, texs: Array) -> void:
@@ -43,9 +45,14 @@ func _gui_input(event: InputEvent) -> void:
 		if mb.button_index == MOUSE_BUTTON_LEFT:
 			if mb.pressed:
 				_pressed = true
-				if mb.double_click:
+				# 自实现双击：400ms 内两击、间距在容差内（兼容触摸轻点的位置抖动）
+				var now := Time.get_ticks_msec()
+				if now - _last_tap_ms < 400 and mb.position.distance_to(_last_tap_pos) < maxf(cell_px * 0.75, 24.0):
+					_last_tap_ms = -10000
 					piece_double_clicked.emit(self)
 				else:
+					_last_tap_ms = now
+					_last_tap_pos = mb.position
 					piece_pressed.emit(self, mb.position)
 			else:
 				_pressed = false

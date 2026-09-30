@@ -59,6 +59,7 @@ var won := false
 # 拖拽 / 提示
 var drag_piece: Control = null
 var drag_off := Vector2.ZERO
+var drag_moved := false          # 本次按压后是否实际移动（区分原地双击与拖拽）
 var ghost_cells: Array = []      # 对齐后的网格坐标
 var ghost_valid := false
 var ghost_origin := Vector2.ZERO   # ghost 吸附基准原点（所在区域网格原点）
@@ -359,6 +360,7 @@ func _on_piece_pressed(p: Control, at: Vector2) -> void:
 		return
 	drag_piece = p
 	drag_off = at
+	drag_moved = false
 	p.z_index = 100   # 拖拽中置顶，确保始终可见
 	p.hinted = false
 	queue_redraw()
@@ -366,8 +368,13 @@ func _on_piece_pressed(p: Control, at: Vector2) -> void:
 
 ## 双击：顺时针旋转 90°，保持原位就近吸附（后操作的块叠在上层）
 func _on_piece_double_clicked(p: Control) -> void:
-	if won or drag_piece == p:
+	if won:
 		return
+	if drag_piece == p:
+		if drag_moved:
+			return   # 拖动中不旋转
+		drag_piece = null   # 原地双击：先结束第一击挂起的拖拽态
+		ghost_show = false
 	p.set_rotation_state(p.rot + 1, _def_cells(p.piece_id))
 	_snap_piece(p)
 	_play_sfx("rotate")
@@ -431,6 +438,8 @@ func _input(event: InputEvent) -> void:
 	if drag_piece == null:
 		return
 	if event is InputEventMouseMotion:
+		if not drag_moved and event.relative.length() > 4.0:
+			drag_moved = true   # 超过抖动阈值才算实际拖动
 		drag_piece.position = event.global_position - drag_off
 		_update_ghost()
 		queue_redraw()
