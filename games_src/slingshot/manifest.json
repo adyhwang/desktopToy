@@ -1,0 +1,7 @@
+{
+	"id": "slingshot",
+	"name": "Slingshot Brawl",
+	"icon": "assets/icon.png",
+	"entry": "scenes/entry.tscn",
+	"version": "1.0.0"
+}

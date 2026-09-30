@@ -7,5 +7,6 @@ fall_rescue.pck
 fish_hook.pck
 hammer.pck
 memory.pck
+slingshot.pck
 stone_skip.pck
 trash.pck
