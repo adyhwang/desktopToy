@@ -9,4 +9,5 @@ hammer.pck
 memory.pck
 slingshot.pck
 stone_skip.pck
+tetris_puzzle.pck
 trash.pck
