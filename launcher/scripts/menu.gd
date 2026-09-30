@@ -71,8 +71,9 @@ func _ready() -> void:
 	_icons.visible = not empty
 	_option_btn.pressed.connect(_show_options)
 	if OS.has_feature("web"):
-		# Web：Option 窗口（音量/截图等桌面配置）无意义，隐藏入口
+		# Web：Option 窗口（音量/截图等桌面配置）、退出按钮无意义，隐藏入口
 		_option_btn.visible = false
+		_exit_btn.visible = false
 	_about_btn.pressed.connect(_show_about)
 	_exit_btn.pressed.connect(get_tree().quit)
 	for b: Button in [_option_btn, _about_btn, _exit_btn]:

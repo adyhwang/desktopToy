@@ -10,8 +10,8 @@ main_banner.png::CompressedTexture2D::4922882401690975797::1790503231::179050325
 arrow.png::CompressedTexture2D::7164308923430367967::1790146056::1790149999::1::::<><><>0<>0<>39a8b31a6edddbd44c8387f9535cd2f7<>res://.godot/imported/arrow.png-f4fc43c0f77840f93834fcd672ad7187.ctex::
 link.png::CompressedTexture2D::144348014983468116::1790134142::1790134418::1::::<><><>0<>0<>aff9462d961a2396fbe6d29ade451b9f<>res://.godot/imported/link.png-b3776b0c66178147336ee3e00ea68df7.ctex::
 ::res://games/::1790750858
-index.txt::TextFile::-1::1790751848::0::1::::<><><>0<>0<><>::
-version.txt::TextFile::-1::1790751849::0::1::::<><><>0<>0<><>::
+index.txt::TextFile::-1::1790753612::0::1::::<><><>0<>0<><>::
+version.txt::TextFile::-1::1790753614::0::1::::<><><>0<>0<><>::
 ::res://games/basket/::1790558839
 de.json::JSON::-1::1790296021::0::1::::<><><>0<>0<><>::
 en.json::JSON::-1::1790296021::0::1::::<><><>0<>0<><>::
@@ -149,8 +149,8 @@ menu.tscn::PackedScene::4890882911148739012::1790501750::0::1::::<><><>0<>0<><>:
 game_card.gd::GDScript::7576683368634253699::1789741994::0::1::::GameCard<>TextureButton<><>0<>0<><>::
 game_manager.gd::GDScript::5196414106738991917::1790567965::0::1::::GameManager<>RefCounted<><>0<>0<><>::
 l10n.gd::GDScript::240291981326564031::1790579474::0::1::::<>Node<><>0<>0<><>::
-main.gd::GDScript::879040873509312805::1790751733::0::1::::<>Node<><>0<>0<><>::
-menu.gd::GDScript::2301265449205643030::1790579474::0::1::::<>Control<><>0<>0<><>::
+main.gd::GDScript::879040873509312805::1790753528::0::1::::<>Node<><>0<>0<><>::
+menu.gd::GDScript::2301265449205643030::1790753278::0::1::::<>Control<><>0<>0<><>::
 screen_capture.gd::GDScript::4672193660488577133::1790567709::0::1::::ScreenCapture<>RefCounted<><>0<>0<><>::
 ::res://tools/::1790686019
 gen_breakout_levels.gd::GDScript::6260590427900659689::1790217914::0::1::::<>SceneTree<><>0<>0<><>::
