@@ -159,6 +159,10 @@ func start_game(info: Dictionary) -> void:
 	print("[Main] 游戏场景已挂载: %s (子节点 %d 个)" % [info.id, _current_game.get_child_count()])
 	if _current_game.has_signal("exit_requested"):
 		_current_game.exit_requested.connect(stop_game)
+	if OS.has_feature("web"):   # Web 端：无"退出程序"概念，隐藏游戏内 EXIT 按钮
+		var eb: Node = _current_game.find_child("ExitButton", true, false)
+		if eb is CanvasItem:
+			(eb as CanvasItem).visible = false
 	if _current_game.has_method("start"):
 		_current_game.start()
 	_loading = false
@@ -202,6 +206,9 @@ func stop_game() -> void:
 
 func _unhandled_input(event: InputEvent) -> void:
 	# ESC 两段式：游戏中返回启动界面；启动界面直接退出进程
+	# Web 端禁用：quit() 对浏览器无意义，且不响应 ESC
+	if OS.has_feature("web"):
+		return
 	if event.is_action_pressed("ui_cancel"):
 		if _current_game != null:
 			stop_game()
