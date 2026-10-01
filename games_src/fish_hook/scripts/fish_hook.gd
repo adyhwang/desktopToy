@@ -983,6 +983,13 @@ func _unhandled_input(event: InputEvent) -> void:
 			if state == State.BITE:
 				_start_fight()
 				return
+			# 正在钓鱼（抛竿中 / 沉浮 / 等待咬钩）：点击鱼竿直接收杆
+			if state in [State.CAST, State.SINK, State.WAIT] \
+					and _hit_prop(mb.position, _rod_rect(get_viewport_rect().size)):
+				state = State.IDLE
+				var rmsg: String = hud.t("ui.reeled_in", "Reeled in")
+				_popup(rmsg, Color(0.8, 0.8, 0.8))
+				return
 			if state != State.IDLE:
 				return
 			var mp := mb.position
@@ -1012,6 +1019,10 @@ func _unhandled_input(event: InputEvent) -> void:
 					_throw_chum(mp)
 				else:
 					_cast(mp)
+			elif _carrying != "":
+				# 点击岸边 / 非水面区域：空手取消打窝手持（触摸友好，与右键取消等效）
+				_carrying = ""
+				_play_sfx("pick")
 		elif mb.button_index == MOUSE_BUTTON_RIGHT and mb.pressed:
 			# 右键：取消打窝手持 / 收竿
 			if _carrying != "":

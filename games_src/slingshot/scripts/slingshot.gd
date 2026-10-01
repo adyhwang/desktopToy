@@ -225,6 +225,10 @@ func _unhandled_input(event: InputEvent) -> void:
 			elif _aiming:
 				_aiming = false
 				if state == St.PLAY:
+					# 松手位置低于弹弓位水平线 = 取消发射（触摸友好的取消手势，与右键取消等效）
+					if mb.position.y > (_spots[_aim_spot] as Vector2).y:
+						_play_sfx("cancel")
+						return
 					_fire()
 		elif mb.button_index == MOUSE_BUTTON_RIGHT:
 			if mb.pressed:
