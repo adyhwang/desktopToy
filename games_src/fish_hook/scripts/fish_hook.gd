@@ -1,14 +1,21 @@
 extends "res://scripts/game_base.gd"  # 打包时自动改写为包前缀路径
 ## 钓鱼 Fish Hook：下方岸坡（木桶/鱼竿/饵盒）+ 上方三层水体（表层/中层/底层）
 ## 流程：木桶选打窝饵 → 点击水面打窝（饵团抛出落水缓缓下沉，窝点内咬钩率大增）
-##       塑料盒选钩饵（挂在钩上，影响不同鱼种的咬钩率）→ 点鱼竿选浮漂深度（表层/中层/底层）
+##       塑料盒选钩饵（挂在钩上，影响不同稀有度鱼的咬钩率）→ 点鱼竿选浮漂深度（表层/中层/底层）
 ##       → 点击水面抛竿，饵钩沉到浮漂深度所在水层 → 鱼咬钩（浮漂下沉抖动）
 ##       → 按住左键向下拖鼠标"拔河"（下拉距离=拉力），拉力压过鱼力则把鱼往岸边拉，
 ##         鱼力连续 5 秒大于拉力 → 鱼线断裂（鱼饵丢失）；拉到岸边即钓起
-## 鱼群：小杂鱼 1 分表层 / 普通鱼 3 分中层 / 大型鱼 5 分中底层 / 小虾 2 分底层 / 河豚 4 分中层
-##       青蛙 2 分表层 / 泥鳅 2 分底层 / 螃蟹 3 分底层 / 甲鱼 6 分底层低概率
-##       金色稀有鱼 10 分底层低概率 / 金龙 15 分全层极稀有（概率 0.001，鱼力满值）
-##       旧靴子 -2 分全层（扣分+断连击）
+## 鱼群：全部鱼类全层活动（任何深度都可能咬钩），但在各自"舒适水层"咬钩率最高（RARITY.comf 倍率）
+## 远水加成：抛竿落点离岸越远，稀有度越高咬钩率加成越大（RARITY.far，常见/垃圾不受影响）
+## 空钩规则：不挂鱼饵时只有垃圾（旧靴子/鱼骨）会咬钩，挂饵才会吸引正常鱼类
+## 钓起展示：居中放大 3 倍展示，下方显示"鱼名·稀有度"标签（稀有度按 RARITY_COL 着色）
+## 稀有度六档统一管理咬钩参数（RARITY 表）：常见/普通/稀有/传说/史诗/神话（垃圾 boot/fishbone 单独 junk 档）
+## 鱼种 61 种（KINDS 表，贴图 assets/<id>.png，旧素材前缀 fish_）：
+##   常见 12：白条/鲫鱼/鲤鱼/草鱼/鲢鱼/鳊鱼/罗非鱼/丁桂鱼/鲳鱼/黄花鱼/梭鱼/金鱼 + 虾/青蛙
+##   普通 4：泥鳅/白条鱼/麦穗鱼/螃蟹  稀有 23：鲶鱼/黑鱼/鳜鱼/鳙鱼/青鱼/翘嘴/三文鱼/鳕鱼/河豚/甲鱼等
+##   传说 5：箭毒鱼/巨骨舌鱼/冰鱼/南极鳕鱼/皇带鱼  史诗 9：金枪鱼/旗鱼/马林鱼/电鳗/海马/锦鲤等
+##   神话 5：金龙/腔棘鱼/电鳗王/龙鱼/鲛人/鲲  垃圾：旧靴子/鱼骨（负分+断连击）
+## 分值：常见 1-5 → 普通 4 → 稀有 6-9 → 传说 13-16 → 史诗 19-24 → 神话 30-40；垃圾负分
 ## 连击：连续钓到鱼加成 ×1→×3 封顶，钓到垃圾或断线清零
 ## 纯鼠标操作；HUD/排行榜/按钮排与合集统一，素材程序生成（GenFishingSprites.cs）
 
@@ -21,7 +28,7 @@ const Y_WATER_TOP := 0.14      # 水面顶（天空/远景带下沿）
 const Y_SHORE := 0.80          # 岸线（水体下沿）
 
 # —— 拔河参数 ——
-const BITE_WINDOW := 10       # 咬钩反应窗口（s，按住左键进入拔河）
+const BITE_WINDOW := 10       # 咬钩反应窗口兜底值（s）；实际按咬钩鱼稀有度 RARITY.window 取值
 const BREAK_T := 2.2           # 拉力超出红线（上/下任一）的容忍时长（s），超时断线
 const PULL_RANGE := 0.22       # 拉力满值下拉鼠标距离（vp.y 比例）
 const REEL_RATE := 0.30        # 拉力-鱼力差 → 上岸进度速率（1/s）
@@ -39,35 +46,120 @@ const CHUM_LIFE := 30.0        # 窝点持续（s）
 const CHUM_SINK_T := 1.4       # 饵团落水下沉时长（s）
 const CHUM_FLY_T := 0.55       # 饵团抛出飞行时长（s）
 const CHUM_MAX := 4            # 同时存在的窝点上限
-# —— 鱼种：value 分值 / layer 水层(0表1中2底，-1=大鱼中底层随机，-2=全层随机)
-#            r 显示半径(min边比) str 基础鱼力 burst 爆发增幅 bite 咬钩基率（纯概率，无空间判定）
-const KINDS := {
-	"minnow": {"value": 1, "layer": 0, "r": 0.030, "str": 0.30, "burst": 0.22, "bite": 0.035, "tex": "fish_minnow.png"},
-	"crucian": {"value": 3, "layer": 1, "r": 0.046, "str": 0.48, "burst": 0.35, "bite": 0.028, "tex": "fish_crucian.png"},
-	"carp": {"value": 5, "layer": -1, "r": 0.066, "str": 0.68, "burst": 0.50, "bite": 0.020, "tex": "fish_carp.png"},
-	"golden": {"value": 10, "layer": 2, "r": 0.060, "str": 0.95, "burst": 0.60, "bite": 0.010, "tex": "fish_golden.png"},
-	"puffer": {"value": 4, "layer": 1, "r": 0.055, "str": 0.60, "burst": 0.65, "bite": 0.022, "tex": "fish_puffer.png"},
-	"shrimp": {"value": 2, "layer": 2, "r": 0.040, "str": 0.32, "burst": 0.20, "bite": 0.028, "tex": "fish_shrimp.png"},
-	"frog": {"value": 2, "layer": 0, "r": 0.038, "str": 0.30, "burst": 0.42, "bite": 0.020, "tex": "fish_frog.png"},
-	"loach": {"value": 2, "layer": 2, "r": 0.034, "str": 0.26, "burst": 0.34, "bite": 0.022, "tex": "fish_loach.png"},
-	"crab": {"value": 3, "layer": 2, "r": 0.044, "str": 0.42, "burst": 0.38, "bite": 0.016, "tex": "fish_crab.png"},
-	"turtle": {"value": 6, "layer": 2, "r": 0.056, "str": 0.72, "burst": 0.30, "bite": 0.008, "tex": "fish_turtle.png"},
-	"goldendragon": {"value": 15, "layer": -2, "r": 0.075, "str": 1.0, "burst": 1.0, "bite": 0.001, "tex": "fish_dragon.png"},
-	"boot": {"value": -2, "layer": -2, "r": 0.052, "str": 0.18, "burst": 0.09, "bite": 0.010, "tex": "boot.png"},
+# —— 稀有度配置（咬钩基率/舒适层倍率/槽位权重/反应窗口/窝点敏感度统一按稀有度管理）——
+# 常见、普通、稀有、传说、史诗、神话、垃圾
+# bite   咬钩基率：该稀有度每秒基础咬钩概率（舒适水层再乘 comf）
+# comf   舒适层咬钩倍率：鱼位于舒适水层时 bite×此值，其他水层 ×1（全层活动但舒适层概率最高）；-1=全层同率
+# slot   槽位权重：鱼群槽位刷新池按稀有度加权（越稀有越难刷出）
+# window 咬钩反应窗口（s）：稀有度越高留给玩家按住拔河的反应时间越短
+# chum   窝点敏感度：窝点加成对该稀有度的有效系数（1=全额；越稀有的鱼越吃窝，垃圾最不吃窝）
+# far    远水加成：落水点离岸越远咬钩率越高，倍率 = 1 + 距岸比例 × far（0=不受距离影响，稀有鱼加成更大）
+const RARITY := {
+	"common":    {"bite": 0.0021, "comf": 2.0, "slot": 5.0, "window": 10.0, "chum": 0.9, "far": 0.0},
+	"uncommon":  {"bite": 0.0015, "comf": 2.2, "slot": 3.0, "window": 9.0,  "chum": 1.0, "far": 0.15},
+	"rare":      {"bite": 0.00085, "comf": 2.4, "slot": 1.6, "window": 8.0,  "chum": 1.1, "far": 0.35},
+	"legendary": {"bite": 0.00055, "comf": 2.6, "slot": 0.8, "window": 7.0,  "chum": 1.2, "far": 0.55},
+	"epic":      {"bite": 0.0003, "comf": 2.8, "slot": 0.4, "window": 6.0,  "chum": 1.35, "far": 0.75},
+	"mythic":    {"bite": 0.00009, "comf": 3.0, "slot": 0.12, "window": 5.0, "chum": 1.5, "far": 1.0},
+	"junk":      {"bite": 0.006, "comf": 1.0, "slot": 1.2, "window": 10.0, "chum": 0.5, "far": 0.0},
 }
-const GARBAGE := ["boot"]   # 全层活动（任何深度都能咬钩）
+# 稀有度显示色（开发者强制鱼种按钮/提示用，纯色扁平）
+const RARITY_COL := {
+	"common": Color(0.85, 0.87, 0.85),
+	"uncommon": Color(0.50, 0.90, 0.50),
+	"rare": Color(0.45, 0.70, 1.00),
+	"legendary": Color(0.75, 0.50, 1.00),
+	"epic": Color(1.00, 0.72, 0.30),
+	"mythic": Color(1.00, 0.40, 0.45),
+	"junk": Color(0.62, 0.56, 0.50),
+}
+# 开发者强制稀有度循环列表（首项 ""=跟随自然概率，其余对应 RARITY 档位）
+const DEV_RARS := ["", "common", "uncommon", "rare", "legendary", "epic", "mythic", "junk"]
 
-# —— 钩饵：mult=各鱼种咬钩率倍数（缺省 0.8；空钩全 0.35）；tint=复用鱼贴图染色（小鱼饵）——
+# —— 鱼种：value 分值 / layer 出现水层(0表1中2底，-1=大鱼中底层随机，-2=全层随机)
+#            rar 稀有度(查 RARITY) / comf 舒适水层(-1=全层同率)
+#            r 显示半径(min边比) str 基础鱼力 burst 爆发增幅
+const KINDS := {
+	"minnow": {"rar": "common", "value": 1, "layer": 0, "comf": 0, "r": 0.030, "str": 0.30, "burst": 0.22, "tex": "fish_minnow.png"},
+	"crucian": {"rar": "common", "value": 3, "layer": 1, "comf": 1, "r": 0.046, "str": 0.48, "burst": 0.35, "tex": "fish_crucian.png"},
+	"carp": {"rar": "common", "value": 5, "layer": -1, "comf": 1, "r": 0.066, "str": 0.62, "burst": 0.45, "tex": "fish_carp.png"},
+	"golden": {"rar": "common", "value": 5, "layer": 2, "comf": 2, "r": 0.060, "str": 0.58, "burst": 0.55, "tex": "fish_golden.png"},
+	"grasscarp": {"rar": "common", "value": 4, "layer": 1, "comf": 1, "r": 0.058, "str": 0.55, "burst": 0.38, "tex": "grasscarp.png"},
+	"silvercarp": {"rar": "common", "value": 3, "layer": 1, "comf": 1, "r": 0.056, "str": 0.50, "burst": 0.35, "tex": "silvercarp.png"},
+	"bream": {"rar": "common", "value": 3, "layer": 1, "comf": 1, "r": 0.054, "str": 0.48, "burst": 0.30, "tex": "bream.png"},
+	"tilapia": {"rar": "common", "value": 3, "layer": 1, "comf": 0, "r": 0.052, "str": 0.50, "burst": 0.36, "tex": "tilapia.png"},
+	"tench": {"rar": "common", "value": 4, "layer": 2, "comf": 2, "r": 0.050, "str": 0.52, "burst": 0.34, "tex": "tench.png"},
+	"pomfret": {"rar": "common", "value": 3, "layer": 1, "comf": 1, "r": 0.052, "str": 0.46, "burst": 0.28, "tex": "pomfret.png"},
+	"yellowcroaker": {"rar": "common", "value": 4, "layer": 1, "comf": 1, "r": 0.048, "str": 0.50, "burst": 0.32, "tex": "yellowcroaker.png"},
+	"mullet": {"rar": "common", "value": 3, "layer": 1, "comf": 0, "r": 0.054, "str": 0.52, "burst": 0.36, "tex": "mullet.png"},
+	"puffer": {"rar": "rare", "value": 9, "layer": 1, "comf": 1, "r": 0.055, "str": 0.62, "burst": 0.65, "tex": "fish_puffer.png"},
+	"shrimp": {"rar": "common", "value": 2, "layer": 2, "comf": 2, "r": 0.040, "str": 0.32, "burst": 0.20, "tex": "fish_shrimp.png"},
+	"frog": {"rar": "common", "value": 2, "layer": 0, "comf": 0, "r": 0.038, "str": 0.30, "burst": 0.42, "tex": "fish_frog.png"},
+	"loach": {"rar": "uncommon", "value": 4, "layer": 2, "comf": 2, "r": 0.034, "str": 0.36, "burst": 0.44, "tex": "fish_loach.png"},
+	"crab": {"rar": "uncommon", "value": 3, "layer": 2, "comf": 2, "r": 0.044, "str": 0.42, "burst": 0.38, "tex": "fish_crab.png"},
+	"bleak": {"rar": "uncommon", "value": 4, "layer": 0, "comf": 0, "r": 0.040, "str": 0.44, "burst": 0.42, "tex": "bleak.png"},
+	"gudgeon": {"rar": "uncommon", "value": 4, "layer": 1, "comf": 1, "r": 0.036, "str": 0.42, "burst": 0.40, "tex": "gudgeon.png"},
+	"catfish": {"rar": "rare", "value": 8, "layer": 2, "comf": 2, "r": 0.064, "str": 0.72, "burst": 0.42, "tex": "catfish.png"},
+	"yellowcat": {"rar": "rare", "value": 7, "layer": 2, "comf": 2, "r": 0.054, "str": 0.66, "burst": 0.44, "tex": "yellowcat.png"},
+	"snakehead": {"rar": "rare", "value": 9, "layer": 2, "comf": 2, "r": 0.062, "str": 0.78, "burst": 0.48, "tex": "snakehead.png"},
+	"mandarinfish": {"rar": "rare", "value": 9, "layer": 2, "comf": 2, "r": 0.056, "str": 0.74, "burst": 0.52, "tex": "mandarinfish.png"},
+	"bighead": {"rar": "rare", "value": 8, "layer": 1, "comf": 1, "r": 0.068, "str": 0.70, "burst": 0.38, "tex": "bighead.png"},
+	"blackcarp": {"rar": "rare", "value": 8, "layer": -1, "comf": 2, "r": 0.064, "str": 0.74, "burst": 0.42, "tex": "blackcarp.png"},
+	"culter": {"rar": "rare", "value": 8, "layer": 1, "comf": 0, "r": 0.058, "str": 0.72, "burst": 0.50, "tex": "culter.png"},
+	"rainbowtrout": {"rar": "rare", "value": 8, "layer": 1, "comf": 1, "r": 0.056, "str": 0.70, "burst": 0.54, "tex": "rainbowtrout.png"},
+	"seabream": {"rar": "rare", "value": 7, "layer": 1, "comf": 1, "r": 0.052, "str": 0.66, "burst": 0.44, "tex": "seabream.png"},
+	"grouper": {"rar": "rare", "value": 9, "layer": 2, "comf": 2, "r": 0.060, "str": 0.76, "burst": 0.46, "tex": "grouper.png"},
+	"flounder": {"rar": "rare", "value": 7, "layer": 2, "comf": 2, "r": 0.058, "str": 0.62, "burst": 0.30, "tex": "flounder.png"},
+	"mackerel": {"rar": "rare", "value": 7, "layer": 1, "comf": 1, "r": 0.054, "str": 0.68, "burst": 0.50, "tex": "mackerel.png"},
+	"hairtail": {"rar": "rare", "value": 7, "layer": 1, "comf": 1, "r": 0.056, "str": 0.66, "burst": 0.46, "tex": "hairtail.png"},
+	"salmon": {"rar": "rare", "value": 8, "layer": 1, "comf": 1, "r": 0.060, "str": 0.72, "burst": 0.56, "tex": "salmon.png"},
+	"cod": {"rar": "rare", "value": 7, "layer": 2, "comf": 2, "r": 0.058, "str": 0.68, "burst": 0.42, "tex": "cod.png"},
+	"ray": {"rar": "rare", "value": 9, "layer": 2, "comf": 2, "r": 0.068, "str": 0.70, "burst": 0.36, "tex": "ray.png"},
+	"betta": {"rar": "rare", "value": 7, "layer": 0, "comf": 0, "r": 0.048, "str": 0.58, "burst": 0.60, "tex": "betta.png"},
+	"arcticcod": {"rar": "rare", "value": 8, "layer": 2, "comf": 2, "r": 0.056, "str": 0.66, "burst": 0.40, "tex": "arcticcod.png"},
+	"poisonfish": {"rar": "legendary", "value": 13, "layer": 1, "comf": 0, "r": 0.052, "str": 0.82, "burst": 0.62, "tex": "poisonfish.png"},
+	"arapaima": {"rar": "legendary", "value": 15, "layer": 2, "comf": 2, "r": 0.076, "str": 0.88, "burst": 0.55, "tex": "arapaima.png"},
+	"icefish": {"rar": "legendary", "value": 14, "layer": 2, "comf": 2, "r": 0.044, "str": 0.70, "burst": 0.50, "tex": "icefish.png"},
+	"antarcod": {"rar": "legendary", "value": 13, "layer": 2, "comf": 2, "r": 0.060, "str": 0.80, "burst": 0.44, "tex": "antarcod.png"},
+	"oarfish": {"rar": "legendary", "value": 16, "layer": 1, "comf": 1, "r": 0.070, "str": 0.86, "burst": 0.48, "tex": "oarfish.png"},
+	"tuna": {"rar": "epic", "value": 20, "layer": -1, "comf": 1, "r": 0.070, "str": 0.94, "burst": 0.58, "tex": "tuna.png"},
+	"sailfish": {"rar": "epic", "value": 22, "layer": 1, "comf": 0, "r": 0.072, "str": 0.96, "burst": 0.60, "tex": "sailfish.png"},
+	"marlin": {"rar": "epic", "value": 24, "layer": 1, "comf": 0, "r": 0.074, "str": 0.98, "burst": 0.62, "tex": "marlin.png"},
+	"eel": {"rar": "epic", "value": 21, "layer": 2, "comf": 2, "r": 0.062, "str": 0.92, "burst": 0.66, "tex": "eel.png"},
+	"seahorse": {"rar": "epic", "value": 19, "layer": 1, "comf": 1, "r": 0.044, "str": 0.60, "burst": 0.35, "tex": "seahorse.png"},
+	"discus": {"rar": "epic", "value": 19, "layer": 1, "comf": 1, "r": 0.054, "str": 0.78, "burst": 0.50, "tex": "discus.png"},
+	"piranha": {"rar": "epic", "value": 20, "layer": 1, "comf": 1, "r": 0.052, "str": 0.90, "burst": 0.72, "tex": "piranha.png"},
+	"lungfish": {"rar": "epic", "value": 19, "layer": 2, "comf": 2, "r": 0.060, "str": 0.86, "burst": 0.44, "tex": "lungfish.png"},
+	"kingsalmon": {"rar": "epic", "value": 22, "layer": 1, "comf": 1, "r": 0.068, "str": 0.96, "burst": 0.58, "tex": "kingsalmon.png"},
+	"koi": {"rar": "epic", "value": 21, "layer": 0, "comf": 0, "r": 0.062, "str": 0.84, "burst": 0.46, "tex": "koi.png"},
+	"goldendragon": {"rar": "mythic", "value": 15, "layer": -2, "comf": -1, "r": 0.075, "str": 1.0, "burst": 1.0, "tex": "fish_dragon.png"},
+	"coelacanth": {"rar": "mythic", "value": 30, "layer": 2, "comf": 2, "r": 0.074, "str": 1.0, "burst": 0.60, "tex": "coelacanth.png"},
+	"eelking": {"rar": "mythic", "value": 32, "layer": 2, "comf": 2, "r": 0.070, "str": 1.0, "burst": 0.72, "tex": "eelking.png"},
+	"arowana": {"rar": "mythic", "value": 30, "layer": 1, "comf": 1, "r": 0.070, "str": 1.0, "burst": 0.58, "tex": "arowana.png"},
+	"mermaid": {"rar": "mythic", "value": 35, "layer": -2, "comf": -1, "r": 0.072, "str": 1.0, "burst": 0.60, "tex": "mermaid.png"},
+	"kun": {"rar": "mythic", "value": 40, "layer": -2, "comf": -1, "r": 0.085, "str": 1.0, "burst": 0.55, "tex": "kun.png"},
+	"turtle": {"rar": "rare", "value": 6, "layer": 2, "comf": 2, "r": 0.056, "str": 0.72, "burst": 0.30, "tex": "fish_turtle.png"},
+	"fishbone": {"rar": "junk", "value": -1, "layer": -2, "comf": -1, "r": 0.048, "str": 0.15, "burst": 0.08, "tex": "fishbone.png"},
+	"boot": {"rar": "junk", "value": -2, "layer": -2, "comf": -1, "r": 0.052, "str": 0.18, "burst": 0.09, "tex": "boot.png"},
+}
+const GARBAGE := ["boot", "fishbone"]   # 垃圾（rar=junk 全层同率咬钩；统计/图鉴过滤用）
+
+
+## 大型鱼/高稀有判定：钓起欢呼音效（r 大或稀有度 rare 以上）
+func _is_big(kind: String) -> bool:
+	return float(KINDS[kind].r) >= 0.060 or (KINDS[kind].rar in ["rare", "legendary", "epic", "mythic"])
+
+# —— 钩饵：mult=各稀有度咬钩率倍数（缺省 0.8）；空钩（none）只有垃圾会咬钩；tint=复用鱼贴图染色（小鱼饵）——
 const BAITS := {
-	"none": {"tex": "", "mult": {}},
-	"worm": {"tex": "bait_worm.png", "mult": {"minnow": 1.6, "crucian": 1.6, "carp": 1.5, "golden": 1.2, "puffer": 1.4, "shrimp": 1.3, "frog": 1.4, "loach": 1.5, "crab": 1.2, "turtle": 1.2, "goldendragon": 0.8, "boot": 1.2}},
-	"corn": {"tex": "bait_corn.png", "mult": {"minnow": 0.7, "crucian": 2.0, "carp": 1.8, "golden": 0.8, "puffer": 0.9, "shrimp": 0.6, "frog": 0.6, "loach": 0.7, "crab": 0.9, "turtle": 1.6, "goldendragon": 0.5, "boot": 1.0}},
-	"greenfish": {"tex": "fish_minnow.png", "tint": Color(0.6, 1.0, 0.68), "mult": {"minnow": 0.25, "crucian": 0.5, "carp": 2.6, "golden": 2.2, "puffer": 1.8, "shrimp": 0.3, "frog": 1.8, "loach": 0.4, "crab": 0.5, "turtle": 2.2, "goldendragon": 2.4, "boot": 0.6}},
-	"crucianfry": {"tex": "fish_crucian.png", "tint": Color(1.0, 0.72, 0.72), "mult": {"minnow": 0.25, "crucian": 0.5, "carp": 2.0, "golden": 2.6, "puffer": 1.5, "shrimp": 0.3, "frog": 1.5, "loach": 0.4, "crab": 0.5, "turtle": 2.4, "goldendragon": 2.6, "boot": 0.6}},
-	"shrimp_bait": {"tex": "fish_shrimp.png", "tint": Color(1.0, 0.88, 0.95), "mult": {"minnow": 0.4, "crucian": 0.8, "carp": 1.6, "golden": 1.4, "puffer": 2.6, "shrimp": 0.3, "frog": 2.0, "loach": 0.5, "crab": 1.8, "turtle": 1.6, "goldendragon": 1.6, "boot": 0.6}},
-	"apple": {"tex": "bait_apple.png", "mult": {"minnow": 0.5, "crucian": 1.5, "carp": 1.2, "golden": 0.9, "puffer": 1.0, "shrimp": 0.4, "frog": 0.5, "loach": 0.6, "crab": 0.7, "turtle": 1.0, "goldendragon": 0.6, "boot": 1.0}},
-	"caterpillar": {"tex": "bait_caterpillar.png", "mult": {"minnow": 2.2, "crucian": 1.5, "carp": 0.8, "golden": 0.7, "puffer": 1.2, "shrimp": 0.5, "frog": 2.4, "loach": 1.0, "crab": 0.8, "turtle": 0.8, "goldendragon": 0.5, "boot": 1.0}},
-	"strawberry": {"tex": "bait_strawberry.png", "mult": {"minnow": 0.6, "crucian": 1.6, "carp": 0.9, "golden": 1.3, "puffer": 1.1, "shrimp": 0.4, "frog": 0.6, "loach": 0.5, "crab": 0.6, "turtle": 0.9, "goldendragon": 1.3, "boot": 1.0}},
+	"none": {"tex": "", "mult": {}},   # 空钩：只有垃圾（junk）会咬钩，junk 倍率 1.0
+	"worm": {"tex": "bait_worm.png", "mult": {"common": 1.6, "uncommon": 1.4, "rare": 1.1, "legendary": 0.9, "epic": 0.8, "mythic": 0.6, "junk": 1.2}},
+	"corn": {"tex": "bait_corn.png", "mult": {"common": 0.7, "uncommon": 1.6, "rare": 1.8, "legendary": 1.2, "epic": 0.9, "mythic": 0.5, "junk": 1.0}},
+	"greenfish": {"tex": "fish_minnow.png", "tint": Color(0.6, 1.0, 0.68), "mult": {"common": 0.3, "uncommon": 1.6, "rare": 2.2, "legendary": 2.4, "epic": 2.0, "mythic": 2.4, "junk": 0.6}},
+	"crucianfry": {"tex": "fish_crucian.png", "tint": Color(1.0, 0.72, 0.72), "mult": {"common": 0.3, "uncommon": 1.4, "rare": 2.4, "legendary": 2.2, "epic": 2.2, "mythic": 2.6, "junk": 0.6}},
+	"shrimp_bait": {"tex": "fish_shrimp.png", "tint": Color(1.0, 0.88, 0.95), "mult": {"common": 0.4, "uncommon": 1.5, "rare": 1.6, "legendary": 1.8, "epic": 1.6, "mythic": 1.6, "junk": 0.6}},
+	"apple": {"tex": "bait_apple.png", "mult": {"common": 0.6, "uncommon": 1.2, "rare": 1.0, "legendary": 1.1, "epic": 1.0, "mythic": 0.6, "junk": 1.0}},
+	"caterpillar": {"tex": "bait_caterpillar.png", "mult": {"common": 1.9, "uncommon": 1.0, "rare": 0.8, "legendary": 0.8, "epic": 0.7, "mythic": 0.5, "junk": 1.0}},
+	"strawberry": {"tex": "bait_strawberry.png", "mult": {"common": 0.6, "uncommon": 1.2, "rare": 1.3, "legendary": 1.2, "epic": 1.1, "mythic": 1.3, "junk": 1.0}},
 }
 const BAIT_ORDER := ["worm", "corn", "greenfish", "crucianfry", "shrimp_bait", "apple", "caterpillar", "strawberry"]
 
@@ -80,19 +172,40 @@ const CHUMS := {
 }
 const CHUM_ORDER := ["worm", "mealworm", "corn", "rice"]
 
-# —— 鱼群槽位（池内按权重刷新；golden 低概率）——
+# —— 鱼群槽位（池内鱼种按各自稀有度 RARITY.slot 权重刷新；条目 ["kind"] 或 ["kind", 权重倍率]）——
 const SLOT_POOLS := [
-	[["minnow", 1.0]], [["minnow", 1.0]], [["minnow", 1.0]], [["minnow", 1.0]],
-	[["crucian", 1.0]], [["crucian", 1.0]],
-	[["puffer", 1.0]],
-	[["crucian", 0.5], ["carp", 0.5]],
-	[["shrimp", 1.0]], [["shrimp", 1.0]],
-	[["carp", 0.51], ["golden", 0.2], ["shrimp", 0.24], ["goldendragon", 0.05]],
-	[["boot", 1.0]],
-	[["frog", 1.0]],                                     # 表层青蛙
-	[["loach", 0.6], ["shrimp", 0.4]],                   # 底层泥鳅/虾
-	[["crab", 1.0]],                                     # 底层螃蟹
-	[["turtle", 0.4], ["carp", 0.4], ["golden", 0.2]],   # 底层稀有甲鱼
+	# —— 常见（8 槽：新手主打，几乎每竿有鱼）——
+	["minnow", "crucian", "silvercarp", "bream", "pomfret", "mullet"],
+	["crucian", "grasscarp", "tilapia", "yellowcroaker"],
+	["minnow", "bleak", "gudgeon"],
+	["grasscarp", "carp", "tench"],
+	["frog"],                                             # 表层青蛙
+	["shrimp", "loach"],                                  # 底层虾/泥鳅
+	["carp", "silvercarp", "bighead"],                    # 中层混养
+	["golden", "minnow", "crucian"],                      # 金鱼点缀
+	# —— 普通/稀有（6 槽：进阶目标）——
+	["bleak", "gudgeon", "loach"],                        # 表层小鱼
+	["catfish", "yellowcat", "snakehead"],                # 底层凶猛
+	["mandarinfish", "blackcarp", "culter"],              # 底层名贵
+	["rainbowtrout", "salmon", "seabream", "mackerel"],   # 中层洄游
+	["grouper", "cod", "arcticcod", "flounder"],          # 底层海鱼
+	["betta", "puffer", "ray", "crab"],                   # 特色种
+	# —— 高稀有（7 槽：传说/史诗出没）——
+	["turtle", "carp", "golden"],                         # 底层稀有甲鱼
+	["poisonfish", "icefish", "antarcod"],                # 极地/毒物
+	["arapaima", "snakehead", "catfish"],                 # 巨型淡水
+	["oarfish", "hairtail", "mackerel"],                  # 深海长条
+	["tuna", "sailfish", "marlin", "kingsalmon"],         # 大洋掠食者
+	["eel", "lungfish", "eelking"],                       # 底层电鳗系
+	["seahorse", "discus", "koi", "piranha", "poisonfish"], # 观赏奇种
+	# —— 神话（3 槽：顶级传说）——
+	["goldendragon", "kun"],                              # 神话全层
+	["coelacanth", "arowana", "mermaid"],                 # 活化石/龙鱼
+	["mermaid", "kun", "eelking", "goldendragon"],        # 神话混池
+	# —— 垃圾（3 槽：鞋/鱼骨）——
+	["boot"],
+	["fishbone"],
+	["boot", "fishbone"],
 ]
 
 const SFX_DB := -4.0
@@ -189,14 +302,13 @@ var _bgm_btn: Button
 var _lb_btn: Button
 var _menu_layer: Control = null   # 打开中的选择面板（木桶/饵盒/鱼竿）
 # 开发者模式（暗门：排行榜面板 5 秒内点满 10 次，关闭排行榜后弹出调试窗口）
-const DEV_KINDS := ["", "minnow", "crucian", "carp", "golden", "puffer", "shrimp", "frog", "loach", "crab", "turtle", "goldendragon", "boot"]
 var _dev_pending := false
 var _dev_clicks := 0
 var _dev_click_ms := 0
 var _dev_win: PanelContainer
 var _dev_drag := false
-var _dev_kind_btn: Button
-var _dev_kind_i := 0             # 强制咬钩鱼种循环索引（0=跟随自然概率）
+var _dev_rar_btn: Button
+var _dev_rar_i := 0             # 强制咬钩稀有度循环索引（0=跟随自然概率，1..7=按稀有度强制）
 var _dev_bite_now := false       # 立即咬钩（下一帧触发）
 var _dev_bite_mult := 1.0        # 咬钩率全局倍率
 var _dev_fish_mult := 1.0        # 鱼力全局倍率
@@ -420,14 +532,21 @@ func _init_population() -> void:
 
 func _pick_pool_kind(pool: Array) -> String:
 	var total := 0.0
-	for e: Array in pool:
-		total += float(e[1])
+	for e: Variant in pool:
+		total += _slot_weight(e)
 	var r := randf() * total
-	for e: Array in pool:
-		r -= float(e[1])
+	for e: Variant in pool:
+		r -= _slot_weight(e)
 		if r <= 0.0:
-			return String(e[0])
-	return String(pool[0][0])
+			return String(e) if e is String else String(e[0])
+	return String(pool[0]) if pool[0] is String else String(pool[0][0])
+
+
+## 槽位条目权重 = 稀有度 slot 权重 × 条目倍率（条目 ["kind"] 或 ["kind", 倍率]）
+func _slot_weight(e: Variant) -> float:
+	var kind: String = e if e is String else String(e[0])
+	var mult: float = 1.0 if e is String else float(e[1])
+	return float(RARITY[KINDS[kind].rar].slot) * mult
 
 
 func _resolve_layer(kind: String) -> int:
@@ -487,7 +606,7 @@ func _process(delta: float) -> void:
 			_step_bite_chance(delta, vp)
 		State.BITE:
 			_bite_t += delta
-			if _bite_t >= BITE_WINDOW:
+			if _bite_t >= _bite_window():
 				_bite_missed()
 		State.FIGHT:
 			_step_fight(delta, vp)
@@ -513,6 +632,13 @@ func _process(delta: float) -> void:
 ## 钩饵下沉时长：越深越久
 func _sink_dur() -> float:
 	return 0.35 + 0.35 * _depth
+
+
+## 咬钩反应窗口：按咬钩鱼的稀有度取值（无鱼引用时用兜底值）
+func _bite_window() -> float:
+	if _bite_fish.is_empty():
+		return BITE_WINDOW
+	return float(RARITY[KINDS[_bite_fish.kind].rar].window)
 
 
 # ===== 打窝 =====
@@ -554,12 +680,17 @@ func _throw_chum(to: Vector2) -> void:
 
 # ===== 咬钩判定 =====
 
-func _bait_mult(kind: String) -> float:
-	var bait: Dictionary = BAITS[_bait]
-	var mult: Dictionary = bait.mult
+## 鱼饵对某稀有度的咬钩率倍数（空钩只咬垃圾：junk 全额 1.0；未配置的稀有度缺省 0.8）
+func _bait_mult(rar: String) -> float:
 	if _bait == "none":
-		return 0.35
-	return float(mult.get(kind, 0.8))
+		return 1.0
+	return float(BAITS[_bait].mult.get(rar, 0.8))
+
+
+## 鱼位于当前浮漂水层的咬钩倍率：舒适层 ×RARITY.comf，全层同率鱼(comf=-1)恒 ×comf
+func _layer_mult(kind: Dictionary) -> float:
+	var r: Dictionary = RARITY[kind.rar]
+	return float(r.comf) if int(kind.comf) < 0 or int(kind.comf) == _depth else 1.0
 
 
 func _hook_chum_q(vp: Vector2) -> float:
@@ -571,14 +702,31 @@ func _hook_chum_q(vp: Vector2) -> float:
 	return q
 
 
+## 落水点离岸距离 0..1（0=贴岸，1=最远水面）：按水面竖直范围归一（岸线在下、水面顶在上）
+func _far_dist() -> float:
+	if _cast_to == Vector2.ZERO:
+		return 0.0
+	var vp := get_viewport_rect().size
+	var d := (Y_SHORE - _cast_to.y / vp.y) / (Y_SHORE - Y_WATER_TOP)
+	return clampf(d, 0.0, 1.0)
+
+
 func _step_bite_chance(delta: float, vp: Vector2) -> void:
-	# 咬钩纯概率判定：目标层鱼群基率 × 鱼饵倍率 × 窝点加成（无空间/距离因素）
+	# 咬钩纯概率判定（无空间/距离因素）：
+	# 稀有度基率 × 舒适层倍率 × 鱼饵(稀有度)倍率 × 窝点加成(稀有度敏感度) × 远水加成(稀有度 far)
+	# 空钩时只有垃圾（旧靴子/鱼骨）会咬钩
+	var q := _hook_chum_q(vp)
+	var far_d := _far_dist()
 	var rate := 0.0
 	for f: Dictionary in _fish:
-		if GARBAGE.has(f.kind) or f.layer == _depth:
-			rate += float(KINDS[f.kind].bite) * _bait_mult(f.kind)
+		var k: Dictionary = KINDS[f.kind]
+		if _bait == "none" and k.rar != "junk":
+			continue
+		var r: Dictionary = RARITY[k.rar]
+		var chum_m: float = 1.0 + (q - 1.0) * float(r.chum)
+		var far_m: float = 1.0 + far_d * float(r.far)
+		rate += float(r.bite) * _layer_mult(k) * _bait_mult(k.rar) * chum_m * far_m
 	if rate > 0.0 or _dev_bite_now:
-		rate *= _hook_chum_q(vp)
 		rate *= _dev_bite_mult
 		if _dev_bite_now:
 			rate = 10.0   # 开发者：立即咬钩
@@ -588,24 +736,21 @@ func _step_bite_chance(delta: float, vp: Vector2) -> void:
 
 
 func _start_bite(vp: Vector2) -> void:
-	# 按咬钩基率加权随机选一条目标层的鱼（垃圾全层可咬）；开发者强制鱼种时直接构造
-	if _dev_kind_i > 0:
-		var want: String = DEV_KINDS[_dev_kind_i]
-		_bite_fish = {"kind": want, "layer": _depth, "slot": -1}
+	# 全层活动：按"稀有度基率×舒适层倍率"加权随机选一条鱼咬钩；开发者强制稀有度时从 KINDS 随机选该档鱼
+	if _dev_rar_i > 0:
+		var rar: String = DEV_RARS[_dev_rar_i]
+		var pool: Array = KINDS.keys().filter(func(k: String) -> bool: return KINDS[k].rar == rar)
+		_bite_fish = {"kind": pool[randi() % pool.size()], "layer": _depth, "slot": -1}
 	else:
-		var cands: Array = []
-		for f: Dictionary in _fish:
-			if GARBAGE.has(f.kind) or f.layer == _depth:
-				cands.append(f)
-		if cands.is_empty():
+		if _fish.is_empty():
 			return
 		var total := 0.0
-		for f: Dictionary in cands:
-			total += float(KINDS[f.kind].bite)
+		for f: Dictionary in _fish:
+			total += float(RARITY[KINDS[f.kind].rar].bite) * _layer_mult(KINDS[f.kind])
 		var r := randf() * total
-		var pick: Dictionary = cands[cands.size() - 1]
-		for f: Dictionary in cands:
-			r -= float(KINDS[f.kind].bite)
+		var pick: Dictionary = _fish[_fish.size() - 1]
+		for f: Dictionary in _fish:
+			r -= float(RARITY[KINDS[f.kind].rar].bite) * _layer_mult(KINDS[f.kind])
 			if r <= 0.0:
 				pick = f
 				break
@@ -770,7 +915,7 @@ func _catch_fish(vp: Vector2) -> void:
 				_popup("%s ×%.1f" % [ctext, mult], Color(1.0, 0.85, 0.3)))
 		if combo >= 2:
 			_play_sfx("combo", clampf(-2.0 + combo, -6.0, 0.0))
-		elif _land_kind in ["carp", "golden", "turtle"]:
+		elif _is_big(_land_kind):
 			_play_sfx("cheer")   # 大型鱼/稀有鱼：群体欢呼
 		else:
 			_play_sfx("catch")
@@ -838,6 +983,8 @@ func _popup(text: String, col: Color) -> void:
 
 
 func _refresh_boards() -> void:
+	if hud == null:
+		return   # 无头冒烟：start() 未调用（hud 未初始化）时跳过
 	var ss: String = hud.t("hud.score", "Score")
 	var ff: String = hud.t("hud.fish", "Fish")
 	_score_board.text = "%s %d" % [ss, score]
@@ -1237,8 +1384,8 @@ func _draw_land_fish(vp: Vector2) -> void:
 		var rot1 := (1.0 - e1) * PI * 0.85 + sin(_time * 18.0) * 0.04 * (1.0 - e1)
 		_draw_fish_sprite(vp, _land_kind, p0.lerp(p1, e1), rot1, 1.0, lerpf(1.0, 3.0, e1))
 	elif _land_t < LAND_T:
-		# 居中放大展示：轻微摆动；金龙/金色稀有鱼周围金光一闪一闪
-		if _land_kind in ["goldendragon", "golden"]:
+		# 居中放大展示：轻微摆动；金色/史诗/神话鱼周围金光一闪一闪
+		if _land_kind == "golden" or KINDS[_land_kind].rar in ["epic", "mythic"]:
 			_draw_golden_glow(center, m)
 		_draw_fish_sprite(vp, _land_kind, center, sin(_time * 5.0) * 0.06, 1.0, 3.0)
 	elif int(KINDS[_land_kind].value) >= 0:
@@ -1250,6 +1397,37 @@ func _draw_land_fish(vp: Vector2) -> void:
 		# 垃圾缩小段：3 倍缩小到 1 倍（ease-out），缩小完成后转岸上层丢出
 		var es := 1.0 - pow(1.0 - clampf((_land_t - LAND_T) / LAND_SHRINK_T, 0.0, 1.0), 2.0)
 		_draw_fish_sprite(vp, _land_kind, center, sin(_time * 5.0) * 0.06, 1.0, lerpf(3.0, 1.0, es))
+	_draw_land_label(vp, center)
+
+
+## 钓起展示标签：鱼名·稀有度（如"龙鱼·神话"），居中展示段显示，拉近淡入、飞走/缩小淡出
+func _draw_land_label(vp: Vector2, center: Vector2) -> void:
+	var m := minf(vp.x, vp.y)
+	var a: float = 1.0
+	if _land_t < 0.4:
+		a = clampf(_land_t / 0.4, 0.0, 1.0)
+	elif _land_t >= LAND_T:
+		a = 1.0 - clampf((_land_t - LAND_T) / 0.35, 0.0, 1.0)
+	if a <= 0.02:
+		return
+	var rar: String = KINDS[_land_kind].rar
+	var fname: String = hud.t("fish." + _land_kind, _land_kind)
+	var rname: String = hud.t("rar." + rar, rar)
+	var font := ThemeDB.fallback_font
+	var fs := int(m * 0.042)
+	var sep := fs * 0.35
+	var w1 := font.get_string_size(fname, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x
+	var w2 := font.get_string_size(rname, HORIZONTAL_ALIGNMENT_LEFT, -1, fs).x
+	var base := Vector2(center.x - (w1 + sep + w2) * 0.5, center.y + m * 0.20)
+	var col_name := Color(1.0, 1.0, 1.0, a)
+	var col_rar: Color = RARITY_COL[rar]
+	col_rar.a = a
+	var col_out := Color(0.05, 0.06, 0.05, a)
+	var osize := int(fs * 0.22)
+	draw_string_outline(font, base, fname, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, osize, col_out)
+	draw_string(font, base, fname, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, col_name)
+	draw_string_outline(font, base + Vector2(w1 + sep, 0.0), rname, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, osize, col_out)
+	draw_string(font, base + Vector2(w1 + sep, 0.0), rname, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, col_rar)
 
 
 ## 金色鱼（金龙/金色稀有鱼）钓起展示：鱼身周围金色光晕一闪一闪
@@ -1381,12 +1559,15 @@ func _draw_gear(vp: Vector2) -> void:
 		var tie: Vector2 = fs.pos + Vector2(0, -FLOAT_R * 2.2 * minf(vp.x, vp.y))
 		draw_line(tip, tie, line_col, 1.6 * _u)
 	elif state == State.FIGHT:
-		# 拔河：主线绷成一条直线（竿尖 → 浮漂为止）；浮漂挂在线末端，
-		# 浮漂到鱼的水下子线不可见（鱼线画在浮漂之上）
+		# 拔河：浮漂留在水面原位并随上岸进度被拉向岸边（与鱼同步，竿尖侧稍偏不遮鱼），
+		# 挣扎/爆发时抖动加剧；主线绷直 竿尖→浮漂（鱼线画在浮漂之上）
 		var fp := _fight_pos(vp)
-		var tie2: Vector2 = fp.lerp(tip, 0.5) + Vector2(0, -FLOAT_R * 2.2 * minf(vp.x, vp.y))
-		_draw_float(tie2 + Vector2(0, FLOAT_R * 2.2 * minf(vp.x, vp.y)), vp, 1.0)
-		draw_line(tip, tie2, line_col, 1.8 * _u)
+		var m2 := minf(vp.x, vp.y)
+		var to_tip := (tip - fp).normalized()
+		var fpos := fp + to_tip * FLOAT_R * 3.6 * m2
+		fpos.y += sin(_time * (18.0 if _burst_on else 9.0)) * 2.5 * _u
+		_draw_float(fpos, vp, 1.0)
+		draw_line(tip, fpos, line_col, 1.8 * _u)
 	elif state == State.REEL:
 		# 自动收杆：浮漂沿主线从水面拉回竿尖挂位（吐钩时空钩跟着收回；断线钩已丢）
 		var ke := 1.0 - pow(1.0 - clampf(_reelin_t / REELIN_T, 0.0, 1.0), 2.0)
@@ -1517,7 +1698,9 @@ func _draw_props(vp: Vector2) -> void:
 	if box_tex != null:
 		var r2 := _box_rect(vp)
 		draw_texture_rect(box_tex, Rect2(r2.position, r2.size), false)
-	# 装备状态小字（鱼饵 + 深度）
+	# 装备状态小字（鱼饵 + 深度）——hud 未初始化（无头冒烟）时跳过
+	if hud == null:
+		return
 	var bait_label: String = hud.t("ui.bait_none", "No Bait")
 	if _bait != "none":
 		bait_label = hud.t("bait." + _bait, _bait)
@@ -1817,7 +2000,7 @@ func _show_dev_window() -> void:
 	var actions := [
 		[hud.t("dev.bite_now", "Bite Now"), _dev_bite_now_act, hud.t("dev.tip_bite_now", "Instant bite: triggers a bite on the next frame while waiting")],
 		[hud.t("dev.land_now", "Land Now"), _dev_land_now_act, hud.t("dev.tip_land_now", "Instant land: pulls the fish to shore into the catch show")],
-		[hud.t("dev.kind_force", "Force Kind"), _dev_kind_cycle, hud.t("dev.tip_kind_force", "Force bite kind: click to cycle (off → minnow → ... → golden dragon → old boot)")],
+		[hud.t("dev.rar_force", "Force Rarity"), _dev_rar_cycle, hud.t("dev.tip_rar_force", "Force bite rarity: click/scroll = next, right-click = prev (off → common → ... → junk)")],
 		[hud.t("dev.score", "Score +100"), _dev_score_act, hud.t("dev.tip_score", "Adds 100 score and commits to the leaderboard")],
 		[hud.t("dev.combo", "Combo x3"), _dev_combo_act, hud.t("dev.tip_combo", "Sets combo to x3")],
 		[hud.t("dev.bite_avg", "Avg Bite 5s"), _dev_bite_avg_act, hud.t("dev.tip_bite_avg", "Sets bite rate to about one bite per 5 s (mult 5.0)")],
@@ -1825,11 +2008,19 @@ func _show_dev_window() -> void:
 	for a: Array in actions:
 		var b: Button = GameHud.make_button(a[0])
 		b.add_theme_font_size_override("font_size", 14)
-		b.custom_minimum_size = Vector2(150.0, 30.0)
+		b.custom_minimum_size = Vector2(176.0, 30.0)
+		b.clip_text = true
 		b.tooltip_text = a[2]   # 悬停提示
 		b.pressed.connect(a[1])
 		grid.add_child(b)
-	_dev_kind_btn = grid.get_child(2)   # 强制鱼种按钮（文字随循环更新）
+	_dev_rar_btn = grid.get_child(2)   # 强制稀有度按钮（文字/颜色随循环更新）
+	# 右键/滚轮上=反向循环
+	_dev_rar_btn.gui_input.connect(func(event: InputEvent) -> void:
+		if event is InputEventMouseButton and event.pressed:
+			if event.button_index == MOUSE_BUTTON_RIGHT or event.button_index == MOUSE_BUTTON_WHEEL_UP:
+				_dev_rar_cycle(-1)
+			elif event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
+				_dev_rar_cycle(1))
 	# 滑块：咬钩率 / 鱼力 / 收线速度
 	_dev_add_slider(vb, hud.t("dev.bite_rate", "Bite Rate"), _dev_bite_mult, 0.0, 20.0, hud.t("dev.tip_bite_rate", "Global bite-rate multiplier (base rate x bait x chum)"), func(v: float) -> void:
 		_dev_bite_mult = v)
@@ -1897,11 +2088,19 @@ func _dev_land_now_act() -> void:
 		_popup("Land Now: need FIGHT state", Color(1.0, 0.6, 0.4))
 
 
-func _dev_kind_cycle() -> void:
-	_dev_kind_i = (_dev_kind_i + 1) % DEV_KINDS.size()
-	if _dev_kind_btn != null and is_instance_valid(_dev_kind_btn):
-		var label: String = hud.t("dev.kind_force", "Force Kind")
-		_dev_kind_btn.text = label if _dev_kind_i == 0 else "%s: %s" % [label, hud.t("fish." + DEV_KINDS[_dev_kind_i], DEV_KINDS[_dev_kind_i])]
+## 强制稀有度循环（dir=1 下一个 / -1 上一个，共 8 档："" + 七档稀有度）
+func _dev_rar_cycle(dir: int = 1) -> void:
+	_dev_rar_i = wrapi(_dev_rar_i + dir, 0, DEV_RARS.size())
+	if _dev_rar_btn != null and is_instance_valid(_dev_rar_btn):
+		if _dev_rar_i == 0:   # 关闭（跟随自然概率）
+			_dev_rar_btn.text = hud.t("dev.rar_force", "Force Rarity")
+			_dev_rar_btn.remove_theme_color_override("font_color")
+			_dev_rar_btn.tooltip_text = hud.t("dev.tip_rar_force", "Force bite rarity: click/scroll = next, right-click = prev")
+		else:
+			var rar: String = DEV_RARS[_dev_rar_i]
+			_dev_rar_btn.text = hud.t("rar." + rar, rar)
+			_dev_rar_btn.add_theme_color_override("font_color", RARITY_COL[rar])
+			_dev_rar_btn.tooltip_text = "%s: %s" % [hud.t("dev.rar_force", "Force Rarity"), hud.t("rar." + rar, rar)]
 
 
 func _dev_score_act() -> void:

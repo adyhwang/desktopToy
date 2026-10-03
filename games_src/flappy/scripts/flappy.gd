@@ -17,7 +17,7 @@ const PIPE_SPEED := 240.0       # 管道基础移动速度（px/s，×_u）
 const SPEED_STEP := 0.10        # 每 10 分管速提升比例
 const SPEED_CAP := 1.8          # 管道速度上限倍率
 const GAP := 300.0              # 管道通行间隙高度（px，×_u）
-const SPAWN_DIST := 520.0       # 管道水平生成间距（px，×_u）
+const SPAWN_DIST := 450.0       # 管道水平生成间距（px，×_u）
 const DIST_FLOOR := 0.85        # 间距缩短下限倍率（−15%）
 
 # ===== 布局常量 =====
