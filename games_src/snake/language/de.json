@@ -1,0 +1,13 @@
+{
+	"game.name": "Schlange",
+	"ui.close": "Schließen",
+	"ui.records_empty": "Noch keine Rekorde",
+	"ui.your_score": "Dein Punkte: %d",
+	"lb.title": "Top 10",
+	"hud.len": "Länge %d",
+	"tip.game_over": "Spiel vorbei",
+	"tip.click_start": "Klicken zum Start",
+	"tip.grid_grow": "Feld vergrößert %d×%d",
+	"tip.slow": "Langsam 3 s",
+	"tip.new_record": "Neuer Rekord!"
+}

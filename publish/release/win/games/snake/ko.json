@@ -1,0 +1,13 @@
+{
+	"game.name": "스네이크",
+	"ui.close": "닫기",
+	"ui.records_empty": "기록 없음",
+	"ui.your_score": "점수: %d",
+	"lb.title": "순위표",
+	"hud.len": "길이 %d",
+	"tip.game_over": "게임 오버",
+	"tip.click_start": "클릭하여 시작",
+	"tip.grid_grow": "필드 확장 %d×%d",
+	"tip.slow": "슬로우 3초",
+	"tip.new_record": "신기록!"
+}

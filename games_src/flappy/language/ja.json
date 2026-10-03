@@ -1,0 +1,13 @@
+{
+	"game.name": "ヘビゲーム",
+	"ui.close": "閉じる",
+	"ui.records_empty": "記録なし",
+	"ui.your_score": "スコア：%d",
+	"lb.title": "ランキング",
+	"hud.len": "長さ %d",
+	"tip.game_over": "ゲームオーバー",
+	"tip.click_start": "クリックで開始",
+	"tip.grid_grow": "フィールド拡大 %d×%d",
+	"tip.slow": "スロー 3秒",
+	"tip.new_record": "新記録！"
+}

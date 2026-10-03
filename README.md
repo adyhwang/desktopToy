@@ -52,9 +52,9 @@ A desktop toy games collection built with Godot 4.7. On startup it captures your
 
 | 打砖块 Breakout | 接水果 Fruit Catch |
 |:---:|:---:|
-| ![breakout](docs/shot_breakout.jpg) | ![fruit](docs/shot_fruit.jpg) |
+| ![breakout](docs/1.jpg) | ![fruit](docs/2.jpg) |
 | **拯救跳楼的人 Fall Rescue** | **桌面破坏王 Desk Wreck** |
-| ![rescue](docs/shot_rescue.jpg) | ![wreck](docs/shot_wreck.jpg) |
+| ![rescue](docs/4.jpg) | ![wreck](docs/5.jpg) |
 
 <p align="center"><img src="docs/about.png" alt="关于窗口" width="480"></p>
 

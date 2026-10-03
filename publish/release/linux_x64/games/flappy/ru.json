@@ -1,0 +1,13 @@
+{
+	"game.name": "Змейка",
+	"ui.close": "Закрыть",
+	"ui.records_empty": "Рекордов пока нет",
+	"ui.your_score": "Ваш счёт: %d",
+	"lb.title": "Топ 10",
+	"hud.len": "Длина %d",
+	"tip.game_over": "Игра окончена",
+	"tip.click_start": "Нажмите, чтобы играть",
+	"tip.grid_grow": "Поле расширено %d×%d",
+	"tip.slow": "Замедление 3 с",
+	"tip.new_record": "Новый рекорд!"
+}

@@ -1,0 +1,13 @@
+{
+	"game.name": "Serpiente",
+	"ui.close": "Cerrar",
+	"ui.records_empty": "Aún sin récords",
+	"ui.your_score": "Tu puntuación: %d",
+	"lb.title": "Top 10",
+	"hud.len": "Largo %d",
+	"tip.game_over": "Fin del juego",
+	"tip.click_start": "Haz clic para empezar",
+	"tip.grid_grow": "Campo ampliado %d×%d",
+	"tip.slow": "Lento 3 s",
+	"tip.new_record": "¡Nuevo récord!"
+}

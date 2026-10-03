@@ -5,9 +5,11 @@ dart.pck
 desk_wreck.pck
 fall_rescue.pck
 fish_hook.pck
+flappy.pck
 hammer.pck
 memory.pck
 slingshot.pck
+snake.pck
 stone_skip.pck
 tetris_puzzle.pck
 trash.pck

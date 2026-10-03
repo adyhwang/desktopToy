@@ -1,0 +1,13 @@
+{
+	"game.name": "貪吃蛇",
+	"ui.close": "關閉",
+	"ui.records_empty": "暫無紀錄",
+	"ui.your_score": "你的分數：%d",
+	"lb.title": "排行榜",
+	"hud.len": "長度 %d",
+	"tip.game_over": "遊戲結束",
+	"tip.click_start": "點擊開始",
+	"tip.grid_grow": "場地擴大 %d×%d",
+	"tip.slow": "減速 3 秒",
+	"tip.new_record": "新紀錄！"
+}

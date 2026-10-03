@@ -1,0 +1,13 @@
+{
+	"game.name": "贪吃蛇",
+	"ui.close": "关闭",
+	"ui.records_empty": "暂无纪录",
+	"ui.your_score": "你的分数：%d",
+	"lb.title": "排行榜",
+	"hud.len": "长度 %d",
+	"tip.game_over": "游戏结束",
+	"tip.click_start": "点击开始",
+	"tip.grid_grow": "场地扩大 %d×%d",
+	"tip.slow": "减速 3 秒",
+	"tip.new_record": "新纪录！"
+}
