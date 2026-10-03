@@ -46,7 +46,7 @@ const BOARD_EDGE_X := 0.03      # 棋盘水平边距 / min(屏宽,屏高)
 const SCORE_FONT_RATIO := 0.035 # 记分牌字号 = m × 此值
 const POPUP_FONT_RATIO := 0.05  # 飘字字号 = m × 此值
 const POPUP_TIME := 0.8         # 飘字时长（s）
-const GROW_ANIM_T := 0.45       # 扩格动画时长（s，期间暂停步进）
+const GROW_ANIM_T := 0.8       # 扩格动画时长（s，期间暂停步进）
 const OVER_T := 1.0             # 结束后延迟弹排行榜（s）：等红色闪烁 + 结束音效
 const FLASH_T := 0.2            # 吃食物闪光时长（s）
 const SHAKE_T := 0.09           # 屏幕震动时长（s）

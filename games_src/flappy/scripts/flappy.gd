@@ -17,8 +17,8 @@ const PIPE_SPEED := 240.0       # 管道基础移动速度（px/s，×_u）
 const SPEED_STEP := 0.10        # 每 10 分管速提升比例
 const SPEED_CAP := 1.8          # 管道速度上限倍率
 const GAP := 300.0              # 管道通行间隙高度（px，×_u）
-const SPAWN_DIST := 430.0       # 管道水平生成间距（px，×_u）
-const DIST_FLOOR := 0.80        # 间距缩短下限倍率（−20%）
+const SPAWN_DIST := 520.0       # 管道水平生成间距（px，×_u）
+const DIST_FLOOR := 0.85        # 间距缩短下限倍率（−15%）
 
 # ===== 布局常量 =====
 const HEADER_H := 150.0         # 顶部 HUD 让高
@@ -416,9 +416,11 @@ func _spawn_pipe() -> void:
 	var gy := 0.0
 	if _pipes.size() > 0:
 		var last_gy: float = _pipes[-1].gy
-		# 限差：与上一间隙中心差 ≤ 竖带高 42%（防跳变不可达）
-		var lo := maxf(margin, last_gy - _band.size.y * 0.42)
-		var hi := minf(_ground_y - margin, last_gy + _band.size.y * 0.42)
+		# 限差：与上一间隙中心差 ≤ 水平间距×0.5——按管间飞行时间预算爬升能力
+		# （鸟可持续爬升约 300px/s，间距缩短时限差同步收紧，保证任何分数段都物理可达）
+		var max_dy: float = _spawn_dist() * 0.5
+		var lo := maxf(margin, last_gy - max_dy)
+		var hi := minf(_ground_y - margin, last_gy + max_dy)
 		gy = randf_range(lo, hi) if hi > lo else (lo + hi) / 2.0
 	else:
 		gy = randf_range(margin, _ground_y - margin)
