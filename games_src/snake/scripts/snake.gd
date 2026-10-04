@@ -255,6 +255,7 @@ func _setup_buttons() -> void:
 	_hbox.name = "TopButtons"
 	_hbox.add_theme_constant_override("separation", 8)
 	add_child(_hbox)
+	_hbox.process_mode = Node.PROCESS_MODE_ALWAYS   # 暂停中（排行榜/弹窗）顶栏按钮仍可点
 	var old_parent := _exit_btn.get_parent()   # tscn 节点迁入容器（原父为游戏根）
 	old_parent.remove_child(_exit_btn)
 	GameHud.style_button(_exit_btn)

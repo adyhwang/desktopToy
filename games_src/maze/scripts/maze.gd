@@ -1122,6 +1122,7 @@ func _setup_buttons() -> void:
 	_top_btns.add_theme_constant_override("separation", 8)
 	_top_btns.z_index = 150
 	add_child(_top_btns)
+	_top_btns.process_mode = Node.PROCESS_MODE_ALWAYS   # 暂停中（排行榜/弹窗）顶栏按钮仍可点
 	var lb_btn := GameHud.make_button("")
 	lb_btn.icon = hud.lb_icon()
 	lb_btn.pressed.connect(_on_leaderboard)

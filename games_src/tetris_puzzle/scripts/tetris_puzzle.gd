@@ -579,6 +579,7 @@ func _setup_buttons() -> void:
 	_top_btns.add_theme_constant_override("separation", 8)
 	_top_btns.z_index = 150   # HUD 高于方块（块 z=1 / 拖动 z=100）
 	add_child(_top_btns)
+	_top_btns.process_mode = Node.PROCESS_MODE_ALWAYS   # 暂停中（排行榜/弹窗）顶栏按钮仍可点
 	_mode_opt = _make_option()
 	_mode_opt.add_item(hud.t("mode.classic", "Classic Blocks"))
 	_mode_opt.add_item(hud.t("mode.prism", "Prism Blocks"))

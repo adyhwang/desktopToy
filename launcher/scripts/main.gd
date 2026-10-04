@@ -187,6 +187,7 @@ func _process(delta: float) -> void:
 
 
 func stop_game() -> void:
+	get_tree().paused = false   # 暂停态（排行榜/弹窗）下退出须复位，防菜单卡死
 	if _current_game == null:
 		return
 	print("[Main] 退出游戏: %s" % _current_game.name)

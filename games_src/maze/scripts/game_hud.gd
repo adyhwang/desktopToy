@@ -331,5 +331,6 @@ static func style_button(b: Button) -> void:
 static func make_button(text: String) -> Button:
 	var b := Button.new()
 	b.text = text
+	b.process_mode = Node.PROCESS_MODE_ALWAYS   # 暂停中（排行榜/胜利弹窗）顶栏按钮仍可点
 	style_button(b)
 	return b
