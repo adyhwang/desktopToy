@@ -8,7 +8,8 @@ extends "res://scripts/game_base.gd"  # 打包时自动改写为包前缀路径
 ## 鱼群：全部鱼类全层活动（任何深度都可能咬钩），但在各自"舒适水层"咬钩率最高（RARITY.comf 倍率）
 ## 远水加成：抛竿落点离岸越远，稀有度越高咬钩率加成越大（RARITY.far，常见/垃圾不受影响）
 ## 空钩规则：不挂鱼饵时只有垃圾（旧靴子/鱼骨）会咬钩，挂饵才会吸引正常鱼类
-## 钓起展示：居中放大 3 倍展示，下方显示"鱼名·稀有度"标签（稀有度按 RARITY_COL 着色）
+## 钓起展示：居中放大 3 倍展示，下方显示"鱼名·稀有度"标签（稀有度按 RARITY_COL 着色）；
+## 史诗/神话鱼从鱼身向外放射五颜六色的太阳光式光芒（画在鱼下层，不被鱼身挡住）
 ## 稀有度六档统一管理咬钩参数（RARITY 表）：常见/普通/稀有/传说/史诗/神话（垃圾 boot/fishbone 单独 junk 档）
 ## 鱼种 61 种（KINDS 表，贴图 assets/<id>.png，旧素材前缀 fish_）：
 ##   常见 12：白条/鲫鱼/鲤鱼/草鱼/鲢鱼/鳊鱼/罗非鱼/丁桂鱼/鲳鱼/黄花鱼/梭鱼/金鱼 + 虾/青蛙
@@ -147,7 +148,7 @@ const GARBAGE := ["boot", "fishbone"]   # 垃圾（rar=junk 全层同率咬钩�
 
 ## 大型鱼/高稀有判定：钓起欢呼音效（r 大或稀有度 rare 以上）
 func _is_big(kind: String) -> bool:
-	return float(KINDS[kind].r) >= 0.060 or (KINDS[kind].rar in ["rare", "legendary", "epic", "mythic"])
+	return (KINDS[kind].rar in ["rare", "legendary", "epic", "mythic"])
 
 # —— 钩饵：mult=各稀有度咬钩率倍数（缺省 0.8）；空钩（none）只有垃圾会咬钩；tint=复用鱼贴图染色（小鱼饵）——
 const BAITS := {
@@ -764,7 +765,7 @@ func _start_bite(vp: Vector2) -> void:
 
 
 func _bite_missed() -> void:
-	_play_sfx("cheer")   # 鱼吐钩跑掉：群体欢呼声（同钓起大鱼）
+	_play_sfx("snap")   # 鱼吐钩跑掉：多人叹气声
 	var f: Dictionary = _bite_fish
 	_bite_fish = {}
 	if not f.is_empty():
@@ -913,10 +914,10 @@ func _catch_fish(vp: Vector2) -> void:
 			var ctext: String = hud.t("ui.combo", "Combo x%d") % combo
 			get_tree().create_timer(0.35).timeout.connect(func() -> void:
 				_popup("%s ×%.1f" % [ctext, mult], Color(1.0, 0.85, 0.3)))
-		if combo >= 2:
+		if _is_big(_land_kind):
+			_play_sfx("cheer")   # 大型鱼/稀有鱼：群体欢呼（优先于连击音效）
+		elif combo >= 2:
 			_play_sfx("combo", clampf(-2.0 + combo, -6.0, 0.0))
-		elif _is_big(_land_kind):
-			_play_sfx("cheer")   # 大型鱼/稀有鱼：群体欢呼
 		else:
 			_play_sfx("catch")
 		# 纪录检测（每局只弹一次）
@@ -1384,10 +1385,11 @@ func _draw_land_fish(vp: Vector2) -> void:
 		var rot1 := (1.0 - e1) * PI * 0.85 + sin(_time * 18.0) * 0.04 * (1.0 - e1)
 		_draw_fish_sprite(vp, _land_kind, p0.lerp(p1, e1), rot1, 1.0, lerpf(1.0, 3.0, e1))
 	elif _land_t < LAND_T:
-		# 居中放大展示：轻微摆动；金色/史诗/神话鱼周围金光一闪一闪
-		if _land_kind == "golden" or KINDS[_land_kind].rar in ["epic", "mythic"]:
-			_draw_golden_glow(center, m)
-		_draw_fish_sprite(vp, _land_kind, center, sin(_time * 5.0) * 0.06, 1.0, 3.0)
+		# 居中放大展示：轻微摆动；史诗/神话鱼沿轮廓发五颜六色流转的光（光环画在鱼下层，大鱼不挡）
+		var sway := sin(_time * 5.0) * 0.06
+		if KINDS[_land_kind].rar in ["epic", "mythic"]:
+			_draw_aura_glow(vp, _land_kind, center, sway, 3.0)
+		_draw_fish_sprite(vp, _land_kind, center, sway, 1.0, 3.0)
 	elif int(KINDS[_land_kind].value) >= 0:
 		# 飞行段：鱼缩小转向左上角列表末尾（新鱼左半叠旧鱼右半）
 		var e2: float = pow(clampf((_land_t - LAND_T) / LAND_MOVE_T, 0.0, 1.0), 2.0)
@@ -1430,24 +1432,38 @@ func _draw_land_label(vp: Vector2, center: Vector2) -> void:
 	draw_string(font, base + Vector2(w1 + sep, 0.0), rname, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, col_rar)
 
 
-## 金色鱼（金龙/金色稀有鱼）钓起展示：鱼身周围金色光晕一闪一闪
-func _draw_golden_glow(pos: Vector2, m: float) -> void:
-	var tw: float = 0.5 + 0.5 * sin(_time * 6.0)         # 闪烁系数 0..1（约 1 秒一闪）
-	var pulse: float = 0.55 + 0.45 * sin(_time * 6.0)
-	var base: float = m * 0.075                          # 光晕基础半径
-	for i in 3:   # 三层同心光圈，随闪烁脉动
-		var rr: float = base * (0.7 + 0.35 * i) + pulse * m * 0.008
-		var a: float = (0.16 - i * 0.04) * tw + 0.05
-		draw_circle(pos, rr, Color(1.0, 0.84, 0.25, a))
-	# 光芒短线：8 根绕圈旋转、随闪烁伸缩
-	var spokes := 8
-	var rot: float = _time * 1.2
-	for i in spokes:
-		var ang: float = TAU * i / spokes + rot
+## 史诗/神话鱼展示：从鱼身向外放射五颜六色的光芒（太阳光式光线）
+## 每根光线为向外张开的楔形（两节梯形拼成，外节渐隐），从鱼轮廓处向外射出；
+## 色相随角度+时间流转、整组缓慢旋转、每根独立伸缩闪烁；画在鱼本体之下——
+## 内端藏进鱼身后、外段透出轮廓之外，形成"鱼向外发光"的效果，大鱼也挡不住
+func _draw_aura_glow(vp: Vector2, kind: String, pos: Vector2, rot: float, mult: float) -> void:
+	var k: Dictionary = KINDS[kind]
+	var rr: float = k.r * minf(vp.x, vp.y) * FISH_SHRINK * mult
+	var m := minf(vp.x, vp.y)
+	var rays := 12
+	draw_set_transform(pos, rot, Vector2.ONE)
+	for i in rays:
+		var ang: float = TAU * i / rays + _time * 0.15
 		var dir := Vector2(cos(ang), sin(ang))
-		var r0: float = base * 1.15
-		var r1: float = r0 + m * (0.012 + 0.016 * tw)
-		draw_line(pos + dir * r0, pos + dir * r1, Color(1.0, 0.88, 0.35, 0.30 + 0.35 * tw), 2.6 * _u)
+		var n := Vector2(-dir.y, dir.x)
+		var hue := fposmod(_time * 0.22 + float(i) / rays, 1.0)
+		var tw_i := 0.5 + 0.5 * sin(_time * 3.0 + i * 1.7)   # 每根光独立闪烁相位
+		var r0 := rr * 1.02                                   # 内端（藏入鱼身，被本体盖住）
+		var length := m * (0.05 + 0.11 * tw_i)                # 光束长度（呼吸伸缩）
+		var r1 := r0 + length
+		var rm := r0 + length * 0.55
+		var w0 := m * 0.010                                   # 内窄外宽的楔形
+		var w1 := m * 0.030
+		var wm := lerpf(w0, w1, 0.55)
+		var a := 0.26 + 0.30 * tw_i
+		var p_a := dir * r0
+		var p_m := dir * rm
+		var p_b := dir * r1
+		var col_in := Color.from_hsv(hue, 0.70, 1.0, a)
+		var col_out := Color.from_hsv(hue, 0.70, 1.0, a * 0.35)
+		draw_colored_polygon(PackedVector2Array([p_a + n * w0, p_a - n * w0, p_m - n * wm, p_m + n * wm]), col_in)
+		draw_colored_polygon(PackedVector2Array([p_m + n * wm, p_m - n * wm, p_b - n * w1, p_b + n * w1]), col_out)
+	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 
 
 ## 垃圾丢出段（水岸之上层绘制）：缩小完成后旋转着甩出画面下方
