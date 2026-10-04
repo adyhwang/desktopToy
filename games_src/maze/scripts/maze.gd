@@ -639,8 +639,8 @@ func _layout() -> void:
 		player.position = origin + ppos * sub_px
 	if door_sprite != null:
 		door_sprite.scale = Vector2.ONE * (3.2 * sub_px / 120.0)
-		door_sprite.position = origin + _door_pos() * sub_px
-		# 左右两侧门洞：门贴图旋转 90° 嵌入竖向外墙
+		door_sprite.position = origin + _cell_center(exit_cell) * sub_px   # 门立在出口光圈内
+		# 左右两侧出口：门贴图旋转 90° 沿通道方向竖放
 		door_sprite.rotation = 0.0 if (exit_cell.y == 0 or exit_cell.y == rows - 1) else PI / 2.0
 	for c: Dictionary in coins:
 		var spr: Sprite2D = c.spr
@@ -858,7 +858,7 @@ func _open_between(a: Vector2i, b: Vector2i) -> bool:
 	return not bool(vw[Vector2i(maxi(a.x, b.x), a.y)])
 
 
-## 小人所在格 → 出口门 BFS 最短路（细分坐标折线：前端接小人，尾端接门中心）
+## 小人所在格 → 出口格 BFS 最短路（细分坐标折线：前端接小人，尾端接出口光圈中心）
 func _path_to_exit() -> PackedVector2Array:
 	var sc := Vector2i(
 		clampi(int(floorf((ppos.x - 1.0) / float(SUB))), 0, cols - 1),
@@ -868,7 +868,7 @@ func _path_to_exit() -> PackedVector2Array:
 		return PackedVector2Array()
 	cells.reverse()
 	cells.insert(0, ppos)
-	cells.append(_door_pos())
+	cells.append(_cell_center(exit_cell))
 	return cells
 
 
@@ -901,7 +901,7 @@ func _bfs_cells_to(sc: Vector2i, target: Vector2i) -> Array:
 
 
 func _check_win() -> void:
-	if ppos.distance_to(_door_pos()) < 1.7:   # 抵达外墙门洞处即通关
+	if ppos.distance_to(_cell_center(exit_cell)) < 2.6:   # 进入出口格光圈即通关
 		_win()
 
 
@@ -1186,8 +1186,8 @@ func _draw() -> void:
 	var sp := origin + _cell_center(start_cell) * sub_px
 	draw_circle(sp, sub_px * SUB * 0.3, COL_START)
 	draw_arc(sp, sub_px * SUB * 0.3, 0.0, TAU, 32, COL_START_RING, 2.0)
-	# 出口门洞光圈（外墙缺口处，门精灵之下）
-	var ep := origin + _door_pos() * sub_px
+	# 出口光圈（出口格中心，整圈位于迷宫内，触摸屏易点中）
+	var ep := origin + _cell_center(exit_cell) * sub_px
 	draw_circle(ep, sub_px * SUB * 0.38, COL_EXIT)
 	# 墙体：先描边后填充（相邻矩形描边自然融合）
 	var ol := maxf(2.0, sub_px * 0.35)
@@ -1473,7 +1473,7 @@ func _dev_add_time() -> void:
 
 
 func _dev_teleport() -> void:
-	ppos = _door_pos()   # 传送到出口门洞 → 下一帧 _check_win 触发通关
+	ppos = _cell_center(exit_cell)   # 传送到出口光圈 → 下一帧 _check_win 触发通关
 	has_target = false
 	if player != null:
 		player.position = origin + ppos * sub_px
