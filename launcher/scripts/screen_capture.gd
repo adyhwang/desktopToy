@@ -168,7 +168,7 @@ static func _load_wallpaper() -> Image:
 ## 拉取壁纸；相对路径经浏览器 URL 解析成绝对地址，自动适配任意部署子目录
 static func _load_wallpaper_web() -> ImageTexture:
 	for fname: String in ["wallpaper.png", "wallpaper.jpg"]:
-		var buf := await GameManager._http_download(fname)
+		var buf := await GameManager._http_download(fname, fname)
 		if buf.is_empty():
 			print("[Capture] Web 壁纸请求失败(%s)（部署目录无此文件？）" % fname)
 			continue

@@ -11,6 +11,11 @@ signal game_selected(info: Dictionary)
 const BANNER_H_RATIO := 0.42   # Banner 显示高度 = 视口高 × 此值（保持宽高比）
 const MENU_CENTER_Y := 0.44    # Banner 中心 y / 视口高（整体上移偏正中）
 const ICONS_GAP := 0.06        # Logo 行顶部 = Banner 底部下方 视口高 × 此值
+const CARD_FALL_RATIO := 0.5   # 卡片初始估算下落起点（视口高 × 此值，_place_card 会精确校正为 Banner 顶）
+const CARD_FALL_TIME := 0.5    # 入场下落时长（TRANS_BOUNCE 落地弹跳，0.5s 后入位）
+const CARD_FADE_TIME := 0.3    # 淡入时长（全透明 → 0.3s 后不透明）
+const CARD_CASCADE := 0.05     # 相邻卡片入场错开间隔
+const CARD_Z := 20             # 动画期间卡片 z：浮于 Banner 之上（结束恢复 0）
 
 const CFG_PATH := "user://settings.cfg"
 const FILLS := ["stretch", "tile", "center", "fit", "cover"]
@@ -53,22 +58,21 @@ var _fp_dir := ""              # 当前目录（空串=Windows 驱动器列表�
 var _fp_last_dir := ""         # 上次浏览目录（下次打开回位）
 var _fp_path_lbl: Label
 var _fp_list: ItemList
+var _card_ids := {}             # 已建卡游戏 id（game_ready 增量触发，去重防重复建卡）
 
 const FP_EXTS := ["png", "jpg", "jpeg", "webp", "bmp"]
 
 
 func _ready() -> void:
 	get_viewport().size_changed.connect(_layout)
+	# 卡片入场动画要飞出容器顶（到 Banner 顶部），关闭滚动区裁剪，否则下落段被裁掉不可见
+	_icons_scroll.clip_contents = false
 	for info in GameManager.games:
-		var card := GameCard.new_card(info)
-		card.set_meta("info", info)
-		card.tooltip_text = _game_name(info)
-		card.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND   # 悬停切手型指针
-		card.activated.connect(game_selected.emit)
-		_icons.add_child(card)
-	var empty := GameManager.games.is_empty()
-	_empty_hint.visible = empty
-	_icons.visible = not empty
+		_add_card(info, false)
+	# 空态提示延后到扫描结束判定（加载进行中不闪 "No games"）
+	_empty_hint.visible = false
+	GameManager.events().game_ready.connect(_on_game_ready)
+	GameManager.events().all_done.connect(_on_all_done)
 	_option_btn.pressed.connect(_show_options)
 	if OS.has_feature("web"):
 		# Web：Option 窗口（音量/截图等桌面配置）、退出按钮无意义，隐藏入口
@@ -82,6 +86,81 @@ func _ready() -> void:
 	_empty_hint.text = L10n.t("menu.empty", "No games · Drop .pck in games folder")
 	L10n.language_changed.connect(_on_language_changed)
 	_layout()
+
+
+func _exit_tree() -> void:
+	GameManager.events().game_ready.disconnect(_on_game_ready)
+	GameManager.events().all_done.disconnect(_on_all_done)
+
+
+func _on_game_ready(info: Dictionary) -> void:
+	_add_card(info, true)
+
+
+## 扫描结束仍无游戏才显示空态提示
+func _on_all_done() -> void:
+	_empty_hint.visible = GameManager.games.is_empty()
+	_icons.visible = not GameManager.games.is_empty()
+
+
+## 增量建卡：animated=true 时经 wrapper 做"从天而降"入场——卡片图层浮于 Banner 之上，
+## 从 Banner 顶部下落（全透明 → 0.3s 不透明，0.5s 落位弹跳）
+## （HFlowContainer 会接管子节点 position，卡片动画须包一层普通 Control 才自由）
+func _add_card(info: Dictionary, animated: bool) -> void:
+	var id := String(info.id)
+	if _card_ids.has(id):
+		return
+	_card_ids[id] = true
+	var card := GameCard.new_card(info)
+	card.set_meta("info", info)
+	card.tooltip_text = _game_name(info)
+	card.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND   # 悬停切手型指针
+	card.activated.connect(game_selected.emit)
+	if _card_ids.size() == 1:
+		_empty_hint.visible = false
+		_icons.visible = true
+	if not animated:
+		_icons.add_child(card)
+		return
+	var wrapper := Control.new()
+	wrapper.custom_minimum_size = Vector2(GameCard.SIZE, GameCard.SIZE)
+	wrapper.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	wrapper.add_child(card)
+	# 手动定尺寸（不用 anchors：容器首帧 resize 会重置 anchored 子节点 position，破坏入场动画）
+	card.size = Vector2(GameCard.SIZE, GameCard.SIZE)
+	_icons.add_child(wrapper)
+	# 初始态：悬在 Banner 顶上方（精确起点在动画启动那刻由 _place_card 校正——
+	# wrapper 此刻尚未被容器布局，全局坐标还不可用），全透明，浮于 Banner 之上
+	var vp := get_viewport_rect().size
+	card.position.y = -vp.y * CARD_FALL_RATIO
+	card.modulate.a = 0.0
+	card.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	card.z_index = CARD_Z
+	# 从天而降：级联间隔 → 落点校正 → 下落 0.5s 弹跳入位，同时 0.3s 淡入
+	var tw := create_tween()
+	tw.tween_interval(CARD_CASCADE * (_card_ids.size() - 1))
+	tw.tween_callback(_place_card.bind(card, wrapper))
+	tw.tween_property(card, "position:y", 0.0, CARD_FALL_TIME) \
+			.set_trans(Tween.TRANS_BOUNCE).set_ease(Tween.EASE_OUT)
+	tw.parallel().tween_property(card, "modulate:a", 1.0, CARD_FADE_TIME)
+	tw.tween_callback(_finish_card_anim.bind(card))
+
+
+## 动画启动那刻校正下落起点：Banner 顶部（视口系）- wrapper 顶部（视口系）
+## = 卡片相对 wrapper 的局部起点 y，此刻容器布局已稳定
+func _place_card(card: GameCard, wrapper: Control) -> void:
+	if not is_instance_valid(card) or not is_instance_valid(wrapper):
+		return
+	card.position.y = _banner.global_position.y - wrapper.global_position.y
+	card.modulate.a = 0.0
+
+
+func _finish_card_anim(card: GameCard) -> void:
+	if is_instance_valid(card):
+		card.mouse_filter = Control.MOUSE_FILTER_STOP
+		card.position = Vector2.ZERO
+		card.modulate.a = 1.0
+		card.z_index = 0
 
 
 func _game_name(info: Dictionary) -> String:
@@ -116,8 +195,12 @@ func _on_language_changed() -> void:
 	_about_btn.text = L10n.t("menu.about", "About")
 	_exit_btn.text = L10n.t("menu.exit", "Exit")
 	_empty_hint.text = L10n.t("menu.empty", "No games · Drop .pck in games folder")
-	for card: GameCard in _icons.get_children():
-		card.tooltip_text = _game_name(card.get_meta("info"))
+	for child in _icons.get_children():
+		var card := child as GameCard
+		if card == null and child.get_child_count() > 0:
+			card = child.get_child(0) as GameCard   # 入场动画卡片包在 wrapper 里
+		if card != null:
+			card.tooltip_text = _game_name(card.get_meta("info"))
 	if _about_layer != null:
 		_about_layer.queue_free()
 		_about_layer = null

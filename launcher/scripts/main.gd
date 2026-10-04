@@ -21,6 +21,9 @@ var _bg_stretch_default := 0        # 场景原始填充方式（关闭自定义
 var _spinner: Control               # 点击游戏后的旋转进度圈（不指示真实进度）
 var _spin_t := 0.0                  # 进度圈旋转相位
 var _loading := false               # 进游戏加载中（await 帧间隙防重复触发）
+var _progress_lbl: PanelContainer   # 右下角加载/下载进度浮字（游戏内也可见，后台下载反馈）
+var _progress_text: Label
+var _progress_fade: Tween
 
 
 func _ready() -> void:
@@ -60,12 +63,17 @@ func _ready() -> void:
 		DisplayServer.screen_get_size(DisplayServer.window_get_current_screen()),
 		DisplayServer.screen_get_scale(DisplayServer.window_get_current_screen())])
 
-	await GameManager.scan()
+	# 菜单先建（空态），扫描/下载后台进行：游戏逐个就绪即出卡片（game_ready→menu），
+	# 右下角浮字显示加载/下载进度，全部就绪后自动淡出——期间即可点卡片进游戏
+	GameManager.events().progress.connect(_on_load_progress)
+	GameManager.events().all_done.connect(_on_load_done)
 	_show_menu()
+	GameManager.scan()
 
 
 func _show_menu() -> void:
 	if _menu != null:
+		_menu.show()   # 菜单常驻：后台扫描期间新就绪的卡片已在其中
 		return
 	_menu = (load(MENU_SCENE) as PackedScene).instantiate()
 	_menu.game_selected.connect(start_game)
@@ -140,8 +148,7 @@ func start_game(info: Dictionary) -> void:
 	# 先弹进度圈并画出一帧，再执行可能卡帧的场景构建/资源烘焙（如 desk_wreck 痕迹烘焙）
 	_show_spinner(true)
 	if _menu != null:
-		_menu.queue_free()
-		_menu = null
+		_menu.hide()   # 菜单常驻不销毁：后台扫描/下载继续建卡，退出游戏即见全部游戏
 	await get_tree().process_frame
 	await get_tree().process_frame
 	var packed: PackedScene = load(info.entry)
@@ -184,6 +191,57 @@ func _process(delta: float) -> void:
 	if _spinner != null and _spinner.visible:
 		_spin_t += delta
 		_spinner.queue_redraw()
+
+
+## ===== 右下角进度浮字 =====
+## 后台扫描/下载进度反馈：收到 progress 显示并刷新文案；all_done 后停 1s 淡出。
+## z_index=1000 浮于一切 UI（游戏元素/弹窗/排行榜）之上；IGNORE 不挡点击；
+## 游戏运行中也持续可见（进游戏后主程序后台继续下载的进度提示）
+
+func _on_load_progress(text: String) -> void:
+	_ensure_progress_label()
+	if _progress_fade != null:
+		_progress_fade.kill()
+		_progress_fade = null
+	_progress_lbl.visible = true
+	_progress_lbl.modulate.a = 1.0
+	_progress_text.text = text
+
+
+func _on_load_done() -> void:
+	if _progress_lbl == null or not _progress_lbl.visible:
+		return
+	_progress_fade = create_tween()
+	_progress_fade.tween_interval(1.0)
+	_progress_fade.tween_property(_progress_lbl, "modulate:a", 0.0, 0.4)
+	_progress_fade.tween_callback(func() -> void: _progress_lbl.visible = false)
+
+
+func _ensure_progress_label() -> void:
+	if _progress_lbl != null:
+		return
+	_progress_lbl = PanelContainer.new()
+	var sb := StyleBoxFlat.new()
+	sb.bg_color = Color(0.16, 0.19, 0.18, 0.92)   # 与设置/排行榜面板同风格深色圆角
+	sb.set_corner_radius_all(10)
+	sb.content_margin_left = 14
+	sb.content_margin_right = 14
+	sb.content_margin_top = 6
+	sb.content_margin_bottom = 8
+	_progress_lbl.add_theme_stylebox_override("panel", sb)
+	_progress_lbl.z_index = 1000
+	_progress_lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_progress_lbl.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
+	_progress_lbl.grow_horizontal = Control.GROW_DIRECTION_BEGIN   # 尺寸变化向左/上扩展
+	_progress_lbl.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	_progress_lbl.offset_left = -16.0
+	_progress_lbl.offset_top = -16.0
+	_progress_lbl.offset_right = -16.0
+	_progress_lbl.offset_bottom = -16.0
+	_progress_text = Label.new()
+	_progress_text.add_theme_color_override("font_color", Color.WHITE)
+	_progress_lbl.add_child(_progress_text)
+	add_child(_progress_lbl)
 
 
 func stop_game() -> void:
