@@ -1,5 +1,5 @@
 {
-	"game.name": "스네이크",
+	"game.name": "Flappy Bird",
 	"ui.close": "닫기",
 	"ui.records_empty": "기록 없음",
 	"ui.your_score": "점수: %d",

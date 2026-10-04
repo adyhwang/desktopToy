@@ -200,6 +200,7 @@ func show_leaderboard(parent: Node, title: String, current: int, rank: int, line
 	sb.set_corner_radius_all(18)
 	sb.set_content_margin_all(m * 0.035)
 	panel.add_theme_stylebox_override("panel", sb)
+	panel.z_index = 220   # 浮于游戏元素之上（飘字/提示/胜利弹窗），低于 DEV 窗口(250)
 	var vb := VBoxContainer.new()
 	vb.add_theme_constant_override("separation", int(m * 0.012))
 	panel.add_child(vb)

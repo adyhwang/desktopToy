@@ -1,5 +1,5 @@
 {
-	"game.name": "Змейка",
+	"game.name": "Flappy Bird",
 	"ui.close": "Закрыть",
 	"ui.records_empty": "Рекордов пока нет",
 	"ui.your_score": "Ваш счёт: %d",

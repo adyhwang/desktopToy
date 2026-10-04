@@ -1,5 +1,5 @@
 {
-	"game.name": "Schlange",
+	"game.name": "Flappy Bird",
 	"ui.close": "Schließen",
 	"ui.records_empty": "Noch keine Rekorde",
 	"ui.your_score": "Dein Punkte: %d",

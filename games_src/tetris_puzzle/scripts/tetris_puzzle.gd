@@ -682,13 +682,23 @@ func _update_hud() -> void:
 		_board_count.text = hud.t("hud.count", "Pieces %d") % count
 
 
+## 重开：不刷新目标图形，仅将方块归位到待选区初始货位（保留当前旋转朝向）
 func _on_restart() -> void:
 	if won:
 		return
 	_play_sfx("fail", 1.0, -10.0)
-	_build_level()
-	_update_hud()
-	_layout()
+	drag_piece = null
+	ghost_show = false
+	_z_top = 1
+	_clear_hint()
+	for i in pieces.size():
+		var p: Control = pieces[i]
+		var off := Vector2i((i % sel_cols) * SLOT_PITCH, (i / sel_cols) * SLOT_PITCH)
+		p.set_meta("zone", "sel")
+		p.set_meta("off", off)
+		p.z_index = 0
+		p.position = sel_origin + Vector2(off) * cell
+	queue_redraw()
 
 
 func _on_bgm(btn: Button) -> void:

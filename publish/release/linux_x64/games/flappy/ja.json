@@ -1,5 +1,5 @@
 {
-	"game.name": "ヘビゲーム",
+	"game.name": "Flappy Bird",
 	"ui.close": "閉じる",
 	"ui.records_empty": "記録なし",
 	"ui.your_score": "スコア：%d",

@@ -63,9 +63,6 @@ func _ready() -> void:
 	await GameManager.scan()
 	_show_menu()
 
-	if "--autotest" in OS.get_cmdline_user_args():
-		_run_autotest()
-
 
 func _show_menu() -> void:
 	if _menu != null:
@@ -208,21 +205,3 @@ func _unhandled_input(event: InputEvent) -> void:
 			stop_game()
 		else:
 			get_tree().quit()
-
-
-## 自动化闭环验证：依次启动每个游戏 → 各运行 2s → 返回菜单 → 全部完成后退出（日志驱动，无人工操作）
-func _run_autotest() -> void:
-	await get_tree().create_timer(0.5).timeout
-	print("[AutoTest] 注册游戏数=%d" % GameManager.games.size())
-	if GameManager.games.is_empty():
-		print("[AutoTest] 无游戏，空状态结束")
-		get_tree().quit()
-		return
-	for info in GameManager.games:
-		print("[AutoTest] ==== %s ====" % info.id)
-		start_game(info)
-		await get_tree().create_timer(2.0).timeout
-		stop_game()
-		await get_tree().create_timer(0.8).timeout
-	print("[AutoTest] 闭环完成，退出")
-	get_tree().quit()

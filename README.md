@@ -13,7 +13,7 @@ A desktop toy games collection built with Godot 4.7. On startup it captures your
 ## ✨ 特性
 
 - **真桌面融合**：启动时自动截屏作为背景（截屏失败时可用旁路 `wallpaper.png/jpg` 兜底），整个窗口看起来就是你原来的桌面，游戏浮在其上
-- **13 款小游戏**：接水果、投篮、打砖块、飞镖、桌面破坏王、拯救跳楼的人、打害虫、记忆配对、打水漂、丢垃圾、弹弓打坏人、钓鱼、方块拼图
+- **16 款小游戏**：接水果、投篮、打砖块、飞镖、桌面破坏王、拯救跳楼的人、打害虫、记忆配对、打水漂、丢垃圾、弹弓打坏人、钓鱼、方块拼图、贪吃蛇、肥鸟、走迷宫
 - **纯鼠标操作**：所有游戏只用鼠标，无键盘依赖
 - **9 种界面语言**：简/繁中文、英、日、韩、法、德、西、俄
 - **本地排行榜**：每款游戏独立记录前十名成绩
@@ -23,7 +23,7 @@ A desktop toy games collection built with Godot 4.7. On startup it captures your
 ### Features
 
 - **True desktop blending**: captures the screen at startup (falls back to a side-car `wallpaper.png/jpg` when capture fails), so the window looks exactly like your original desktop with games floating on top
-- **13 mini games**: Fruit Catch, Basketball, Breakout, Darts, Desk Wreck, Fall Rescue, Pest Smash, Memory Match, Stone Skip, Trash Toss, Slingshot, Fish Hook, Tetris Puzzle
+- **16 mini games**: Fruit Catch, Basketball, Breakout, Darts, Desk Wreck, Fall Rescue, Pest Smash, Memory Match, Stone Skip, Trash Toss, Slingshot, Fish Hook, Tetris Puzzle, Snake, Flappy Bird, Maze
 - **Mouse only**: every game is designed for pure mouse control, no keyboard needed
 - **9 UI languages**: zh_CN / zh_TW / en / ja / ko / fr / de / es / ru
 - **Local leaderboard**: top-10 scores stored per game
@@ -47,6 +47,9 @@ A desktop toy games collection built with Godot 4.7. On startup it captures your
 | 🪃 弹弓打坏人 Slingshot | 轮盘选"子弹"（石头、鸡蛋、水气球……）拉弹弓打跑一波波来犯的劫匪，坚持更多波次 |
 | 🎣 钓鱼 Fish Hook | 抛竿等待鱼咬钩，咬钩瞬间快速点击拔河收线；可投饵打窝吸引鱼群，钓齐更多鱼种 |
 | 🧩 方块拼图 Tetris Puzzle | 拖动方块碎片旋转拼合，完全填满目标图形即过关；含经典方块与棱镜方块两种模式，无尽挑战 |
+| 🐍 贪吃蛇 Snake | 点击屏幕转向吃食物长身体，撞墙或咬到自己即结束；5 种水果各有不同加分效果，棋盘随蛇身变大 |
+| 🐦 肥鸟 Flappy Bird | 点击扇翅上升、重力自然下坠，穿过成对管道间隙 +1 分；撞击或坠地即结束，每 10 分提速一档 |
+| 🧭 走迷宫 Maze | 点击/拖拽指引小人寻路到出口门，捡金币 +10 分；小猪会贴墙走抢先出迷宫，关卡越深迷宫越大 |
 
 ## 📸 截图 / Screenshots
 
