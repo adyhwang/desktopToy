@@ -1,5 +1,6 @@
 basket.pck
 basketball.pck
+block_stack.pck
 breakout.pck
 dart.pck
 desk_wreck.pck
