@@ -23,5 +23,11 @@
 	"tool.stamp": "도장",
 	"tool.dog": "강아지",
 	"tool.washer": "세척 건",
-	"tool.sponge": "스펀지"
+	"tool.sponge": "스펀지",
+	"tool.ball": "튀기는 공",
+	"tool.tornado": "회오리",
+	"tool.rocket": "로켓 발사기",
+	"tool.fw_s": "소형 불꽃",
+	"tool.fw_l": "대형 불꽃",
+	"tool.robot": "청소 로봇"
 }

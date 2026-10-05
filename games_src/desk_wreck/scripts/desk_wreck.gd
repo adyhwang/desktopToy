@@ -29,6 +29,8 @@ const HAND_TEX := 208.0         # 手持道具光标显示尺寸（贴图 256，
 const GUN_H := 72.0             # 枪械显示高度（贴图 96 高）
 const GUN_MUZZLE_OFF := 66.0    # 枪口距枪身中心偏移（贴图 88px × 显示比 0.75）
 const HAND_HIDE_T := 0.4        # 投掷道具丢出后图标重生延迟（s）
+const FW_HIDE_T := 0.5          # 烟花放置后重新手持的延迟（s）
+const FW_TOP := 46.0            # 烟花礼盒/礼箱顶缘距放置中心（1080 基准，HAND_TEX/4-6 引线位）
 const SWING_T := 0.16           # 铁锤砸击动画时长（s）
 const PRESS_T := 0.18           # 印章按压动画时长（s）
 const HAMMER_HOT := Vector2(0, 256)    # 鼠标点在锤光标画布中的位置（图片左下角，256 基准）
@@ -36,23 +38,50 @@ const HAMMER_PIVOT := Vector2(116, 220)   # 锤柄尾（握把末端）画布坐
 const HAMMER_HEAD := Vector2(115, 60)     # 锤头中心画布坐标：抡到 -90° 时砸击落点=此处
 const DOG_CD := 0.5             # 小狗放置冷却（期间隐藏手持图标且不可放置）
 
+const BALL_G := 3.4             # 弹力皮球俯视高度重力（高度单位/s²，1=手持高度）
+const BALL_R := 13.0            # 皮球落地半径（屏幕 px，1080 基准）
+const BALL_HI := 34.0           # 皮球手持/最高处半径（俯视越大=越高）
+const BALL_N := 7               # 一把皮球数量（一起丢下，平稳后各自爆炸留同色漆痕）
+const BALL_HOLD := [Vector2(-15, 5), Vector2(14, 7), Vector2(-4, -13), Vector2(7, -3),
+		Vector2(-12, -5), Vector2(2, 13), Vector2(13, -11)]   # 手持一簇球的固定布局（1080 基准）
+const BALL_LIFE := 9.0          # 皮球存活上限（s，兜底；正常弹跳平稳后爆炸即消失）
+const TORNADO_R := 124.0        # 龙卷风湿痕半径（屏幕 px，1080 基准）
+const TORNADO_SPD := 260.0      # 龙卷风位移速度（px/s，1080 基准）
+const ROCKET_SPD := 1500.0      # 火箭弹飞行速度（px/s，1080 基准）
+const ROBOT_R := 56.0           # 扫地机器人擦除半径（屏幕 px，1080 基准）
+const ROBOT_SPD := 380.0        # 扫地机器人行进速度（px/s，1080 基准）
+const ROBOT_TURN_T := 0.45      # 扫地机器人边缘换行动画时长（s）
+const FW_FUSE_T := 2.0          # 大小烟花引线时长（s）
+const FW_S_T := 10.0            # 小型烟花秀持续时长（s）
+const FW_L_T := 15.0            # 大型烟花秀持续时长（s）
+const FW_COLS := [              # 烟花色板
+	Color(1.0, 0.42, 0.32), Color(1.0, 0.72, 0.22), Color(1.0, 0.95, 0.4), Color(0.5, 0.95, 0.45),
+	Color(0.35, 0.8, 1.0), Color(0.55, 0.5, 1.0), Color(1.0, 0.55, 0.85), Color(1.0, 1.0, 1.0),
+]
+
 # 道具表：kind = click 单次生效 / hold 按住连发；clean = true 清洁类（准星蓝色+擦除圈预览）
 # cat = hand 手持（道具贴图即光标，作用点=贴图中心）/ gun 枪械（底部持枪对准光标）/ toss 投掷（底部图标抛出）
 const TOOLS := [
 	{"id": "egg", "name": "鸡蛋", "kind": "click", "clean": false, "cat": "toss"},
+	{"id": "ball", "name": "弹力皮球", "kind": "click", "clean": false, "cat": "hand"},
 	{"id": "paint", "name": "彩弹枪", "kind": "click", "clean": false, "cat": "gun"},
 	{"id": "saw", "name": "电锯", "kind": "hold", "clean": false, "cat": "hand"},
 	{"id": "flame", "name": "喷火器", "kind": "hold", "clean": false, "cat": "hand"},
 	{"id": "mg", "name": "机关枪", "kind": "hold", "clean": false, "cat": "gun"},
+	{"id": "rocket", "name": "火箭筒", "kind": "click", "clean": false, "cat": "gun"},
 	{"id": "hammer", "name": "铁锤", "kind": "click", "clean": false, "cat": "hand"},
 	{"id": "ink", "name": "墨水瓶", "kind": "click", "clean": false, "cat": "toss"},
 	{"id": "spray", "name": "涂鸦喷雾", "kind": "hold", "clean": false, "cat": "hand"},
 	{"id": "cracker", "name": "小鞭炮", "kind": "click", "clean": false, "cat": "toss"},
+	{"id": "tornado", "name": "龙卷风", "kind": "click", "clean": false, "cat": "hand"},
+	{"id": "fw_s", "name": "小型烟花", "kind": "click", "clean": false, "cat": "hand"},
+	{"id": "fw_l", "name": "大型烟花", "kind": "click", "clean": false, "cat": "hand"},
 	{"id": "laser", "name": "激光笔", "kind": "hold", "clean": false, "cat": "gun"},
 	{"id": "stamp", "name": "印章", "kind": "click", "clean": false, "cat": "hand"},
 	{"id": "dog", "name": "小狗", "kind": "click", "clean": false, "cat": "hand"},
 	{"id": "washer", "name": "清洗喷枪", "kind": "hold", "clean": true, "cat": "gun"},
 	{"id": "sponge", "name": "海绵擦", "kind": "hold", "clean": false, "cat": "hand"},
+	{"id": "robot", "name": "扫地机器人", "kind": "click", "clean": true, "cat": "hand"},
 ]
 
 const PAINT_COLS := [
@@ -86,7 +115,7 @@ const GLYPHS := {
 
 const SFX_DB := -4.0
 const BGM_DB := -6.0
-const SFX_POOL := 4
+const SFX_POOL := 6
 
 var hud: RefCounted
 var state := 0                  # 0 游玩（沙盒无结算，占位与扩展一致）
@@ -229,7 +258,7 @@ func _load_textures() -> void:
 	for t: Dictionary in TOOLS:
 		_tex["t_" + t.id] = _load_png("assets/t_%s.png" % t.id)
 	for n: String in ["cur_saw", "cur_flame", "cur_hammer", "cur_spray", "cur_stamp", "cur_sponge",
-			"gun_paint", "gun_mg", "gun_laser", "gun_washer"]:
+			"gun_paint", "gun_mg", "gun_laser", "gun_washer", "gun_rocket"]:
 		_tex[n] = _load_png("assets/%s.png" % n)
 	for f in 4:
 		_tex["dog_w%d" % f] = _load_png("assets/dog_w%d.png" % f)
@@ -338,11 +367,44 @@ func _paint_white(vpos: Vector2, half: float) -> void:
 			var dedge := half - maxf(dx, dy)   # 切比雪夫距离到边
 			if dedge <= 0.0:
 				continue
-			var fall := dedge / half           # 中心1→边缘0
+			var fall := dedge / half * 0.45    # 中心1→边缘0，步幅0.45：单次擦只推进一部分，多次擦才渐近全白
 			var idx := row + x * 4
 			for k in 3:
 				bytes[idx + k] = int(bytes[idx + k] + (255.0 - bytes[idx + k]) * fall)
-			bytes[idx + 3] = int(maxf(bytes[idx + 3], 255.0 * fall))
+			bytes[idx + 3] = int(bytes[idx + 3] + (252.0 - bytes[idx + 3]) * fall)   # alpha 向 99% 推进（叠加后趋白）
+	var patch := Image.create_from_data(w, rect.size.y, false, Image.FORMAT_RGBA8, bytes)
+	_canvas.blit_rect(patch, Rect2i(0, 0, w, rect.size.y), rect.position)
+	_grid_resample(rect)
+	_canvas_dirty = true
+	_dirty_rect = _dirty_rect.merge(rect) if _dirty_rect.has_area() else rect
+
+
+## 烟花火星灼斑：以火星颜色在画布上留彩色软边圆斑（cpos=画布坐标）
+func _burn_dot(cpos: Vector2, col: Color, rad: float = 0.0) -> void:
+	var r := maxf(rad, randf_range(3.5, 7.5))
+	var rect := Rect2i(int(cpos.x - r) - 1, int(cpos.y - r) - 1,
+			int(r * 2.0) + 2, int(r * 2.0) + 2) \
+			.intersection(Rect2i(0, 0, _canvas.get_width(), _canvas.get_height()))
+	if rect.size.x <= 0 or rect.size.y <= 0:
+		return
+	var region := _canvas.get_region(rect)
+	var bytes := region.get_data()
+	var w := rect.size.x
+	var cr := col.r * 255.0
+	var cg := col.g * 255.0
+	var cb := col.b * 255.0
+	for y in rect.size.y:
+		var row := y * w * 4
+		for x in w:
+			var d := Vector2(float(x + rect.position.x) - cpos.x, float(y + rect.position.y) - cpos.y).length()
+			if d > r:
+				continue
+			var fall := 1.0 - (d / r) * (d / r)   # 中心1→边缘0（软边）
+			var idx := row + x * 4
+			bytes[idx] = int(bytes[idx] + (cr - bytes[idx]) * fall)
+			bytes[idx + 1] = int(bytes[idx + 1] + (cg - bytes[idx + 1]) * fall)
+			bytes[idx + 2] = int(bytes[idx + 2] + (cb - bytes[idx + 2]) * fall)
+			bytes[idx + 3] = int(bytes[idx + 3] + (252.0 - bytes[idx + 3]) * fall)
 	var patch := Image.create_from_data(w, rect.size.y, false, Image.FORMAT_RGBA8, bytes)
 	_canvas.blit_rect(patch, Rect2i(0, 0, w, rect.size.y), rect.position)
 	_grid_resample(rect)
@@ -536,8 +598,9 @@ func _gen_stamps_bg() -> void:
 		d["lava_hot"].append(_splat(34, Color(1.0, 0.78, 0.22, 0.9), 4))
 	d["hole_rim"] = _blob(44, Color(0.24, 0.22, 0.20, 0.45), 0.4)
 	d["hole"] = _blob(18, Color(0.06, 0.05, 0.04, 0.95), 0.55)
-	d["dent"] = _blob(120, Color(0.24, 0.18, 0.13, 0.5), 0.3)
-	d["dent_core"] = _blob(56, Color(0.14, 0.10, 0.07, 0.55), 0.4)
+	d["dent"] = _blob(240, Color(0.24, 0.18, 0.13, 0.5), 0.3)      # 铁锤凹痕（痕迹加大：240）
+	d["dent_core"] = _blob(96, Color(0.14, 0.10, 0.07, 0.55), 0.4) # 铁锤凹痕芯（96）
+	d["dent_sm"] = _blob(72, Color(0.24, 0.18, 0.13, 0.32), 0.3)   # 弹力皮球撞击浅凹痕
 	d["blast"] = _blob(110, Color(0.09, 0.07, 0.05, 0.85), 0.25)
 	d["crack_bit"] = _blob(12, Color(0.10, 0.08, 0.06, 0.9), 0.6)
 	d["paw"] = []
@@ -621,8 +684,8 @@ func _stamp_icons_set(base: Color, cache: Array) -> Array:
 	return cache
 
 
-## 点阵文字痕迹图（印章英文单词/阿拉伯数字）：5x7 字模逐位渲染
-func _word_img(text: String, col: Color, scale: int = 3) -> Image:
+## 点阵文字痕迹图（印章英文单词/阿拉伯数字）：5x7 字模逐位渲染（scale=6：点阵字模比初版大一倍）
+func _word_img(text: String, col: Color, scale: int = 6) -> Image:
 	var w := (5 * scale + 2) * text.length() - 2
 	var img := Image.create_empty(w, 7 * scale, false, Image.FORMAT_RGBA8)
 	for ci in text.length():
@@ -667,7 +730,7 @@ func _unhandled_input(event: InputEvent) -> void:
 					if _tool == "saw":
 						_saw_line_p0 = mp
 						_saw_line_on = false   # 电锯：按下重置，待初始移动锁定直线方向
-					_use_click_tool()
+					_use_click_tool(mp)
 			else:
 				_hold = false
 
@@ -679,8 +742,8 @@ func _open_wheel(sticky: bool = false) -> void:
 	_wheel_sticky = sticky
 	var vp := get_viewport_rect().size
 	var m := minf(vp.x, vp.y)
-	_wheel_r_out = m * 0.205
-	_wheel_r_in = m * 0.06
+	_wheel_r_out = m * 0.215
+	_wheel_r_in = m * 0.055
 	var mp := get_global_mouse_position()
 	var at := vp * 0.5 if sticky else mp   # 点击模式固定屏幕中心弹出，避免左下角被裁
 	_wheel_center = Vector2(
@@ -705,6 +768,7 @@ func _close_wheel(confirm: bool) -> void:
 func _set_tool(idx: int) -> void:
 	_tool_idx = idx
 	_tool = TOOLS[idx].id
+	_hand_hide = 0.0       # 切换道具：手里已换新道具，取消隐藏倒计时
 	_hammer_wait = false   # 中途切锤取消：本次挥击不结算落痕
 	_play_sfx("select")
 	_popup_at(_wheel_center, hud.t("tool." + String(TOOLS[idx].id), String(TOOLS[idx].name)),
@@ -749,7 +813,7 @@ func _draw_wheel() -> void:
 		w.draw_polygon(pts, cols)
 		var amid := -PI / 2.0 + (i + 0.5) * seg
 		var ipos := c + Vector2.from_angle(amid) * (_wheel_r_in + (_wheel_r_out - _wheel_r_in) * 0.55)
-		var isz := m * (0.060 if i == _wheel_hover else 0.048)
+		var isz := m * (0.050 if i == _wheel_hover else 0.038)
 		var tex: Texture2D = _tex["t_" + TOOLS[i].id]
 		if tex != null:
 			w.draw_texture_rect(tex, Rect2(ipos - Vector2(isz, isz) * 0.5, Vector2(isz, isz)), false)
@@ -777,18 +841,22 @@ func _draw_wheel() -> void:
 
 # ===== 道具使用 =====
 
-func _use_click_tool() -> void:
-	var mp := get_global_mouse_position()
+func _use_click_tool(mp: Vector2) -> void:
 	match _tool:
 		"egg":
 			_play_sfx("throw")
 			_hand_hide = HAND_HIDE_T
 			_toss(_tex["proj_egg"], mp, 0.38, func(pos: Vector2) -> void: _egg_splat(pos))
+		"ball":
+			_ball_drop(mp)
 		"paint":
 			_play_sfx("shot")
 			var ci := randi() % PAINT_COLS.size()
 			_fx.append({"kind": "pellet", "a": _gun_muzzle, "b": mp, "pos": _gun_muzzle,
 					"t": 0.0, "life": 0.13, "col": PAINT_COLS[ci], "ci": ci})
+		"rocket":
+			_play_sfx("rocket")
+			_rocket_fire(mp)
 		"ink":
 			_play_sfx("throw")
 			_hand_hide = HAND_HIDE_T
@@ -797,6 +865,18 @@ func _use_click_tool() -> void:
 			_play_sfx("throw")
 			_hand_hide = HAND_HIDE_T
 			_toss(_tex["proj_cracker"], mp, 0.34, func(pos: Vector2) -> void: _cracker_land(pos))
+		"tornado":
+			_tornado_spawn(mp)
+		"fw_s":
+			if _hand_hide > 0.0:
+				return   # 上一支刚放下：过 FW_HIDE_T 才手持新烟花
+			_hand_hide = FW_HIDE_T
+			_fw_land(mp, false)   # 手持放置：点击处直接立筒点火
+		"fw_l":
+			if _hand_hide > 0.0:
+				return
+			_hand_hide = FW_HIDE_T
+			_fw_land(mp, true)
 		"hammer":
 			if _hammer_wait:   # 上一击还没落锤又点了：先把上一击落了再起新挥
 				_hammer_wait = false
@@ -810,6 +890,8 @@ func _use_click_tool() -> void:
 			if _dog_cd <= 0.0:
 				_spawn_dog(mp)
 				_dog_cd = DOG_CD   # 冷却期间隐藏手持图标且不可再放
+		"robot":
+			_robot_spawn(mp)
 
 
 ## 投掷物：从底部道具图标位置旋转抛物线飞向落点
@@ -834,7 +916,7 @@ func _egg_splat(vpos: Vector2) -> void:
 	_play_sfx("splat")
 
 
-func _paint_splat(vpos: Vector2, ci: int) -> void:
+func _paint_splat(vpos: Vector2, ci: int, snd: bool = true) -> void:
 	var col: Color = PAINT_COLS[ci]
 	var c := _to_canvas(vpos)
 	var arr: Array = _st.get("paint", {}).get(col, [])
@@ -843,7 +925,8 @@ func _paint_splat(vpos: Vector2, ci: int) -> void:
 	var drip: Variant = _st.get("paint_drip", {}).get(col)
 	for i in 1 + randi() % 2:   # 流滴
 		_stamp_mark(drip, c + Vector2(randf_range(-24, 24), randf_range(36, 66)))
-	_play_sfx("splat")
+	if snd:
+		_play_sfx("splat")
 
 
 func _ink_splash(vpos: Vector2) -> void:
@@ -909,16 +992,16 @@ func _hammer_head_pos(mp: Vector2) -> Vector2:
 func _hammer_smash(vpos: Vector2) -> void:
 	var c := _to_canvas(vpos)
 	_stamp_mark(_st_pick("dent"), c)
-	_stamp_mark(_st_pick("dent_core"), c + Vector2(randf_range(-6, 6), randf_range(-6, 6)))
-	for i in 8 + randi() % 4:   # 放射状裂纹
-		var ang := TAU * float(i) / 8.0 + randf_range(-0.25, 0.25)
+	_stamp_mark(_st_pick("dent_core"), c + Vector2(randf_range(-8, 8), randf_range(-8, 8)))
+	for i in 14 + randi() % 5:   # 放射状裂纹（痕迹加大：条数/步长同步增加）
+		var ang := TAU * float(i) / 14.0 + randf_range(-0.25, 0.25)
 		var p := c
-		var step := randf_range(6.0, 10.0) * _u
-		for j in 3 + randi() % 4:
+		var step := randf_range(9.0, 15.0) * _u
+		for j in 4 + randi() % 4:
 			ang += randf_range(-0.4, 0.4)
 			p += Vector2.from_angle(ang) * step
 			_stamp_mark(_st_pick("crack_bit"), p, 8.0)
-	_shake(9.0, 0.2)
+	_shake(14.0, 0.24)
 	_play_sfx("thud")
 	_play_sfx("boom", -8.0)
 
@@ -959,6 +1042,123 @@ func _dog_paw(vpos: Vector2) -> void:
 	_stamp_mark(_st_pick("paw"), c)
 	if randf() < 0.3:
 		_stamp_mark(_st_pick("mud"), c + Vector2(randf_range(-16, 16), randf_range(-16, 16)))
+
+
+# ===== 新增道具：弹力皮球 / 龙卷风 / 火箭筒 / 平刮刀 / 扫地机器人 / 大小烟花 =====
+
+## 弹力皮球：手持一大把，点击一起丢下——各球从手持高处散开下落（球由大变小），
+## 落地留浅凹痕后随机朝向继续弹跳（弹跳越高球越大），能量耗尽平稳后爆炸留同色漆痕
+func _ball_drop(mp: Vector2) -> void:
+	var vp := get_viewport_rect().size
+	for i in BALL_N:
+		var ci := randi() % PAINT_COLS.size()
+		_fx.append({"kind": "ball", "pos": mp + Vector2.from_angle(randf() * TAU) * randf_range(0.0, 30.0) * _u,
+				"h": 1.0, "vh": 0.0, "dirv": Vector2.from_angle(randf() * TAU),
+				"spd": randf_range(0.04, 0.1) * minf(vp.x, vp.y),
+				"t": 0.0, "life": BALL_LIFE, "col": PAINT_COLS[ci], "ci": ci,
+				"bn": 0, "stop": 0.0})
+
+
+## 龙卷风：小型旋风向最远端屏幕边缘位移，沿弧线抖动移动，沿途把颜色卷走留白色不规则痕迹
+func _tornado_spawn(mp: Vector2) -> void:
+	var vp := get_viewport_rect().size
+	var corners := [Vector2(0, 0), Vector2(vp.x, 0), Vector2(0, vp.y), vp]
+	var far: Vector2 = corners[0]
+	for cc: Vector2 in corners:
+		if cc.distance_to(mp) > far.distance_to(mp):
+			far = cc
+	var dir := (far - mp).normalized()
+	if dir.length() < 0.5:
+		dir = Vector2(0, -1)
+	_fx.append({"kind": "tornado", "pos": mp, "dir": dir, "t": 0.0, "life": 6.0,
+			"sd": randf() * TAU, "acc": 0.0})
+
+
+## 火箭筒：从枪口发射飞行火箭弹，命中点产生大火球 + 大范围痕迹
+func _rocket_fire(mp: Vector2) -> void:
+	var from := _gun_muzzle
+	var dist := from.distance_to(mp)
+	_fx.append({"kind": "rocket", "a": from, "b": mp, "pos": from, "t": 0.0,
+			"life": clampf(dist / (ROCKET_SPD * _u), 0.08, 0.6), "ang": (mp - from).angle()})
+
+
+func _rocket_hit(vpos: Vector2) -> void:
+	var c := _to_canvas(vpos)
+	for i in 4:   # 大范围焦痕：多层错位
+		_stamp_mark(_st_pick("blast"), c + Vector2(randf_range(-30, 30), randf_range(-30, 30)) * _u)
+	_stamp_mark(_st_pick("char"), c)
+	for i in 6:   # 周缘熔融斑
+		var cc := c + Vector2.from_angle(randf() * TAU) * randf_range(60.0, 130.0) * _u
+		_stamp_mark(_st_pick("lava_dark"), cc)
+		_stamp_mark(_st_pick("lava"), cc + Vector2(randf_range(-6, 6), randf_range(-6, 6)) * _u)
+	for i in 18:   # 大范围放射裂纹
+		var ang := TAU * float(i) / 18.0 + randf_range(-0.2, 0.2)
+		var p := c
+		var step := randf_range(10.0, 16.0) * _u
+		for j in 4 + randi() % 4:
+			ang += randf_range(-0.35, 0.35)
+			p += Vector2.from_angle(ang) * step
+			_stamp_mark(_st_pick("crack_bit"), p, 8.0)
+	_fx.append({"kind": "flash", "pos": vpos, "vel": Vector2.ZERO, "t": 0.0, "life": 0.4, "r0": 16.0, "r1": 230.0})
+	for i in 16:
+		_fx.append({"kind": "spark", "pos": vpos, "vel": Vector2.from_angle(randf() * TAU) * randf_range(260, 640) * _u,
+				"t": 0.0, "life": randf_range(0.4, 0.7), "col": Color(1.0, randf_range(0.5, 0.8), 0.2)})
+	for i in 6:
+		_fx.append({"kind": "smoke", "pos": vpos + Vector2(randf_range(-50, 50), randf_range(-50, 50)) * _u,
+				"vel": Vector2(randf_range(-40, 40), randf_range(-90, -30)) * _u,
+				"t": 0.0, "life": randf_range(0.8, 1.3), "size": 12.0})
+	_shake(26.0, 0.45)
+	_play_sfx("explosion")
+
+
+## 扫地机器人：放置后立即前往最近角落，再从角落开始全屏逐行清扫（下角向上/上角向下换行）
+func _robot_spawn(mp: Vector2) -> void:
+	var vp := get_viewport_rect().size
+	var corners := [Vector2(0, 0), Vector2(vp.x, 0), Vector2(0, vp.y), vp]
+	var near: Vector2 = corners[0]
+	for cc: Vector2 in corners:
+		if cc.distance_to(mp) < near.distance_to(mp):
+			near = cc
+	_fx.append({"kind": "robot", "pos": mp, "phase": "goto", "corner": near,
+			"dir": 1.0, "vy": 1.0, "t": 0.0, "life": 240.0, "row_y": mp.y, "turn": 0.0, "ty": mp.y})
+	_play_sfx("thud", -10.0)
+
+
+## 大小烟花放置：引线燃 2s → 持续把烟花弹打到空中炸开（小的更低更小），
+## 烟花筒主体（fwbody）留存到整场秀结束才随烟花消失
+func _fw_land(vpos: Vector2, big: bool) -> void:
+	var dur: float = FW_L_T if big else FW_S_T
+	_fx.append({"kind": "fwbody", "pos": vpos, "big": big, "t": 0.0, "life": FW_FUSE_T + dur})
+	_fuses.append({"pos": vpos + Vector2(0, -FW_TOP * _u), "t": FW_FUSE_T, "notex": true})   # 引线期火花（盒顶伸出，筒身由 fwbody 绘制）
+	_play_sfx("thud", -10.0)
+	var gen := _gen
+	var tw := create_tween()
+	tw.tween_interval(FW_FUSE_T)
+	tw.tween_callback(func() -> void:
+		if gen != _gen:
+			return
+		_fx.append({"kind": "fwshow", "pos": vpos, "big": big, "t": 0.0, "life": dur, "acc": 0.0, "iv": 0.0})
+		_play_sfx("fwlight", -4.0))
+
+
+## 烟花弹到达高空：炸开（大小烟花统一，仅范围差异）
+func _fwrise_burst(p: Dictionary) -> void:
+	_firework_burst(p.b, float(p.r), p.col)
+	_shake(10.0 if bool(p.get("big", true)) else 4.0, 0.25)
+
+
+## 烟花爆开：闪光 + 径向彩色火星（fspark 带衰减/微重力）
+func _firework_burst(vpos: Vector2, r: float, col: Color) -> void:
+	_fx.append({"kind": "flash", "pos": vpos, "vel": Vector2.ZERO, "t": 0.0, "life": 0.28, "r0": r * 0.12, "r1": r * 0.5})
+	var n := 18 + randi() % 10
+	for i in n:
+		var ang := TAU * float(i) / float(n) + randf_range(-0.12, 0.12)
+		_fx.append({"kind": "fspark", "pos": vpos, "vel": Vector2.from_angle(ang) * r * randf_range(1.7, 2.6),
+				"t": 0.0, "life": randf_range(0.7, 1.2), "col": col})
+	for i in 6 + randi() % 4:   # 二次余烬
+		_fx.append({"kind": "fspark", "pos": vpos, "vel": Vector2.from_angle(randf() * TAU) * r * randf_range(0.5, 1.3),
+				"t": 0.0, "life": randf_range(0.5, 1.0), "col": col.lightened(0.5)})
+	_play_sfx("burst", -4.0 if r > 150.0 * _u else -9.0)
 
 
 # ===== 持续型道具（按住左键 tick）=====
@@ -1134,13 +1334,163 @@ func _tick_fx(delta: float) -> void:
 			_paint_splat(p.b, int(p.ci))
 		if kind == "fireball" and nt >= 1.0:   # 火团烧尽：留下岩浆洼
 			_fireball_out(p)
+		if kind == "rocket" and nt >= 1.0:   # 火箭弹命中：大火球+大范围痕迹
+			_rocket_hit(p.b)
+		if kind == "fwrise" and nt >= 1.0:   # 烟花弹到顶：大范围炸开+进入烟花秀
+			_fwrise_burst(p)
 		p.t = nt
 		if p.t >= 1.0:
+			if kind == "fspark":   # 火星熄灭：留下火星同色的灼斑（非黑焦痕）
+				var fc := _to_canvas(p.pos)
+				_burn_dot(fc, p.col)
+				if randf() < 0.3:
+					_burn_dot(fc + Vector2(randf_range(-8, 8), randf_range(-8, 8)) * _u, p.col, 3.0)
 			_fx.remove_at(i)
 		else:
 			match kind:
 				"pellet":
 					p.pos = p.a.lerp(p.b, p.t)
+				"rocket":
+					p.pos = p.a.lerp(p.b, p.t)
+					# 尾焰与烟
+					_fx.append({"kind": "flame", "pos": p.pos,
+							"vel": (p.a - p.b).normalized().rotated(randf_range(-0.4, 0.4)) * randf_range(120, 220) * _u,
+							"t": 0.0, "life": randf_range(0.14, 0.22), "size": randf_range(5.0, 8.0) * _u})
+					if randf() < 0.4:
+						_fx.append({"kind": "smoke", "pos": p.pos, "vel": (p.a - p.b).normalized() * randf_range(40, 90) * _u,
+								"t": 0.0, "life": 0.7, "size": 5.0})
+				"fwrise":
+					p.pos = p.a.lerp(p.b, p.t)
+					if randf() < 0.7:   # 上升尾焰
+						_fx.append({"kind": "spark", "pos": p.pos, "vel": Vector2(randf_range(-30, 30), randf_range(20, 80)) * _u,
+								"t": 0.0, "life": 0.3, "col": Color(1.0, 0.75, 0.3)})
+				"ball":
+					# 俯视高度模拟：h∈0..1（1=手持高处），大小随高度变化；落地随机朝向弹跳
+					var vps: Vector2 = get_viewport_rect().size
+					if float(p.stop) > 0.0:   # 能量耗尽平稳：立即爆炸留同色漆痕后消失
+						_paint_splat(p.pos, int(p.ci), false)
+						for i2 in 7:   # 爆裂粒子（球同色）
+							_fx.append({"kind": "spark", "pos": p.pos,
+									"vel": Vector2.from_angle(randf() * TAU) * randf_range(90, 240) * _u,
+									"t": 0.0, "life": 0.3, "col": p.col})
+						_fx.append({"kind": "flash", "pos": p.pos, "r0": 6.0, "r1": 46.0,
+								"t": 0.0, "life": 0.3})
+						if randf() < 0.4:
+							_play_sfx("splat", -4.0)
+						p.t = 1.0
+					else:
+						p.vh -= BALL_G * delta
+						p.h += p.vh * delta
+						p.pos += Vector2(p.dirv) * float(p.spd) * delta
+						var r0: float = lerpf(BALL_R, BALL_HI, clampf(float(p.h), 0.0, 1.0)) * _u
+						if p.pos.x < r0:   # 屏幕边缘水平反弹
+							p.pos.x = r0
+							p.dirv = Vector2(absf(float(p.dirv.x)), float(p.dirv.y))
+						elif p.pos.x > vps.x - r0:
+							p.pos.x = vps.x - r0
+							p.dirv = Vector2(-absf(float(p.dirv.x)), float(p.dirv.y))
+						if p.pos.y < r0:
+							p.pos.y = r0
+							p.dirv = Vector2(float(p.dirv.x), absf(float(p.dirv.y)))
+						elif p.pos.y > vps.y - r0:
+							p.pos.y = vps.y - r0
+							p.dirv = Vector2(float(p.dirv.x), -absf(float(p.dirv.y)))
+						if float(p.h) <= 0.0:   # 落地：浅凹痕 + 弹跳声 + 随机朝向继续弹跳
+							p.h = 0.0
+							_stamp_mark(_st_pick("dent_sm"), _to_canvas(p.pos), 40.0)
+							p.bn = int(p.bn) + 1
+							if int(p.bn) == 1:   # 首次落地：随机朝向开始弹跳移动
+								p.dirv = Vector2.from_angle(randf() * TAU)
+								p.spd = randf_range(0.3, 0.55) * minf(vps.x, vps.y)
+							if randf() < 0.45:
+								_play_sfx("boing", -3.0)
+							p.vh = -float(p.vh) * 0.7   # 反弹（衰减慢，弹跳次数多）
+							for i2 in 2:
+								_fx.append({"kind": "spark", "pos": p.pos,
+										"vel": Vector2.from_angle(randf() * TAU) * randf_range(50, 140) * _u,
+										"t": 0.0, "life": 0.25, "col": Color(1, 1, 1)})
+							if float(p.vh) < 0.08:   # 能量耗尽：停住
+								p.vh = 0.0
+								p.stop = 0.001
+				"tornado":
+					var npos: Vector2 = p.pos + p.dir * TORNADO_SPD * _u * delta
+					npos += Vector2(-p.dir.y, p.dir.x) * sin(p.t * 14.0 + float(p.sd)) * 55.0 * _u * delta   # 弧线摆动
+					p.pos = npos
+					p.acc += delta
+					if p.acc >= 0.03:   # 沿途卷走颜色（多点扰动→白色不规则痕迹）
+						p.acc = 0.0
+						for i2 in 2:
+							_paint_white(p.pos + Vector2(randf_range(-30, 30), randf_range(-30, 30)) * _u,
+									TORNADO_R * _u * randf_range(0.55, 1.0))
+					var vps2: Vector2 = get_viewport_rect().size
+					if p.pos.x < -40.0 or p.pos.x > vps2.x + 40.0 or p.pos.y < -40.0 or p.pos.y > vps2.y + 40.0:
+						p.t = 1.0   # 到达屏幕边缘：消失
+				"robot":
+					var r2: float = ROBOT_R * _u
+					var vps3: Vector2 = get_viewport_rect().size
+					if String(p.phase) == "goto":   # 阶段1：直线前往最近角落（途中顺便清扫）
+						var dv: Vector2 = Vector2(p.corner) - p.pos
+						var step: float = ROBOT_SPD * _u * delta
+						if dv.length() <= step:
+							p.pos = Vector2(p.corner)
+							p.phase = "sweep"
+							p.dir = -1.0 if p.corner.x > vps3.x * 0.5 else 1.0   # 右角→向左扫，左角→向右
+							p.vy = -1.0 if p.corner.y > vps3.y * 0.5 else 1.0    # 下角→逐行向上，上角→向下
+							p.row_y = clampf(float(p.corner.y), r2, vps3.y - r2)
+							p.ty = float(p.row_y)
+							p.turn = 0.0
+						else:
+							p.pos += dv.normalized() * step
+							_erase_at(p.pos, r2, 1.0)
+					else:   # 阶段2：从角落开始全屏逐行清扫
+						if float(p.turn) > 0.0:   # 边缘换行动画：转向摆动 + 平移到下一行
+							p.turn -= delta
+							p.pos.y = lerpf(float(p.ty), float(p.row_y), 1.0 - float(p.turn) / ROBOT_TURN_T)
+						else:
+							p.pos.x += float(p.dir) * ROBOT_SPD * _u * delta
+							_erase_at(p.pos, r2, 1.0)   # 逐行擦除恢复壁纸
+							_erase_at(p.pos - Vector2(float(p.dir) * r2 * 0.6, 0.0), r2 * 0.9, 1.0)
+							var edge := r2 * 0.7
+							if (float(p.dir) > 0.0 and p.pos.x >= vps3.x - edge) or (float(p.dir) < 0.0 and p.pos.x <= edge):
+								# 换行：转向动画 + 行距 1.5R 下移/上移
+								p.ty = p.pos.y
+								p.row_y = p.pos.y + float(p.vy) * r2 * 1.5
+								p.dir = -float(p.dir)
+								p.turn = ROBOT_TURN_T
+								p.pos.x = clampf(p.pos.x, edge, vps3.x - edge)
+							if (float(p.vy) < 0.0 and float(p.row_y) < -r2) or (float(p.vy) > 0.0 and float(p.row_y) > vps3.y + r2):
+								# 全部行完成
+								p.t = 1.0
+								_popup(hud.t("ui.cleaned", "桌面已清理"), Color(0.5, 1.0, 0.55))
+								_play_sfx("select", -2.0)
+				"fspark":
+					p.vel *= maxf(1.0 - delta * 1.1, 0.0)
+					p.vel.y += 240.0 * _u * delta
+					p.pos += p.vel * delta
+				"fwshow":
+					# 持续烟花秀：间隔随机把烟花弹从筒顶打到空中，弹到顶自动炸开（_fwrise_burst）
+					p.acc += delta
+					if p.acc >= float(p.iv):
+						p.acc = 0.0
+						p.iv = randf_range(0.45, 0.85) if bool(p.big) else randf_range(0.35, 0.7)
+						var vps4: Vector2 = get_viewport_rect().size
+						var big0: bool = bool(p.big)
+						var to := Vector2(
+								clampf(p.pos.x + randf_range(-0.4, 0.4) * vps4.x, vps4.x * 0.08, vps4.x * 0.92),
+								vps4.y - vps4.y * (randf_range(0.5, 0.8) if big0 else randf_range(0.28, 0.5)))
+						var dist: float = p.pos.distance_to(to)
+						_fx.append({"kind": "fwrise", "a": p.pos + Vector2(0, -FW_TOP * _u), "b": to,
+								"pos": p.pos, "t": 0.0, "life": clampf(dist / (900.0 * _u), 0.5, 1.2),
+								"col": FW_COLS[randi() % FW_COLS.size()],
+								"r": minf(vps4.x, vps4.y) * (randf_range(0.16, 0.26) if big0 else randf_range(0.07, 0.13)),
+								"big": big0})
+						_play_sfx("fwlaunch", -5.0 if big0 else -8.0)   # 礼花炮筒发射（弹从盒顶射出）
+				"fwbody":
+					# 引线期火花由 _fuses 负责；燃放期盒顶偶发小火星（盒身随秀结束一起消失）
+					if float(p.t) > FW_FUSE_T / float(p.life) and randf() < delta * 8.0:
+						_fx.append({"kind": "spark", "pos": p.pos + Vector2(randf_range(-3, 3), -FW_TOP * _u),
+								"vel": Vector2.from_angle(-PI / 2.0 + randf_range(-0.9, 0.9)) * randf_range(50, 140) * _u,
+								"t": 0.0, "life": 0.3, "col": Color(1.0, 0.8, 0.3)})
 				"fireball":
 					p.vel *= maxf(1.0 - delta * (1.5 if p.roll else 0.9), 0.0)
 					p.pos += p.vel * delta
@@ -1252,6 +1602,40 @@ func _draw_fx() -> void:
 				var tail: Vector2 = p.a.lerp(p.b, maxf(p.t - 0.2, 0.0))
 				w.draw_line(tail, p.pos, Color(p.col.r, p.col.g, p.col.b, 0.5), 4.5 * _u, true)
 				w.draw_circle(p.pos, 6.5 * _u, p.col)
+			"rocket":
+				w.draw_set_transform(p.pos, float(p.ang), Vector2.ONE)
+				w.draw_circle(Vector2(-9.0 * _u, 0), 5.0 * _u, Color(0.88, 0.88, 0.9))   # 弹体
+				w.draw_circle(Vector2(3.0 * _u, 0), 5.0 * _u, Color(0.85, 0.3, 0.2))     # 弹头
+				w.draw_circle(Vector2(-16.0 * _u, 0), 3.5 * _u, Color(1.0, 0.7, 0.2, 0.9))   # 尾喷
+				w.draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+			"fwrise":
+				w.draw_circle(p.pos, 5.0 * _u, Color(1.0, 0.9, 0.55))
+				w.draw_circle(p.pos, 2.4 * _u, Color(1, 1, 1))
+			"ball":
+				# 俯视：地面阴影 + 球体（越大=越高）
+				var hh: float = clampf(float(p.h), 0.0, 1.0)
+				var rr: float = lerpf(BALL_R, BALL_HI, hh) * _u
+				w.draw_circle(p.pos, rr * (1.0 + hh * 0.5), Color(0.0, 0.0, 0.0, 0.22 * (1.0 - hh * 0.55)))
+				w.draw_circle(p.pos, rr, Color(p.col.r, p.col.g, p.col.b))
+				w.draw_arc(p.pos, rr, 0, TAU, 20, Color(0.1, 0.1, 0.1, 0.55), 2.0 * _u, true)
+				w.draw_circle(p.pos + Vector2(-rr * 0.35, -rr * 0.35), rr * 0.3, Color(1, 1, 1, 0.7))
+			"tornado":
+				for i in 6:   # 漏斗圈：底大顶小，随高度缩小并快速旋转摆动
+					var trr: float = (46.0 - i * 6.0) * _u
+					var ta := _time * (10.0 - i * 0.8) + float(i) * 1.9 + float(p.sd)
+					var tcx: Vector2 = p.pos + Vector2(sin(ta) * trr * 0.6, -i * 16.0 * _u)
+					w.draw_arc(tcx, trr, 0, TAU, 20, Color(0.72, 0.76, 0.82, 0.4), 5.0 * _u, true)
+				w.draw_circle(p.pos + Vector2(0, 8.0 * _u), 42.0 * _u, Color(0.8, 0.82, 0.85, 0.16))   # 底部尘雾
+			"robot":
+				var rb_ang := 0.0
+				if float(p.turn) > 0.0:   # 换行转向摆动
+					rb_ang = sin((1.0 - float(p.turn) / ROBOT_TURN_T) * PI) * 0.5 * float(p.dir)
+				_draw_robot_body(w, p.pos, rb_ang, float(p.dir))
+			"fspark":
+				var fc: Color = p.col.lerp(Color(1, 1, 1, 0.9), t * 0.7)
+				fc.a = 1.0 - t
+				w.draw_line(p.pos - p.vel * 0.035, p.pos, Color(fc.r, fc.g, fc.b, fc.a * 0.5), 2.2 * _u, true)
+				w.draw_circle(p.pos, 2.6 * _u, fc)
 			"jet":
 				var jv: Vector2 = p.vel.normalized() * 14.0 * _u
 				w.draw_line(p.pos - jv, p.pos, Color(0.55, 0.8, 1.0, 0.7 * (1.0 - t)), 3.0 * _u, true)
@@ -1259,18 +1643,40 @@ func _draw_fx() -> void:
 				var r: float = lerpf(p.r0, p.r1, t) * _u
 				w.draw_circle(p.pos, r, Color(1.0, 0.95, 0.8, 0.5 * (1.0 - t)))
 				w.draw_arc(p.pos, r, 0, TAU, 32, Color(1.0, 0.8, 0.35, 0.8 * (1.0 - t)), 4.0 * _u, true)
+			"fwbody":
+				# 烟花礼盒/礼箱主体：直立立于放置点，与手持图示同大，留存到整场秀结束（与 fwshow 同寿命）
+				var ftex: Texture2D = _tex["t_fw_l"] if bool(p.big) else _tex["t_fw_s"]
+				var fsz: float = HAND_TEX * 0.5 * _u
+				if ftex != null:
+					w.draw_set_transform(p.pos, 0.0, Vector2.ONE)
+					w.draw_texture_rect(ftex, Rect2(Vector2(-fsz, -fsz) * 0.5, Vector2(fsz, fsz)), false)
+					w.draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 	for f: Dictionary in _fuses:
-		var ctex: Texture2D = _tex["proj_cracker"]   # 鞭炮本体躺在落点（此前只有火星没有本体）
-		if ctex != null:
-			w.draw_set_transform(f.pos, 0.4, Vector2.ONE)
-			w.draw_texture_rect(ctex, Rect2(Vector2(-17, -17) * _u, Vector2(34, 34) * _u), false)
-			w.draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+		if not f.get("notex", false):   # 鞭炮本体躺在落点（烟花筒走 fwbody 直立绘制）
+			var ctex: Texture2D = f.get("tex", _tex["proj_cracker"])
+			var fsz2: float = float(f.get("sz", 34.0)) * _u
+			if ctex != null:
+				w.draw_set_transform(f.pos, 0.4, Vector2.ONE)
+				w.draw_texture_rect(ctex, Rect2(Vector2(-fsz2, -fsz2) * 0.5, Vector2(fsz2, fsz2)), false)
+				w.draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 		w.draw_circle(f.pos + Vector2(0, -10) * _u, 3.5 * _u, Color(1.0, 0.75, 0.25))
 		for i in 3:
 			var a := randf() * TAU
 			w.draw_line(f.pos + Vector2(0, -10) * _u,
 					f.pos + Vector2(0, -10) * _u + Vector2.from_angle(a) * randf_range(4.0, 11.0) * _u,
 					Color(1.0, 0.85, 0.3, 0.9), 1.5 * _u, true)
+
+
+## 扫地机器人机身绘制（_draw_fx 放置态与 _draw_reticle 手持态共用，大小一致）
+func _draw_robot_body(cv: CanvasItem, pos: Vector2, ang: float, dir: float) -> void:
+	var rb_r: float = ROBOT_R * _u * 0.62
+	cv.draw_set_transform(pos, ang, Vector2.ONE)
+	cv.draw_circle(Vector2.ZERO, rb_r, Color(0.22, 0.24, 0.28))          # 机身
+	cv.draw_arc(Vector2.ZERO, rb_r, 0, TAU, 24, Color(0.12, 0.12, 0.14), 3.0 * _u, true)
+	cv.draw_arc(Vector2.ZERO, rb_r * 0.55, 0, TAU, 20, Color(0.4, 0.44, 0.5), 2.5 * _u, true)
+	cv.draw_circle(Vector2(dir * rb_r * 0.5, 0), 4.0 * _u, Color(0.95, 0.75, 0.2))   # 前向指示灯
+	cv.draw_circle(Vector2.ZERO, rb_r * 0.16, Color(0.3, 0.8, 1.0))      # 顶部传感器
+	cv.draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 
 
 func _shake(d: float, dur: float) -> void:
@@ -1306,15 +1712,17 @@ func _draw_reticle() -> void:
 	var r: Control = _reticle_ctl
 	# ===== 手持类：道具贴图即光标（作用点=贴图中心=痕迹产生点）；轮盘打开时隐藏（避免遮挡选项）=====
 	if cat == "hand" and not _wheel_open:
-		var ctex: Texture2D = _tex["dog_w0"] if _tool == "dog" else _tex["cur_" + _tool]
+		var ctex: Texture2D = _tex["dog_w0"] if _tool == "dog" else _tex.get("cur_" + _tool, _tex["t_" + _tool])
 		var hs := HAND_TEX * _u
 		var tsz := Vector2(128.0 * _u, 96.0 * _u) if _tool == "dog" else Vector2(hs, hs)   # 小狗手持=放置实际大小（贴图 128x96）
+		if _tool == "fw_s" or _tool == "fw_l":
+			tsz *= 0.5   # 烟花礼盒/礼箱：手持=放置同大（缩小一半）
 		var wob := Vector2.ZERO
 		if _hold and (_tool == "saw" or _tool == "spray" or _tool == "flame"):
 			wob = Vector2(randf_range(-2.2, 2.2), randf_range(-2.2, 2.2)) * _u   # 使用中手持抖动
 		var ang := 0.0
 		var sc := 1.0
-		var sp := mp   # 锯切点：电锯持锯时被约束在锁定的直线上（光标只沿线移动）
+		var sp := mp   # 锯切/刮削点：被约束在锁定的直线上（光标只沿线移动）
 		if _tool == "saw" and _hold and _saw_line_on:
 			sp = _saw_line_p0 + _saw_line_dir * maxf((mp - _saw_line_p0).dot(_saw_line_dir), 0.0)
 		var pivot := sp + wob
@@ -1333,14 +1741,26 @@ func _draw_reticle() -> void:
 			var sq := Rect2(mp - Vector2(hv, hv), Vector2(hv, hv) * 2.0)
 			r.draw_rect(sq, Color(1.0, 1.0, 1.0, 0.22), true)
 			r.draw_rect(sq, Color(1.0, 1.0, 1.0, 0.55), false, 2.0 * _u)
-		if ctex != null and not (_tool == "dog" and _dog_cd > 0.0):
+		if ctex != null and _hand_hide <= 0.0 and not (_tool == "dog" and _dog_cd > 0.0) and _tool != "ball" and _tool != "robot":
 			var anchor := -tsz * 0.5
 			if _tool == "hammer":
 				anchor = -HAMMER_HOT / 256.0 * tsz      # 图片左下角对齐鼠标点（HAMMER_HOT）
 			r.draw_set_transform(pivot, ang, Vector2(sc, sc))
 			r.draw_texture_rect(ctex, Rect2(sp + wob + anchor - pivot, tsz), false)
 			r.draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
-		if _tool == "dog" and _dog_cd > 0.0:   # 放置冷却：隐藏手持小狗，显示准星环提示
+		if _tool == "ball":   # 手持一大把弹力皮球：一簇彩球，点击一起丢下
+			r.draw_circle(mp + Vector2(0, 9.0 * _u), 36.0 * _u, Color(0.0, 0.0, 0.0, 0.13))   # 整簇投影
+			for i in BALL_N:
+				var bp: Vector2 = mp + Vector2(BALL_HOLD[i]) * _u
+				var brr := BALL_R * 0.95 * _u
+				var bc: Color = PAINT_COLS[i % PAINT_COLS.size()]
+				r.draw_circle(bp, brr, bc)
+				r.draw_arc(bp, brr, 0, TAU, 18, Color(0.1, 0.1, 0.1, 0.75), 2.0 * _u, true)
+				r.draw_circle(bp + Vector2(-brr * 0.35, -brr * 0.35), brr * 0.28, Color(1, 1, 1, 0.65))
+		elif _tool == "robot":   # 手持扫地机器人：与放置后同样大小 + 擦除范围圈
+			_draw_robot_body(r, mp, 0.0, 1.0)
+			r.draw_arc(mp, ROBOT_R * _u, 0, TAU, 36, Color(0.35, 0.65, 1.0, 0.3), 2.0 * _u, true)
+		elif _tool == "dog" and _dog_cd > 0.0:   # 放置冷却：隐藏手持小狗，显示准星环提示
 			r.draw_arc(mp, 13.0 * _u, 0, TAU, 24, Color(0.95, 0.3, 0.25, 0.9), 2.4 * _u, true)
 	# ===== 枪械类：底部持枪 + 枪口→光标特效线 =====
 	elif cat == "gun":
@@ -1367,11 +1787,11 @@ func _draw_reticle() -> void:
 		r.draw_circle(mp, 2.6 * _u, col)
 	# 底部投掷道具图标（丢出后短暂隐藏，0.4s 重生"新道具"）
 	if cat == "toss" and _hand_hide <= 0.0:
-		var itex: Texture2D = _tex["proj_egg"] if _tool == "egg" else (_tex["proj_cracker"] if _tool == "cracker" else _tex["t_ink"])
+		var itex: Texture2D = _tex["proj_egg"] if _tool == "egg" else (_tex["proj_cracker"] if _tool == "cracker" else _tex["t_" + _tool])
 		var isz2 := 64.0 * _u
 		r.draw_texture_rect(itex, Rect2(Vector2(vp.x * 0.5 - isz2 * 0.5, vp.y - isz2 - 14.0 * _u), Vector2(isz2, isz2)), false)
 	# 当前道具小徽章（左下角：图标 + 名称，点击弹出道具选择轮盘）
-	var isz := 40.0 * _u
+	var isz := 80.0 * _u
 	var chip := Vector2(18.0, vp.y - 18.0 - isz)
 	_badge_rect = Rect2(chip - Vector2(6.0, 6.0) * _u, Vector2(isz + 12.0 * _u, isz + 12.0 * _u))
 	var tex: Texture2D = _tex["t_" + _tool]
@@ -1437,6 +1857,20 @@ func _process(delta: float) -> void:
 				sp.play()
 		elif sp.playing:
 			sp.stop()
+	# 龙卷风 / 扫地机器人循环声对账：场上有实体则播放
+	var loop_act := {"tornado": false, "robot": false}
+	for p in _fx:
+		var pk: String = p.get("kind", "")
+		if loop_act.has(pk):
+			loop_act[pk] = true
+	for k: String in loop_act:
+		if _sfx_loop.has(k):
+			var sp3: AudioStreamPlayer = _sfx_loop[k]
+			if loop_act[k]:
+				if not sp3.playing:
+					sp3.play()
+			elif sp3.playing:
+				sp3.stop()
 	_update_pct()
 
 
@@ -1666,6 +2100,63 @@ func _sfx_stream(parts: Array) -> AudioStreamWAV:
 	return st
 
 
+## 从 assets/sfx 载入真实音效文件（免费可商用授权，见 CREDITS.txt）；成功覆盖同名合成音
+func _load_sfx_file(key: String, fname: String) -> void:
+	for base: String in ["res://games/desk_wreck/assets/sfx/" + fname, "res://assets/sfx/" + fname]:
+		var f := FileAccess.open(base, FileAccess.READ)
+		if f != null:
+			var bytes := f.get_buffer(f.get_length())
+			var st: AudioStream = null
+			if fname.ends_with(".mp3"):
+				st = AudioStreamMP3.load_from_buffer(bytes)
+			elif fname.ends_with(".ogg"):
+				st = AudioStreamOggVorbis.load_from_buffer(bytes)
+			elif fname.ends_with(".wav"):
+				st = AudioStreamWAV.load_from_buffer(bytes)
+			if st != null:
+				_sfx[key] = st
+			return
+
+
+## 循环音效：assets/sfx 文件优先，缺失用合成流兜底，均建为循环播放器入 _sfx_loop
+func _load_loop_file(key: String, fname: String, synth: Array) -> void:
+	var st: AudioStream = null
+	for base: String in ["res://games/desk_wreck/assets/sfx/" + fname, "res://assets/sfx/" + fname]:
+		var f := FileAccess.open(base, FileAccess.READ)
+		if f != null:
+			var bytes := f.get_buffer(f.get_length())
+			if fname.ends_with(".mp3"):
+				var m := AudioStreamMP3.load_from_buffer(bytes)
+				if m != null:
+					m.loop = true
+					st = m
+			elif fname.ends_with(".ogg"):
+				var o := AudioStreamOggVorbis.load_from_buffer(bytes)
+				if o != null:
+					o.loop = true
+					st = o
+			elif fname.ends_with(".wav"):
+				var wv := AudioStreamWAV.load_from_buffer(bytes)
+				if wv != null:
+					wv.loop_mode = AudioStreamWAV.LOOP_FORWARD
+					wv.loop_begin = 0
+					wv.loop_end = wv.data.size() / 2   # 16bit 单声道：帧数=字节数/2
+					st = wv
+			break
+	if st == null:
+		var syn := _sfx_stream(synth)
+		syn.loop_mode = AudioStreamWAV.LOOP_FORWARD
+		syn.loop_begin = 0
+		syn.loop_end = syn.data.size() / 2
+		st = syn
+	if st != null:
+		var p := AudioStreamPlayer.new()
+		p.stream = st
+		p.volume_db = SFX_DB - 2.0
+		add_child(p)
+		_sfx_loop[key] = p
+
+
 func _init_sfx() -> void:
 	_sfx["splat"] = _sfx_stream([["n", 0.12, 0.55, 2.0], ["t", 160.0, 60.0, 0.10, false, 0.5]])   # 蛋/彩弹砸糊
 	_sfx["shot"] = _sfx_stream([["n", 0.05, 0.5, 1.2]])                        # 机关枪点射
@@ -1681,6 +2172,26 @@ func _init_sfx() -> void:
 	_sfx["throw"] = _sfx_stream([["n", 0.15, 0.25, 3.0]])                      # 投掷风声
 	_sfx["drip"] = _sfx_stream([["t", 600.0, 300.0, 0.08, false, 0.25]])       # 墨滴
 	_sfx["select"] = _sfx_stream([["t", 500.0, 750.0, 0.09, false, 0.3]])      # 轮盘选道具
+	# 新增道具音效：assets/sfx 真实录音优先（免费可商用授权，见 CREDITS.txt），缺失回退合成音
+	_load_sfx_file("boing", "boing.mp3")
+	if not _sfx.has("boing"):
+		_sfx["boing"] = _sfx_stream([["t", 320.0, 110.0, 0.16, true, 0.4], ["t", 200.0, 90.0, 0.1, true, 0.3]])   # 皮球弹跳
+	_load_sfx_file("rocket", "rocket.wav")
+	if not _sfx.has("rocket"):
+		_sfx["rocket"] = _sfx_stream([["n", 0.5, 0.6, 2.0], ["t", 180.0, 70.0, 0.4, false, 0.4]])   # 火箭发射
+	_load_sfx_file("explosion", "explosion.wav")
+	if not _sfx.has("explosion"):
+		_sfx["explosion"] = _sfx["boom"]
+	_load_sfx_file("fwlaunch", "fwlaunch.wav")
+	if not _sfx.has("fwlaunch"):
+		_sfx["fwlaunch"] = _sfx_stream([["n", 0.25, 0.5, 2.0], ["t", 600.0, 90.0, 0.5, false, 0.5]])   # 礼花发射（短促砰+下扫）
+	_load_sfx_file("burst", "burst.ogg")
+	if not _sfx.has("burst"):
+		_sfx["burst"] = _sfx_stream([["n", 0.2, 0.5, 2.5], ["t", 800.0, 200.0, 0.3, false, 0.3]])   # 烟花爆开
+	_load_sfx_file("fwlight", "fwlight.ogg")   # 烟花点火嘶声（文件缺失则静默）
+	# 循环声：龙卷风风声 / 扫地机器人马达（文件优先→合成兜底，均 loop 播放器）
+	_load_loop_file("tornado", "wind.ogg", [["n", 0.6, 0.4, 3.0]])
+	_load_loop_file("robot", "robot.mp3", [["t", 130.0, 126.0, 0.5, false, 0.22], ["n", 0.25, 0.1, 8.0]])
 	# 电锯/激光用真实录音（Mixkit 免费授权）：电锯=循环播放（按住播、松开停），激光=单发重触发
 	for base: String in ["res://games/desk_wreck/assets/sfx/saw.mp3", "res://assets/sfx/saw.mp3"]:
 		var sf := FileAccess.open(base, FileAccess.READ)

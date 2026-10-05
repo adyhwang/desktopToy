@@ -23,5 +23,11 @@
 	"tool.stamp": "スタンプ",
 	"tool.dog": "子犬",
 	"tool.washer": "洗浄ガン",
-	"tool.sponge": "スポンジ"
+	"tool.sponge": "スポンジ",
+	"tool.ball": "ボール",
+	"tool.tornado": "竜巻",
+	"tool.rocket": "ロケット発射筒",
+	"tool.fw_s": "小型花火",
+	"tool.fw_l": "大型花火",
+	"tool.robot": "掃除ロボット"
 }

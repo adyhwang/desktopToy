@@ -23,5 +23,11 @@
 	"tool.stamp": "Sello",
 	"tool.dog": "Cachorro",
 	"tool.washer": "Pistola de agua",
-	"tool.sponge": "Esponja"
+	"tool.sponge": "Esponja",
+	"tool.ball": "Pelota elastica",
+	"tool.tornado": "Tornado",
+	"tool.rocket": "Lanzacohetes",
+	"tool.fw_s": "Fuegos pequenos",
+	"tool.fw_l": "Fuegos grandes",
+	"tool.robot": "Robot limpiador"
 }

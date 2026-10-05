@@ -23,5 +23,11 @@
 	"tool.stamp": "Stamp",
 	"tool.dog": "Puppy",
 	"tool.washer": "Water Gun",
-	"tool.sponge": "Sponge"
+	"tool.sponge": "Sponge",
+	"tool.ball": "Bouncy Ball",
+	"tool.tornado": "Tornado",
+	"tool.rocket": "Rocket Launcher",
+	"tool.fw_s": "Small Fireworks",
+	"tool.fw_l": "Big Fireworks",
+	"tool.robot": "Sweeping Robot"
 }

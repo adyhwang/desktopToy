@@ -23,5 +23,11 @@
 	"tool.stamp": "Stempel",
 	"tool.dog": "Welpe",
 	"tool.washer": "Wasserpistole",
-	"tool.sponge": "Schwamm"
+	"tool.sponge": "Schwamm",
+	"tool.ball": "Gummiball",
+	"tool.tornado": "Tornado",
+	"tool.rocket": "Raketenwerfer",
+	"tool.fw_s": "Kleines Feuerwerk",
+	"tool.fw_l": "Grosses Feuerwerk",
+	"tool.robot": "Saugroboter"
 }

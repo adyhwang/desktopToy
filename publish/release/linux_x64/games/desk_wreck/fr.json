@@ -23,5 +23,11 @@
 	"tool.stamp": "Tampon",
 	"tool.dog": "Chiot",
 	"tool.washer": "Pistolet à eau",
-	"tool.sponge": "Éponge"
+	"tool.sponge": "Éponge",
+	"tool.ball": "Ballon rebondissant",
+	"tool.tornado": "Tornade",
+	"tool.rocket": "Lance-roquettes",
+	"tool.fw_s": "Petit feu d'artifice",
+	"tool.fw_l": "Grand feu d'artifice",
+	"tool.robot": "Robot nettoyeur"
 }

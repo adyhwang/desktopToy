@@ -23,5 +23,11 @@
 	"tool.stamp": "印章",
 	"tool.dog": "小狗",
 	"tool.washer": "清洗喷枪",
-	"tool.sponge": "海绵擦"
+	"tool.sponge": "海绵擦",
+	"tool.ball": "弹力皮球",
+	"tool.tornado": "龙卷风",
+	"tool.rocket": "火箭筒",
+	"tool.fw_s": "小型烟花",
+	"tool.fw_l": "大型烟花",
+	"tool.robot": "扫地机器人"
 }

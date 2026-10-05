@@ -23,5 +23,11 @@
 	"tool.stamp": "Печать",
 	"tool.dog": "Щенок",
 	"tool.washer": "Брандспойт",
-	"tool.sponge": "Губка"
+	"tool.sponge": "Губка",
+	"tool.ball": "Резиновый мяч",
+	"tool.tornado": "Торнадо",
+	"tool.rocket": "Ракетница",
+	"tool.fw_s": "Малый фейерверк",
+	"tool.fw_l": "Большой фейерверк",
+	"tool.robot": "Робот-уборщик"
 }
