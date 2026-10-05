@@ -26,7 +26,7 @@ const HELD_Y_RATIO := 0.16     # 待放方块在屏幕高度的比例位置
 const SPAWN_DELAY := 1       # 放下方块到下一块出现的间隔（秒）
 const KEY_SPEED := 550.0       # 键盘移动速度（px/秒）
 const ROT_STEP := PI / 4.0     # 每次双击旋转 45°
-const GRAVITY_SCALE := 0.1     # 方块重力倍率
+const GRAVITY_SCALE := 0.3     # 方块重力倍率
 const PERFECT_PX := 5.0        # 精准对齐：与下方支撑中心水平偏差
 const GOOD_PX := 17.0          # 较好对齐阈值
 const SCORE_LAND := 10         # 落地基础分
@@ -72,7 +72,7 @@ const BLOCKS: Array = [
 ]
 
 # 配色（扁平卡通，对齐合集风格）
-const COL_SKY := Color(0.80, 0.91, 0.94, 0.5)   # 50% 透明，透出桌面背景
+const COL_SKY := Color(0.80, 0.91, 0.94, 0.4)   # 50% 透明，透出桌面背景
 const COL_WATER := Color(0.25, 0.55, 0.85)      # 底部水面（蓝色，顶部波浪滚动）
 const COL_PEDESTAL := Color(0.78, 0.62, 0.42)
 const COL_PEDESTAL_TOP := Color(0.90, 0.76, 0.55)
@@ -116,6 +116,8 @@ var held_pos := Vector2.ZERO
 var spawn_left := 0.0
 var held_spr: Sprite2D
 var _held_pop := 0.0           # 旋转/出现的弹跳动画计时
+var _last_tap_ms := -10000     # 自实现双击判定：上次按下时刻（触摸屏合成的 double_click 不可靠，参考方块拼图）
+var _last_tap_pos := Vector2.ZERO
 
 # ===== 虚影预测（_physics_process 计算，_draw 使用）=====
 var ghost_valid := false
@@ -331,8 +333,15 @@ func _unhandled_input(ev: InputEvent) -> void:
 	if ev is InputEventMouseButton and ev.button_index == MOUSE_BUTTON_LEFT:
 		var pos := get_global_mouse_position()
 		if ev.pressed:
-			if ev.double_click and _point_on_held(pos):
-				_rotate_held()
+			if _point_on_held(pos):
+				# 自实现双击：400ms 内两击、间距在容差内（触摸屏合成的 double_click 不可靠，参考方块拼图）
+				var now := Time.get_ticks_msec()
+				if now - _last_tap_ms < 400 and pos.distance_to(_last_tap_pos) < 32.0:
+					_last_tap_ms = -10000
+					_rotate_held()
+				else:
+					_last_tap_ms = now
+					_last_tap_pos = pos
 		elif held_active:
 			# 左键在方块下方区域释放 → 放下方块（按住不放不下落）
 			if pos.y > held_pos.y + _held_half().y:

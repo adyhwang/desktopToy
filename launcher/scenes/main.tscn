@@ -5,7 +5,10 @@
 [node name="Root" type="Node"]
 script = ExtResource("1_main")
 
-[node name="BackgroundColor" type="ColorRect" parent="."]
+[node name="BgLayer" type="CanvasLayer" parent="."]
+layer = -1
+
+[node name="BackgroundColor" type="ColorRect" parent="BgLayer"]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -13,7 +16,7 @@ grow_horizontal = 2
 grow_vertical = 2
 color = Color(0.20, 0.42, 0.75, 1)
 
-[node name="Background" type="TextureRect" parent="."]
+[node name="Background" type="TextureRect" parent="BgLayer"]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0

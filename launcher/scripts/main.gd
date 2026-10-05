@@ -10,14 +10,17 @@ const CURSOR_SIZE := 24.0    # 自定义光标最长边显示尺寸（px，原�
 const CURSOR_ARROW := "res://assets/ui/cursor/arrow.png"   # 默认箭头指针（热点=左上尖端）
 const CURSOR_HAND := "res://assets/ui/cursor/link.png"     # 悬停按钮手型指针（热点=指尖）
 
-@onready var _background: TextureRect = $Background
-@onready var _background_color: ColorRect = $BackgroundColor
+# 背景层在独立 CanvasLayer（layer=-1）：游戏相机的 canvas 变换（平移/缩放）只作用于 layer 0，
+# 不再连带壁纸变形（曾出现游戏内镜头上移/缩放时壁纸跟着位移缩小）
+@onready var _background: TextureRect = $BgLayer/Background
+@onready var _background_color: ColorRect = $BgLayer/BackgroundColor
 @onready var _game_host: Node = $GameHost
 
 var _menu: Control = null
 var _current_game: Node = null
 var _desktop_tex: ImageTexture      # 启动时桌面快照（自定义背景关闭/恢复默认时透出）
 var _bg_stretch_default := 0        # 场景原始填充方式（关闭自定义背景时还原）
+var _top_layer: CanvasLayer         # 顶层独立层（加载圈/进度浮字）：游戏相机只影响 layer 0，此层不受镜头平移/缩放影响
 var _spinner: Control               # 点击游戏后的旋转进度圈（不指示真实进度）
 var _spin_t := 0.0                  # 进度圈旋转相位
 var _loading := false               # 进游戏加载中（await 帧间隙防重复触发）
@@ -28,6 +31,9 @@ var _progress_fade: Tween
 
 func _ready() -> void:
 	add_to_group("launcher_main")   # 供设置弹窗通知应用背景变更
+	_top_layer = CanvasLayer.new()
+	_top_layer.layer = 1000   # 浮于游戏 UI（layer 1）/菜单之上，且不受游戏相机 canvas 变换影响
+	add_child(_top_layer)
 	# 自定义鼠标指针：默认箭头 / 悬停按钮自动切手型（游戏包按钮 style_button 已设 POINTING_HAND；
 	# dart 的 HIDDEN 隐藏指针模式与自定义指针独立，恢复 VISIBLE 后仍显示自定义图）
 	_setup_cursor(CURSOR_ARROW, Input.CURSOR_ARROW, Vector2(4, 4))
@@ -176,7 +182,7 @@ func _show_spinner(on: bool) -> void:
 		_spinner.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 		_spinner.mouse_filter = Control.MOUSE_FILTER_STOP
 		_spinner.draw.connect(_on_spinner_draw)
-		add_child(_spinner)   # 末位子节点 = 显示在最上层
+		_top_layer.add_child(_spinner)   # 独立顶层：不随游戏相机变换
 	_spin_t = 0.0
 	_spinner.visible = on
 
@@ -195,7 +201,7 @@ func _process(delta: float) -> void:
 
 ## ===== 右下角进度浮字 =====
 ## 后台扫描/下载进度反馈：收到 progress 显示并刷新文案；all_done 后停 1s 淡出。
-## z_index=1000 浮于一切 UI（游戏元素/弹窗/排行榜）之上；IGNORE 不挡点击；
+## 挂 _top_layer（CanvasLayer layer=1000）浮于一切 UI/游戏层之上，且不随游戏相机变换；
 ## 游戏运行中也持续可见（进游戏后主程序后台继续下载的进度提示）
 
 func _on_load_progress(text: String) -> void:
@@ -229,7 +235,6 @@ func _ensure_progress_label() -> void:
 	sb.content_margin_top = 6
 	sb.content_margin_bottom = 8
 	_progress_lbl.add_theme_stylebox_override("panel", sb)
-	_progress_lbl.z_index = 1000
 	_progress_lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_progress_lbl.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
 	_progress_lbl.grow_horizontal = Control.GROW_DIRECTION_BEGIN   # 尺寸变化向左/上扩展
@@ -241,7 +246,7 @@ func _ensure_progress_label() -> void:
 	_progress_text = Label.new()
 	_progress_text.add_theme_color_override("font_color", Color.WHITE)
 	_progress_lbl.add_child(_progress_text)
-	add_child(_progress_lbl)
+	_top_layer.add_child(_progress_lbl)
 
 
 func stop_game() -> void:
