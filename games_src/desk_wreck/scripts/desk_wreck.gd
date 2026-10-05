@@ -29,7 +29,11 @@ const HAND_TEX := 208.0         # 手持道具光标显示尺寸（贴图 256，
 const GUN_H := 72.0             # 枪械显示高度（贴图 96 高）
 const GUN_MUZZLE_OFF := 66.0    # 枪口距枪身中心偏移（贴图 88px × 显示比 0.75）
 const HAND_HIDE_T := 0.4        # 投掷道具丢出后图标重生延迟（s）
-const FW_HIDE_T := 0.5          # 烟花放置后重新手持的延迟（s）
+const PLACE_T := 0.5            # 放置类道具通用放置间隔（s，期间隐藏手持且不可放置）
+const TORNADO_CAP := 4          # 同屏龙卷风上限
+const ROBOT_CAP := 4            # 同屏扫地机器人上限
+const FW_CAP := 4               # 大小烟花各自的上限
+const BALL_CAP := 20            # 同屏弹力球（颗）上限
 const FW_TOP := 46.0            # 烟花礼盒/礼箱顶缘距放置中心（1080 基准，HAND_TEX/4-6 引线位）
 const SWING_T := 0.16           # 铁锤砸击动画时长（s）
 const PRESS_T := 0.18           # 印章按压动画时长（s）
@@ -848,6 +852,12 @@ func _use_click_tool(mp: Vector2) -> void:
 			_hand_hide = HAND_HIDE_T
 			_toss(_tex["proj_egg"], mp, 0.38, func(pos: Vector2) -> void: _egg_splat(pos))
 		"ball":
+			if _hand_hide > 0.0:
+				return   # 放置间隔中
+			if _fx_count("ball") >= BALL_CAP:
+				_popup_at(mp, hud.t("ui.too_many_ball", "弹力球太多了！"), Color(0.98, 0.35, 0.3))
+				return
+			_hand_hide = PLACE_T
 			_ball_drop(mp)
 		"paint":
 			_play_sfx("shot")
@@ -866,16 +876,28 @@ func _use_click_tool(mp: Vector2) -> void:
 			_hand_hide = HAND_HIDE_T
 			_toss(_tex["proj_cracker"], mp, 0.34, func(pos: Vector2) -> void: _cracker_land(pos))
 		"tornado":
+			if _hand_hide > 0.0:
+				return   # 放置间隔中
+			if _fx_count("tornado") >= TORNADO_CAP:
+				_popup_at(mp, hud.t("ui.too_many_tornado", "龙卷风太多了！"), Color(0.98, 0.35, 0.3))
+				return
+			_hand_hide = PLACE_T
 			_tornado_spawn(mp)
 		"fw_s":
 			if _hand_hide > 0.0:
-				return   # 上一支刚放下：过 FW_HIDE_T 才手持新烟花
-			_hand_hide = FW_HIDE_T
+				return   # 放置间隔中
+			if _fx_count("fwbody", "big", false) >= FW_CAP:
+				_popup_at(mp, hud.t("ui.too_many_fw", "烟花太多了！"), Color(0.98, 0.35, 0.3))
+				return
+			_hand_hide = PLACE_T
 			_fw_land(mp, false)   # 手持放置：点击处直接立筒点火
 		"fw_l":
 			if _hand_hide > 0.0:
 				return
-			_hand_hide = FW_HIDE_T
+			if _fx_count("fwbody", "big", true) >= FW_CAP:
+				_popup_at(mp, hud.t("ui.too_many_fw", "烟花太多了！"), Color(0.98, 0.35, 0.3))
+				return
+			_hand_hide = PLACE_T
 			_fw_land(mp, true)
 		"hammer":
 			if _hammer_wait:   # 上一击还没落锤又点了：先把上一击落了再起新挥
@@ -891,7 +913,25 @@ func _use_click_tool(mp: Vector2) -> void:
 				_spawn_dog(mp)
 				_dog_cd = DOG_CD   # 冷却期间隐藏手持图标且不可再放
 		"robot":
+			if _hand_hide > 0.0:
+				return   # 放置间隔中
+			if _fx_count("robot") >= ROBOT_CAP:
+				_popup_at(mp, hud.t("ui.too_many_robot", "扫地机器人太多了！"), Color(0.98, 0.35, 0.3))
+				return
+			_hand_hide = PLACE_T
 			_robot_spawn(mp)
+
+
+## 统计 _fx 中某 kind 的数量（可按字段过滤，如 fwbody 按 big 区分大小烟花）
+func _fx_count(kind: String, key: String = "", val: Variant = null) -> int:
+	var n := 0
+	for p in _fx:
+		if p.kind != kind:
+			continue
+		if key != "" and p.get(key) != val:
+			continue
+		n += 1
+	return n
 
 
 ## 投掷物：从底部道具图标位置旋转抛物线飞向落点
@@ -1748,7 +1788,7 @@ func _draw_reticle() -> void:
 			r.draw_set_transform(pivot, ang, Vector2(sc, sc))
 			r.draw_texture_rect(ctex, Rect2(sp + wob + anchor - pivot, tsz), false)
 			r.draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
-		if _tool == "ball":   # 手持一大把弹力皮球：一簇彩球，点击一起丢下
+		if _tool == "ball" and _hand_hide <= 0.0:   # 手持一大把弹力皮球：一簇彩球，点击一起丢下
 			r.draw_circle(mp + Vector2(0, 9.0 * _u), 36.0 * _u, Color(0.0, 0.0, 0.0, 0.13))   # 整簇投影
 			for i in BALL_N:
 				var bp: Vector2 = mp + Vector2(BALL_HOLD[i]) * _u
@@ -1757,7 +1797,7 @@ func _draw_reticle() -> void:
 				r.draw_circle(bp, brr, bc)
 				r.draw_arc(bp, brr, 0, TAU, 18, Color(0.1, 0.1, 0.1, 0.75), 2.0 * _u, true)
 				r.draw_circle(bp + Vector2(-brr * 0.35, -brr * 0.35), brr * 0.28, Color(1, 1, 1, 0.65))
-		elif _tool == "robot":   # 手持扫地机器人：与放置后同样大小 + 擦除范围圈
+		elif _tool == "robot" and _hand_hide <= 0.0:   # 手持扫地机器人：与放置后同样大小 + 擦除范围圈
 			_draw_robot_body(r, mp, 0.0, 1.0)
 			r.draw_arc(mp, ROBOT_R * _u, 0, TAU, 36, Color(0.35, 0.65, 1.0, 0.3), 2.0 * _u, true)
 		elif _tool == "dog" and _dog_cd > 0.0:   # 放置冷却：隐藏手持小狗，显示准星环提示
