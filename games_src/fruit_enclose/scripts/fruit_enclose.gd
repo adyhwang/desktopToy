@@ -1,6 +1,8 @@
 extends "res://scripts/game_base.gd"  # 打包时自动改写为包前缀路径
 ## 围住水果（Fruit Enclose）：棋盘随机布满水果，玩家移动 2×2 方框，找出与右上角
-## 目标样板完全一致的 2×2 区域，双击左键提交判定；通过进入下一关
+## 目标样板完全一致的 2×2 区域，提交判定；通过进入下一关。
+## 交互：左键按住方框区域内拖动才能移动方框（按住点相对方框的偏移保持不变）；
+## 双击方框区域、或按住方框区域不动 0.5s 触发提交（一旦拖动过则本次按压不触发长按，避免移动误提交）
 ## （棋盘每过 1 关扩 1 格，方向按屏幕剩余空间决定，总格子数达 400 封顶且单维可超 20，尽量填满屏幕）
 ## 最高通关关卡复用合集存档（GameHud submit_score/commit_score，排行榜分值 = 关卡数）
 
@@ -12,8 +14,10 @@ const BOARD_CELLS := 400    # 总格子数上限（=20×20，单维可超 20）�
 const KINDS_BASE := 3       # 种类数 = 3 + 关卡（夹 4..10）：第 1 关 4 种，第 7 关起满 10 种
 const TOP_H := 86.0         # 顶栏高度（棋盘从其下开始布局）
 const MARGIN := 14.0        # 棋盘区边距
-const DOUBLE_MS := 400      # 双击判定：两次按下最大间隔 ms（触摸屏合成事件 double_click 标志不可靠，自实现）
-const DOUBLE_DIST := 32.0   # 双击判定：两次按下最大间距 px
+const HOLD_MS := 500        # 长按提交判定：按住方框不动的时长 ms
+const MOVE_DIST := 14.0     # 按压后移动超过该距离判定为拖动（取消本次长按资格）
+const DOUBLE_MS := 400      # 双击提交判定：两次按下最大间隔 ms（触摸屏合成事件 double_click 标志不可靠，自实现）
+const DOUBLE_DIST := 32.0   # 双击提交判定：两次按下最大间距 px
 const WIN_HOLD := 0.9       # 通过后的停留时长（s），期间禁提交，到时切下一关
 const ERR_TIME := 0.66      # 失败红闪时长（s，3 次闪烁）
 const POPUP_TIME := 0.8     # 飘字动画时长（s）
@@ -26,8 +30,8 @@ const COL_PANEL := Color(0.984, 0.918, 0.749)        # 棋盘底：米黄
 const COL_PANEL_BORDER := Color(0.30, 0.23, 0.18)    # 深棕描边
 const COL_GRID := Color(0.858, 0.769, 0.576)         # 网格线
 const COL_CHECKER := Color(1, 1, 1, 0.16)            # 棋盘格淡色交替
-const COL_SEL_FILL := Color(1.0, 0.96, 0.55, 0.32)   # 选择框半透明高亮
-const COL_SEL_LINE := Color(0.30, 0.23, 0.18)        # 选择框描边
+const COL_SEL_FILL := Color(0.25, 0.85, 0.40, 0.30)  # 选择框半透明绿色高亮
+const COL_SEL_LINE := Color(0.14, 0.55, 0.26)        # 选择框深绿描边
 const COL_SEL_LINE2 := Color(1, 1, 1, 0.9)           # 选择框外圈白线提亮
 const COL_ERR := Color(0.92, 0.22, 0.16)             # 失败红闪
 
@@ -46,6 +50,12 @@ var _by := 0
 var _busy := false                        # 通过动画期间禁提交
 var _win_t := -1.0                        # >0：通过停留倒计时
 var _err_t := -1.0                        # >0：失败红闪倒计时
+var _pressing := false                    # 左键按住中（按下点在方框区域内）
+var _dragging := false                    # 本次按压已进入拖动（取消长按资格）
+var _hold_fired := false                  # 本次按压长按已触发（防重复提交）
+var _press_ms := 0                        # 按下时刻 ms
+var _press_pos := Vector2.ZERO            # 按下点
+var _grab_px := Vector2.ZERO              # 按下点相对方框左上角的像素偏移（拖动保持）
 var _last_ms := 0                         # 上次左键按下时刻（双击判定，0 = 无记录）
 var _last_pos := Vector2.ZERO
 var _sfx_streams := {}
@@ -95,22 +105,44 @@ func stop() -> void:
 
 
 ## 键盘 R 重开（与右上角 R 按钮一致）
+## 鼠标：按下方框区域内才开始按压；移动超阈值进入拖动（方框按抓取偏移跟随）；
+## 按住不动满 HOLD_MS 触发提交（拖动过则本次按压不触发）
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_R:
 		_restart()
 		return
 	if event is InputEventMouseMotion:
-		_move_box(event.position)
-	elif event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
-		_move_box(event.position)   # 按下即对齐方框（触摸屏点按无先行 motion 也能直接框中）
-		var pos: Vector2 = event.position
-		var now := Time.get_ticks_msec()
-		if _last_ms > 0 and now - _last_ms <= DOUBLE_MS and pos.distance_to(_last_pos) <= DOUBLE_DIST:
-			_last_ms = 0
-			_submit()
-		else:
-			_last_ms = now
-			_last_pos = pos
+		if _pressing and not _dragging and not _hold_fired \
+				and event.position.distance_to(_press_pos) >= MOVE_DIST:
+			_dragging = true
+			queue_redraw()   # 停画长按进度圈
+		if _pressing and _dragging:
+			_move_box(event.position - _grab_px)
+	elif event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
+		if event.pressed:
+			var sel := Rect2(_origin + Vector2(_bx, _by) * _cell, Vector2.ONE * (_cell * 2.0))
+			if sel.has_point(event.position):
+				_pressing = true
+				_dragging = false
+				_hold_fired = false
+				_press_ms = Time.get_ticks_msec()
+				_press_pos = event.position
+				_grab_px = event.position - sel.position
+				# 双击提交（与长按并存）：第二次按下在时限/间距内立即提交
+				var now := Time.get_ticks_msec()
+				if _last_ms > 0 and now - _last_ms <= DOUBLE_MS \
+						and event.position.distance_to(_last_pos) <= DOUBLE_DIST:
+					_last_ms = 0
+					_hold_fired = true   # 已提交，本次按压取消长按资格
+					_submit()
+				else:
+					_last_ms = now
+					_last_pos = event.position
+				queue_redraw()   # 开始画长按进度圈
+		elif _pressing:
+			_pressing = false
+			_dragging = false
+			queue_redraw()
 
 
 func _exit_button_pressed() -> void:
@@ -170,6 +202,9 @@ func _gen_level() -> void:
 	_write_pattern(randi() % (cols - 1), randi() % (rows - 1))
 	_bx = clampi(cols / 2 - 1, 0, cols - 2)
 	_by = clampi(rows / 2 - 1, 0, rows - 2)
+	_pressing = false
+	_dragging = false
+	_hold_fired = false
 	_last_ms = 0
 	_dev_hint_cell = Vector2i(-1, -1)   # 换关清提示
 	_dev_hint_t = -1.0
@@ -218,6 +253,12 @@ func _box_center() -> Vector2:
 
 
 func _process(delta: float) -> void:
+	# 长按提交：按住方框未拖动满 HOLD_MS 触发一次
+	if _pressing and not _dragging and not _hold_fired \
+			and Time.get_ticks_msec() - _press_ms >= HOLD_MS:
+		_hold_fired = true
+		queue_redraw()   # 停画进度圈
+		_submit()
 	if _err_t > 0.0:
 		_err_t -= delta
 		queue_redraw()   # 红闪逐帧刷新
@@ -457,6 +498,11 @@ func _draw() -> void:
 		lw = 6.0
 	draw_rect(sel, lc, false, lw)
 	draw_rect(sel.grow(3.0), COL_SEL_LINE2, false, 2.0)
+	# 长按进度圈：按住方框未拖动时显示（金色圆弧随时间填满，满圈即提交）
+	if _pressing and not _dragging and not _hold_fired:
+		var k := clampf(float(Time.get_ticks_msec() - _press_ms) / float(HOLD_MS), 0.0, 1.0)
+		draw_arc(sel.get_center(), _cell * 0.62, -PI * 0.5, -PI * 0.5 + TAU * k, 40,
+				Color(1.0, 0.85, 0.25), maxf(_cell * 0.09, 3.0))
 	# DEV 提示：金色闪烁高亮解区
 	if _dev_hint_t > 0.0 and _dev_hint_cell.x >= 0:
 		var hr := Rect2(_origin + Vector2(_dev_hint_cell) * _cell, Vector2.ONE * (_cell * 2.0)).grow(-4.0)

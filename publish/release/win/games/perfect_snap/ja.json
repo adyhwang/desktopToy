@@ -1,0 +1,19 @@
+{
+	"game.name": "パーフェクトスナップ",
+	"ui.close": "閉じる",
+	"ui.records_empty": "記録なし",
+	"ui.your_score": "スコア：%d",
+	"ui.top10": "トップ10",
+	"ps.target": "お手本",
+	"ps.yours": "撮った写真",
+	"ps.match": "一致度",
+	"ps.rating_perfect": "パーフェクト！",
+	"ps.rating_great": "すごい",
+	"ps.rating_good": "まあまあ",
+	"ps.rating_fail": "惜しい",
+	"ps.retake": "撮り直す",
+	"ps.next": "次へ",
+	"ps.new_record": "新記録！",
+	"ps.combo": "コンボ ×%d",
+	"ps.fail_hint": "%d%%未達——構図を調整して再度挑戦！"
+}

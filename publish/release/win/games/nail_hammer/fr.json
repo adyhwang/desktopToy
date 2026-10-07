@@ -1,0 +1,10 @@
+{
+    "game.name":  "Maître du marteau",
+    "ui.close":  "Fermer",
+    "ui.records_empty":  "Aucun record pour l\u0027instant",
+    "ui.your_score":  "Votre score : %d",
+    "ui.top10":  "Top 10",
+    "nh.perfect":  "Parfait !",
+    "nh.overload":  "Trop fort !",
+    "nh.time_bonus":  "Bonus temps"
+}

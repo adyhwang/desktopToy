@@ -1,0 +1,19 @@
+{
+	"game.name": "퍼펙트 스냅",
+	"ui.close": "닫기",
+	"ui.records_empty": "기록이 없습니다",
+	"ui.your_score": "점수: %d",
+	"ui.top10": "톱 10",
+	"ps.target": "목표 화면",
+	"ps.yours": "내 사진",
+	"ps.match": "일치도",
+	"ps.rating_perfect": "완벽해요!",
+	"ps.rating_great": "훌륭해요",
+	"ps.rating_good": "무난해요",
+	"ps.rating_fail": "아쉬워요",
+	"ps.retake": "다시 찍기",
+	"ps.next": "다음",
+	"ps.new_record": "신기록!",
+	"ps.combo": "콤보 ×%d",
+	"ps.fail_hint": "%d%% 미만 — 구도를 조정하고 다시 시도하세요!"
+}

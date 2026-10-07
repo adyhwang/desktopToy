@@ -1,0 +1,10 @@
+{
+    "game.name":  "Maestro del Martillo",
+    "ui.close":  "Cerrar",
+    "ui.records_empty":  "Aún no hay récords",
+    "ui.your_score":  "Tu puntuación: %d",
+    "ui.top10":  "Top 10",
+    "nh.perfect":  "¡Perfecto!",
+    "nh.overload":  "¡Exceso!",
+    "nh.time_bonus":  "Bonus de tiempo"
+}

@@ -1,0 +1,19 @@
+{
+	"game.name": "Perfect Snap",
+	"ui.close": "Close",
+	"ui.records_empty": "No records yet",
+	"ui.your_score": "Your score: %d",
+	"ui.top10": "Top 10",
+	"ps.target": "Target",
+	"ps.yours": "Your Photo",
+	"ps.match": "Match",
+	"ps.rating_perfect": "Perfect!",
+	"ps.rating_great": "Great",
+	"ps.rating_good": "Good",
+	"ps.rating_fail": "Miss",
+	"ps.retake": "Retake",
+	"ps.next": "Next",
+	"ps.new_record": "New Record!",
+	"ps.combo": "Combo x%d",
+	"ps.fail_hint": "Below %d%% — adjust framing and try again!"
+}

@@ -1,0 +1,19 @@
+{
+	"game.name": "Идеальный кадр",
+	"ui.close": "Закрыть",
+	"ui.records_empty": "Записей пока нет",
+	"ui.your_score": "Ваш результат: %d",
+	"ui.top10": "Топ 10",
+	"ps.target": "Образец",
+	"ps.yours": "Ваш снимок",
+	"ps.match": "Совпадение",
+	"ps.rating_perfect": "Идеально!",
+	"ps.rating_great": "Отлично",
+	"ps.rating_good": "Сойдёт",
+	"ps.rating_fail": "Промах",
+	"ps.retake": "Переснять",
+	"ps.next": "Далее",
+	"ps.new_record": "Новый рекорд!",
+	"ps.combo": "Серия ×%d",
+	"ps.fail_hint": "Меньше %d%% — поправьте кадр и попробуйте снова!"
+}

@@ -1,0 +1,10 @@
+{
+    "game.name":  "锤钉高手",
+    "ui.close":  "关闭",
+    "ui.records_empty":  "暂无纪录",
+    "ui.your_score":  "你的分数：%d",
+    "ui.top10":  "前十名",
+    "nh.perfect":  "完美!",
+    "nh.overload":  "过载!",
+    "nh.time_bonus":  "时间奖励"
+}

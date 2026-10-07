@@ -1,5 +1,5 @@
 extends "res://scripts/game_base.gd"  # 打包时自动改写为包前缀路径
-## 水果分区（Fruit Zones）：棋盘随机布满水果并被切成 N 个连通区域，
+## 水果分区（Fruit Count，哪个水果多）：棋盘随机布满水果并被切成 N 个连通区域，
 ## 找出水果最多（格子数最多、唯一最大）的区域，单击该区域得分进入下一关；
 ## 选错扣分并可继续尝试。（棋盘每 2 关扩 1 格、区域数 3 起隔关 +1 封顶 7 个，
 ## 扩格方向按屏幕剩余空间逐格判断，总格子数达 400 封顶且单维可超 20，尽量填满屏幕）
@@ -31,7 +31,7 @@ const COL_PANEL := Color(0.984, 0.918, 0.749)        # 棋盘底：米黄
 const COL_PANEL_BORDER := Color(0.30, 0.23, 0.18)    # 深棕描边
 const COL_GRID := Color(0.858, 0.769, 0.576)         # 细网格线
 const COL_CHECKER := Color(1, 1, 1, 0.16)            # 棋盘格淡色交替
-const COL_ZONE_LINE := Color(0.36, 0.28, 0.21)       # 区域分隔线（比网格深且粗）
+const COL_ZONE_LINE := Color(0.16, 0.55, 0.28)       # 区域分隔线（绿色，与棋盘米黄底对比清晰）
 const COL_HL := Color(1.0, 0.85, 0.25)               # 点击高亮边框：金色
 const COL_HL2 := Color(1, 1, 1, 0.9)                 # 高亮外圈白线
 const COL_ERR_MASK := Color(0.92, 0.22, 0.16, 0.30)  # 选错区域红色半透明遮罩
@@ -81,7 +81,7 @@ var _volume_btn: Button
 
 func start() -> void:
 	randomize()
-	hud = GameHud.new("fruit_zones")
+	hud = GameHud.new("fruit_count")
 	get_viewport().size_changed.connect(_layout)
 	_load_textures()
 	_setup_buttons()   # 先建按钮再布局（_layout 会定位，null 会报错中断）
@@ -95,7 +95,7 @@ func stop() -> void:
 	if _bgm != null:
 		_bgm.stop()
 	hud.commit_score()   # 退出视作本局结束，得分入排行榜
-	print("[fruit_zones] stop, level=%d score=%d" % [level, score])
+	print("[fruit_count] stop, level=%d score=%d" % [level, score])
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -181,13 +181,17 @@ func _gen_level() -> void:
 
 ## ===== 区域切分 =====
 
-## 把 w×h 切成 n 个连通区域，保证"水果最多"的区域唯一（尽量领先 gap_min = max(2, 总数/40) 格）：
-## 带配额的随机生长（目标区域配额 ≈ 1.5×均分，其余区域不超过其配额）→ 校验不满足则重掷；
+## 把 w×h 切成 n 个连通区域，保证"水果最多"的区域唯一（领先差距随关卡收紧）：
+## 前期最大区明显领先便于上手，后期最大区领先第二大限制在 1..5 格（肉眼难分辨，需数格子）——
+## gap_max 随关卡从 9 递减到 5，gap_min 随关卡从 7 收紧到 1；目标区配额系数同步贴近均分。
+## 带配额的随机生长（目标区域配额 ≈ 系数×均分，其余区域不超过其配额）→ 校验不满足则重掷；
 ## 重掷耗尽后用"叶子格转移"兜底强制唯一
 func _gen_zones(w: int, h: int, n: int) -> PackedInt32Array:
 	var total := w * h
-	var gap_min := maxi(2, total / 40)
-	var q_target := clampi(int(float(total) * 1.5 / n), n + 1, total - 2 * (n - 1))
+	var gap_max := clampi(5 + (10 - level) / 2, 5, 10)                        # 领先上限
+	var gap_min := clampi(mini(gap_max - 2, 11 - level), 1, gap_max - 1)     # 领先下限
+	var q_factor := clampf(1.5 - (level - 1) * 0.05, 1.05, 1.5)              # 目标区配额系数
+	var q_target := clampi(int(float(total) * q_factor / n), n + 1, total - 2 * (n - 1))
 	for attempt in 60:
 		var zones_try := _grow_zones(w, h, n, q_target)
 		var sizes := _zone_sizes(zones_try, n)
@@ -196,7 +200,7 @@ func _gen_zones(w: int, h: int, n: int) -> PackedInt32Array:
 			order.append(z)
 		order.sort_custom(func(a: int, b: int) -> bool: return sizes[a] > sizes[b])
 		var lead: int = sizes[order[0]] - sizes[order[1]]
-		if lead >= gap_min or (attempt >= 40 and lead >= 1):
+		if (lead >= gap_min and lead <= gap_max) or (attempt >= 40 and lead >= 1):
 			return zones_try   # lead >= 1 即唯一最大
 	# 兜底：转移叶子格强制唯一最大（玩法正确性优先于领先幅度）
 	var zones_out := _grow_zones(w, h, n, q_target)
@@ -685,7 +689,7 @@ func _spawn_popup(text: String, col: Color, pos: Vector2) -> void:
 func _init_sfx() -> void:
 	var files := {"win": "win.wav", "fail": "fail.wav"}
 	for sname: String in files:
-		for base in ["res://games/fruit_zones/assets/sfx/", "res://assets/sfx/"]:
+		for base in ["res://games/fruit_count/assets/sfx/", "res://assets/sfx/"]:
 			var path: String = base + files[sname]
 			if ResourceLoader.exists(path):
 				_sfx_streams[sname] = load(path)
@@ -699,7 +703,7 @@ func _init_sfx() -> void:
 		add_child(p)
 		_sfx_players.append(p)
 	# BGM：复用围住水果的水果主题（低音量循环，跟随 GameHud [audio] bgm_on）
-	for base in ["res://games/fruit_zones/assets/sfx/bgm.mp3", "res://assets/sfx/bgm.mp3"]:
+	for base in ["res://games/fruit_count/assets/sfx/bgm.mp3", "res://assets/sfx/bgm.mp3"]:
 		var bf := FileAccess.open(base, FileAccess.READ)
 		if bf != null:
 			var st := AudioStreamMP3.load_from_buffer(bf.get_buffer(bf.get_length()))
@@ -728,7 +732,7 @@ func _play_sfx(sfx_name: String, volume_db: float = 0.0) -> void:
 ## 水果贴图加载：pck 内 png 未走导入流程，字节解码（双路径兼容）
 func _load_textures() -> void:
 	for fname: String in FRUITS:
-		for base in ["res://games/fruit_zones/assets/fruits/", "res://assets/fruits/"]:
+		for base in ["res://games/fruit_count/assets/fruits/", "res://assets/fruits/"]:
 			var path: String = base + fname + ".png"
 			if ResourceLoader.exists(path):
 				_texs[fname] = load(path)

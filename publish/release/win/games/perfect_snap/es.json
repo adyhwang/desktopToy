@@ -1,0 +1,19 @@
+{
+	"game.name": "Foto Perfecta",
+	"ui.close": "Cerrar",
+	"ui.records_empty": "Aún no hay récords",
+	"ui.your_score": "Tu puntuación: %d",
+	"ui.top10": "Top 10",
+	"ps.target": "Objetivo",
+	"ps.yours": "Tu foto",
+	"ps.match": "Coincidencia",
+	"ps.rating_perfect": "¡Perfecto!",
+	"ps.rating_great": "Genial",
+	"ps.rating_good": "Bien",
+	"ps.rating_fail": "Fallo",
+	"ps.retake": "Repetir",
+	"ps.next": "Siguiente",
+	"ps.new_record": "¡Nuevo récord!",
+	"ps.combo": "Combo ×%d",
+	"ps.fail_hint": "Menos del %d%% — ¡ajusta el encuadre e inténtalo de nuevo!"
+}

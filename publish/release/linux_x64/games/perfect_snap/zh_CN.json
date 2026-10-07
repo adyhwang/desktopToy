@@ -1,0 +1,19 @@
+{
+	"game.name": "完美拍照",
+	"ui.close": "关闭",
+	"ui.records_empty": "暂无纪录",
+	"ui.your_score": "你的分数：%d",
+	"ui.top10": "前十名",
+	"ps.target": "目标画面",
+	"ps.yours": "你的照片",
+	"ps.match": "匹配度",
+	"ps.rating_perfect": "完美！",
+	"ps.rating_great": "优秀",
+	"ps.rating_good": "合格",
+	"ps.rating_fail": "不合格",
+	"ps.retake": "重拍",
+	"ps.next": "下一关",
+	"ps.new_record": "新纪录！",
+	"ps.combo": "连击 ×%d",
+	"ps.fail_hint": "低于 %d%% ——调整取景后再试一次！"
+}

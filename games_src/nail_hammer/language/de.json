@@ -1,0 +1,10 @@
+{
+    "game.name":  "Nagelhammer-Meister",
+    "ui.close":  "Schließen",
+    "ui.records_empty":  "Noch keine Rekorde",
+    "ui.your_score":  "Deine Punkte: %d",
+    "ui.top10":  "Top 10",
+    "nh.perfect":  "Perfekt!",
+    "nh.overload":  "Zu viel!",
+    "nh.time_bonus":  "Zeitbonus"
+}

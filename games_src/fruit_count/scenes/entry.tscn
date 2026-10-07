@@ -1,11 +1,11 @@
 [gd_scene load_steps=3 format=3]
 
-[ext_resource type="Script" path="res://scripts/fruit_zones.gd" id="1_main"]
+[ext_resource type="Script" path="res://scripts/fruit_count.gd" id="1_main"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_score"]
 bg_color = Color(0.5411765, 0.62352943, 0.5921569, 0.7607843)
 
-[node name="FruitZones" type="Node2D"]
+[node name="FruitCount" type="Node2D"]
 script = ExtResource("1_main")
 
 [node name="HudBar" type="HBoxContainer" parent="."]

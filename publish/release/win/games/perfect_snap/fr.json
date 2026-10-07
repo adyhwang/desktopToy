@@ -1,0 +1,19 @@
+{
+	"game.name": "Photo Parfaite",
+	"ui.close": "Fermer",
+	"ui.records_empty": "Aucun record",
+	"ui.your_score": "Votre score : %d",
+	"ui.top10": "Top 10",
+	"ps.target": "Cible",
+	"ps.yours": "Votre photo",
+	"ps.match": "Correspondance",
+	"ps.rating_perfect": "Parfait !",
+	"ps.rating_great": "Superbe",
+	"ps.rating_good": "Correct",
+	"ps.rating_fail": "Raté",
+	"ps.retake": "Reprendre",
+	"ps.next": "Suivant",
+	"ps.new_record": "Nouveau record !",
+	"ps.combo": "Combo ×%d",
+	"ps.fail_hint": "Moins de %d%% — ajustez le cadrage et réessayez !"
+}

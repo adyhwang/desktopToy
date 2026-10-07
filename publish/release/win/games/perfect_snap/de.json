@@ -1,0 +1,19 @@
+{
+	"game.name": "Perfekte Aufnahme",
+	"ui.close": "Schließen",
+	"ui.records_empty": "Noch keine Rekorde",
+	"ui.your_score": "Dein Ergebnis: %d",
+	"ui.top10": "Top 10",
+	"ps.target": "Zielbild",
+	"ps.yours": "Dein Foto",
+	"ps.match": "Übereinstimmung",
+	"ps.rating_perfect": "Perfekt!",
+	"ps.rating_great": "Super",
+	"ps.rating_good": "Gut",
+	"ps.rating_fail": "Verfehlt",
+	"ps.retake": "Neu aufnehmen",
+	"ps.next": "Weiter",
+	"ps.new_record": "Neuer Rekord!",
+	"ps.combo": "Kombo ×%d",
+	"ps.fail_hint": "Unter %d%% — Bildausschnitt anpassen und nochmal versuchen!"
+}

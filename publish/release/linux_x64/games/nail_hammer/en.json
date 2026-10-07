@@ -1,0 +1,10 @@
+{
+    "game.name":  "Nail Hammer",
+    "ui.close":  "Close",
+    "ui.records_empty":  "No records yet",
+    "ui.your_score":  "Your score: %d",
+    "ui.top10":  "Top 10",
+    "nh.perfect":  "Perfect!",
+    "nh.overload":  "Over!",
+    "nh.time_bonus":  "Time Bonus"
+}

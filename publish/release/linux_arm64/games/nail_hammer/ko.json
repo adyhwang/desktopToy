@@ -1,0 +1,10 @@
+{
+    "game.name":  "못 두드리기 달인",
+    "ui.close":  "닫기",
+    "ui.records_empty":  "기록이 없습니다",
+    "ui.your_score":  "점수: %d",
+    "ui.top10":  "톱 10",
+    "nh.perfect":  "완벽!",
+    "nh.overload":  "과부하!",
+    "nh.time_bonus":  "시간 보너스"
+}

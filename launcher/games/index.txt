@@ -7,11 +7,13 @@ desk_wreck.pck
 fall_rescue.pck
 fish_hook.pck
 flappy.pck
+fruit_count.pck
 fruit_enclose.pck
-fruit_zones.pck
 hammer.pck
 maze.pck
 memory.pck
+nail_hammer.pck
+perfect_snap.pck
 slingshot.pck
 snake.pck
 stone_skip.pck

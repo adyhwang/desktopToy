@@ -1,6 +1,6 @@
 {
-	"id": "fruit_zones",
-	"name": "Fruit Zones",
+	"id": "fruit_count",
+	"name": "Fruit Count",
 	"icon": "assets/icon.png",
 	"entry": "scenes/entry.tscn",
 	"version": "1.0.0"
