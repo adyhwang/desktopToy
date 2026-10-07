@@ -1,0 +1,16 @@
+{
+	"game.name": "围住水果",
+	"ui.close": "关闭",
+	"ui.records_empty": "暂无纪录",
+	"ui.your_score": "你的分数：%d",
+	"ui.top10": "前十名",
+	"fe.target": "目标样板",
+	"fe.win": "第 %d 关通过！",
+	"fe.fail": "不匹配！",
+	"dev.prev": "上一关",
+	"dev.next": "下一关",
+	"dev.reveal": "提示位置",
+	"dev.solve": "自动过关",
+	"dev.jump_lv": "跳关",
+	"dev.jump": "跳"
+}

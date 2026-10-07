@@ -1,0 +1,7 @@
+{
+    "game.name":  "水果分區",
+    "ui.close":  "關閉",
+    "ui.records_empty":  "暫無紀錄",
+    "ui.your_score":  "你的分數：%d",
+    "ui.top10":  "前十名"
+}

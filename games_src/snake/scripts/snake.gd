@@ -1,5 +1,5 @@
 extends "res://scripts/game_base.gd"  # 打包时自动改写为包前缀路径
-## 贪吃蛇 Snake：N×N 网格（10 起步，身体每增 6 段横竖各扩 1 格带动画，30 封顶）
+## 贪吃蛇 Snake：矩形网格（10×10 起步，身体每增 6 段扩 1 格带动画，方向按屏幕剩余空间决定，总格子数达 900 封顶且单维可超 30）
 ## 操作：鼠标左键/触屏点击转向（水平移动按 Y 判上下、垂直移动按 X 判左右，点击蛇身无效）；
 ##       方向键 ↑↓←→ 备选；R 重开。撞墙/咬自身游戏结束。
 ## 食物（FOODS 表统一配置）：苹果 60% +1节+10分 提速；香蕉 10% +2节+25分 减速；
@@ -16,9 +16,9 @@ const BGM_DB := -9.0            # BGM 音量（dB）
 const SFX_DB := -4.0            # 音效全局音量偏移
 
 # ===== 可调参数（改这里全局生效）=====
-const GRID_START := 10          # 初始网格边长（GRID_START×GRID_START）
-const GRID_MAX := 30            # 网格上限
-const GROW_EVERY := 6           # 身体每增加 6 段，网格横竖各扩 1 格
+const GRID_START := 10          # 初始网格宽/高（GRID_START×GRID_START）
+const GRID_CELLS := 900         # 总格子数上限（=30×30，单维可超 30），达到后不再扩大
+const GROW_EVERY := 6           # 身体每增加 6 段扩 1 格（方向按屏幕剩余空间决定）
 const STEP_BASE := 0.5         # 蛇基础移动速度（秒/格，越小越快）——同时是减速下限（间隔上限）
 const STEP_DEC := 0.0055        # 每吃 1 个提速水果的速度增量（步进间隔减量，s）
 const STEP_INC := 0.0055        # 每吃 1 个减速水果的步进间隔增量（s，回退提速）
@@ -67,9 +67,12 @@ var hud: RefCounted
 
 var state := State.READY
 var score := 0
-var _grid := GRID_START                 # 当前网格边长（逻辑值）
-var _grid_disp := float(GRID_START)     # 网格边长显示值（扩格动画插值）
-var _grid_from := float(GRID_START)     # 扩格动画起点
+var _cols := GRID_START                 # 当前网格列数（逻辑值）
+var _rows := GRID_START                 # 当前网格行数（逻辑值）
+var _cols_disp := float(GRID_START)     # 列数显示值（扩格动画插值）
+var _rows_disp := float(GRID_START)     # 行数显示值（扩格动画插值）
+var _cols_from := float(GRID_START)     # 扩格动画起点（列）
+var _rows_from := float(GRID_START)     # 扩格动画起点（行）
 var _cells: Array = []                  # 蛇身格子（Vector2i，[0]=头）
 var _prev_cells: Array = []             # 上一步格子快照（渲染插值源）
 var _dir := Vector2i.RIGHT
@@ -77,6 +80,7 @@ var _pending_dir := Vector2i.RIGHT      # 下一步生效的转向（防一步�
 var _step_t := 0.0                      # 步进累计
 var _grow_pending := 0                  # 待生长节数（香蕉 +2 分两步长）
 var _growth_total := 0                  # 身体累计增加段数（扩格依据）
+var _grid_steps := 0                    # 已跨过的扩格档数（_growth_total / GROW_EVERY）
 var _speed_off := 0.0                   # 步进间隔净偏移（负=净提速，clamp 在 [STEP_MIN,STEP_BASE]）
 var _slow_left := 0.0                   # 临时减速剩余（s）
 var _food_cell := Vector2i(-1, -1)
@@ -91,7 +95,7 @@ var _low_fx := false                    # 手机浏览器精简特效
 
 # 布局快照（_layout 更新）
 var _m := 100.0
-var _board_rect := Rect2()              # 棋盘像素矩形（正方形，居中）
+var _board_rect := Rect2()              # 棋盘像素矩形（格为正方形的矩形，可用区内居中）
 var _cell := 40.0                       # 单元格边长
 
 var _board: Node2D                      # 棋盘绘制（面板/网格线/墙，参与震动）
@@ -145,7 +149,7 @@ func stop() -> void:
 	if _bgm != null:
 		_bgm.stop()
 	hud.commit_score()   # 中途退出也把本局分数入排行榜（已提交则无害）
-	print("[snake] stop, score=%d len=%d grid=%d" % [score, _cells.size(), _grid])
+	print("[snake] stop, score=%d len=%d grid=%dx%d" % [score, _cells.size(), _cols, _rows])
 
 
 func _exit_button_pressed() -> void:
@@ -213,12 +217,13 @@ func _play_sfx(n: String, volume_db: float = 0.0) -> void:
 func _layout() -> void:
 	var vp := get_viewport_rect().size
 	_m = minf(vp.x, vp.y)
-	# 棋盘正方形：水平留 BOARD_EDGE_X 边距，顶部让出 HUD，底部留边，可用区垂直居中
+	# 棋盘矩形（格为正方形）：水平留 BOARD_EDGE_X 边距，顶部让出 HUD，底部留边，可用区内居中
 	var avail_h := vp.y - HEADER_H - EDGE_BOTTOM
-	var side := maxf(minf(vp.x - _m * BOARD_EDGE_X * 2.0, avail_h), 120.0)
+	var avail_w := vp.x - _m * BOARD_EDGE_X * 2.0
+	_cell = maxf(minf(avail_w / _cols_disp, avail_h / _rows_disp), 2.0)
 	var center := Vector2(vp.x / 2.0, HEADER_H + avail_h / 2.0)
-	_board_rect = Rect2(center - Vector2(side, side) / 2.0, Vector2(side, side))
-	_cell = side / _grid_disp
+	_board_rect = Rect2(center - Vector2(_cell * _cols_disp, _cell * _rows_disp) / 2.0,
+			Vector2(_cell * _cols_disp, _cell * _rows_disp))
 	if _flash_rect != null:
 		_flash_rect.position = Vector2.ZERO
 		_flash_rect.size = vp
@@ -313,13 +318,16 @@ func _new_game() -> void:
 	var lb := get_node_or_null("LeaderboardPanel")   # 重开时关掉排行榜弹窗（双保险）
 	if lb != null:
 		lb.queue_free()
-	_grid = GRID_START
-	_grid_disp = float(GRID_START)
-	_grid_from = float(GRID_START)
-	_cell = _board_rect.size.x / _grid_disp   # 格长立即归位（否则首帧按上局格长渲染）
-	_board.queue_redraw()   # 重绘网格线：不重绘则棋盘残留上局的大网格（扩格后重开不归位）
+	_cols = GRID_START
+	_rows = GRID_START
+	_cols_disp = float(GRID_START)
+	_rows_disp = float(GRID_START)
+	_cols_from = float(GRID_START)
+	_rows_from = float(GRID_START)
+	_layout()   # 格长/棋盘矩形立即归位（否则首帧按上局尺寸渲染）
 	score = 0
 	_growth_total = 0
+	_grid_steps = 0
 	_grow_pending = 0
 	_speed_off = 0.0
 	_slow_left = 0.0
@@ -331,8 +339,8 @@ func _new_game() -> void:
 	hud.reset_run()
 	_sync_bgm()   # 结算停过 BGM，重开恢复播放
 	# 初始 3 节：头+身+尾，居中水平朝右
-	var cy := _grid / 2
-	_cells = [Vector2i(_grid / 2 + 1, cy), Vector2i(_grid / 2, cy), Vector2i(_grid / 2 - 1, cy)]
+	var cy := _rows / 2
+	_cells = [Vector2i(_cols / 2 + 1, cy), Vector2i(_cols / 2, cy), Vector2i(_cols / 2 - 1, cy)]
 	_prev_cells = _cells.duplicate()
 	_dir = Vector2i.RIGHT
 	_pending_dir = _dir
@@ -345,9 +353,48 @@ func _new_game() -> void:
 			Vector2(_board_rect.get_center().x, _board_rect.position.y + _board_rect.size.y * 0.30))
 
 
-## 身体累计增量对应网格边长：每 GROW_EVERY 段扩 1 格
-func _grid_for(growth: int) -> int:
-	return mini(GRID_START + growth / GROW_EVERY, GRID_MAX)
+## 身体累计增量跨过 GROW_EVERY 整数倍 → 向屏幕剩余空间更大的方向扩 1 格（带动画）
+func _grow_one() -> void:
+	var target := _grow_target()
+	if target.x == _cols and target.y == _rows:
+		return   # 30×30 封顶，不再扩
+	_cols_from = _cols_disp
+	_rows_from = _rows_disp
+	_cols = target.x
+	_rows = target.y
+	_grow_anim_t = GROW_ANIM_T
+	state = State.GROW
+	_play_sfx("grow")
+	_popup(hud.t("tip.grid_grow", "Field Grows %d×%d") % [_cols, _rows],
+			Color(1.0, 0.85, 0.25),
+			Vector2(_board_rect.get_center().x, _board_rect.position.y + _board_rect.size.y * 0.14))
+
+
+## 扩格目标尺寸（取当前屏幕可用区后转纯函数决策）
+func _grow_target() -> Vector2i:
+	var vp := get_viewport_rect().size
+	var m := minf(vp.x, vp.y)
+	var avail := Vector2(vp.x - m * BOARD_EDGE_X * 2.0, vp.y - HEADER_H - EDGE_BOTTOM)
+	return _grow_dir(avail)
+
+
+## 扩格方向决策（纯函数便于测试，avail 与 _layout 同源）：
+## 横向加一列不缩格子则优先加宽，否则纵向加一行不缩格子则加高；
+## 两边都要缩格子时选格子更大的方向继续扩（此时才真正缩小棋盘格子，尽量填满屏幕）；
+## 总格子数达到 GRID_CELLS（=30×30=900，单维可超 30）后返回原尺寸（封顶）
+func _grow_dir(avail: Vector2) -> Vector2i:
+	if _cols * _rows >= GRID_CELLS:
+		return Vector2i(_cols, _rows)
+	var cur := minf(avail.x / _cols, avail.y / _rows)   # 当前格子边长
+	var cw := avail.x / (_cols + 1.0)                   # 加一列后的格子边长
+	var ch := avail.y / (_rows + 1.0)                   # 加一行后的格子边长
+	if cw >= cur:
+		return Vector2i(_cols + 1, _rows)
+	if ch >= cur:
+		return Vector2i(_cols, _rows + 1)
+	if cw >= ch:
+		return Vector2i(_cols + 1, _rows)
+	return Vector2i(_cols, _rows + 1)
 
 
 ## 当前步进间隔：基础 + 净偏移（苹果提速负 / 减速水果正），clamp 在 [STEP_MIN, STEP_BASE]
@@ -390,11 +437,12 @@ func _process(delta: float) -> void:
 		# 扩格动画：网格显示值平滑过渡（格子渐小），期间暂停步进
 		_grow_anim_t -= delta
 		var k := 1.0 - clampf(_grow_anim_t / GROW_ANIM_T, 0.0, 1.0)
-		_grid_disp = lerpf(_grid_from, float(_grid), k)
-		_cell = _board_rect.size.x / _grid_disp
-		_board.queue_redraw()
+		_cols_disp = lerpf(_cols_from, float(_cols), k)
+		_rows_disp = lerpf(_rows_from, float(_rows), k)
+		_layout()   # 棋盘矩形随网格尺寸逐帧重算（cell 渐小、受限边不变）
 		if _grow_anim_t <= 0.0:
-			_grid_disp = float(_grid)
+			_cols_disp = float(_cols)
+			_rows_disp = float(_rows)
 			state = State.PLAY
 			_board.queue_redraw()
 	elif state == State.PLAY:
@@ -416,7 +464,7 @@ func _step() -> void:
 	_prev_cells = _cells.duplicate()
 	var nh: Vector2i = _cells[0] + _dir
 	# 撞地图边界墙体
-	if nh.x < 0 or nh.y < 0 or nh.x >= _grid or nh.y >= _grid:
+	if nh.x < 0 or nh.y < 0 or nh.x >= _cols or nh.y >= _rows:
 		_die()
 		return
 	# 头部碰撞自身身体任意一节
@@ -458,17 +506,11 @@ func _on_eat() -> void:
 		_shake_t = SHAKE_T
 	_refresh_boards()
 	_spawn_food()
-	# 扩格检查：身体累计增量跨过 GROW_EVERY 整数倍 → 网格 +1（带动画）
-	var target := _grid_for(_growth_total)
-	if target > _grid:
-		_grid_from = float(_grid)
-		_grid = target
-		_grow_anim_t = GROW_ANIM_T
-		state = State.GROW
-		_play_sfx("grow")
-		_popup(hud.t("tip.grid_grow", "Field Grows %d×%d") % [_grid, _grid],
-				Color(1.0, 0.85, 0.25),
-				Vector2(_board_rect.get_center().x, _board_rect.position.y + _board_rect.size.y * 0.14))
+	# 扩格检查：身体累计增量跨过 GROW_EVERY 整数倍 → 向屏幕剩余空间更大的方向 +1（带动画）
+	var steps := _growth_total / GROW_EVERY
+	if steps > _grid_steps:
+		_grid_steps = steps
+		_grow_one()
 
 
 ## 死亡（撞墙/咬自身）：红色闪烁特效 + 入榜 + 延迟弹排行榜
@@ -480,13 +522,13 @@ func _die() -> void:
 		_shake_t = SHAKE_T * 1.6
 	_over_rank = hud.commit_score()
 	_over_t = OVER_T
-	print("[snake] game over, score=%d len=%d grid=%d" % [score, _cells.size(), _grid])
+	print("[snake] game over, score=%d len=%d grid=%dx%d" % [score, _cells.size(), _cols, _rows])
 
 
 # ===== 渲染（每帧格间插值 + 转向角度渐变）=====
 
 func _update_positions(t: float) -> void:
-	_cell = _board_rect.size.x / _grid_disp
+	_cell = _board_rect.size.x / _cols_disp
 	var n := _cells.size()
 	if n == 0:
 		return
@@ -564,14 +606,16 @@ func _on_board_draw() -> void:
 	sb.set_border_width_all(3)
 	sb.border_color = COL_BORDER
 	sb.draw(_board.get_canvas_item(), r)
-	# 网格线（浅色半透明）：竖横各 n-1 条，随 _grid_disp 插值平滑移动
-	var n := int(roundf(_grid_disp))
+	# 网格线（浅色半透明）：竖 cols-1 条、横 rows-1 条，随显示值插值平滑移动
+	var nc := int(roundf(_cols_disp))
+	var nr := int(roundf(_rows_disp))
 	var lw := 1.0 if _low_fx else 1.5
-	for i in range(1, n):
+	for i in range(1, nc):
 		var x := r.position.x + i * _cell
-		var y := r.position.y + i * _cell
 		if x < r.end.x - 0.5:
 			_board.draw_line(Vector2(x, r.position.y + 3), Vector2(x, r.end.y - 3), COL_GRID, lw)
+	for i in range(1, nr):
+		var y := r.position.y + i * _cell
 		if y < r.end.y - 0.5:
 			_board.draw_line(Vector2(r.position.x + 3, y), Vector2(r.end.x - 3, y), COL_GRID, lw)
 
@@ -736,13 +780,13 @@ func _spawn_food() -> void:
 	for c: Vector2i in _cells:
 		occupied[c] = true
 	var empty: Array = []
-	for y in _grid:
-		for x in _grid:
+	for y in _rows:
+		for x in _cols:
 			var c := Vector2i(x, y)
 			if not occupied.has(c):
 				empty.append(c)
 	if empty.is_empty():
-		_food_cell = Vector2i(-1, -1)   # 满盘（理论上 30×30 蛇占满前已结束）
+		_food_cell = Vector2i(-1, -1)   # 满盘（理论上占满 900 格前已结束）
 		return
 	_food_cell = empty[randi() % empty.size()]
 	# 种类：按 FOODS 配置表权重随机（权重自动归一化）

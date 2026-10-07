@@ -1,0 +1,16 @@
+{
+	"game.name": "フルーツ囲み",
+	"ui.close": "閉じる",
+	"ui.records_empty": "記録なし",
+	"ui.your_score": "スコア：%d",
+	"ui.top10": "トップ10",
+	"fe.target": "お手本",
+	"fe.win": "レベル %d クリア！",
+	"fe.fail": "違うよ！",
+	"dev.prev": "前のレベル",
+	"dev.next": "次のレベル",
+	"dev.reveal": "ヒント",
+	"dev.solve": "自動クリア",
+	"dev.jump_lv": "ジャンプ",
+	"dev.jump": "実行"
+}

@@ -1,0 +1,7 @@
+{
+	"id": "fruit_enclose",
+	"name": "Fruit Enclose",
+	"icon": "assets/icon.png",
+	"entry": "scenes/entry.tscn",
+	"version": "1.0.0"
+}

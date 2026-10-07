@@ -1,0 +1,7 @@
+{
+    "game.name":  "Fruchtzonen",
+    "ui.close":  "Schließen",
+    "ui.records_empty":  "Noch keine Rekorde",
+    "ui.your_score":  "Deine Punkte: %d",
+    "ui.top10":  "Top 10"
+}

@@ -1,6 +1,6 @@
 extends "res://scripts/game_base.gd"  # 打包时自动改写为包前缀路径
 ## Maze（走迷宫）：俯视角随机迷宫，控制小人抵达绿色出口门通关，无失败判定
-## 关卡：第 1 关 10×10，每过 1 关迷宫长或宽轮流 +1；低关按比例打通死路（braid），高关死路更多
+## 关卡：第 1 关 10×10，每过 1 关扩 1 格（方向按屏幕剩余空间决定，总格子数达 625 封顶且单维可超 25）；低关按比例打通死路（braid），高关死路更多
 ## 生成：递归回溯完美迷宫（全连通，出口必可达）→ BFS 取距起点最远边界格为出口
 ## 外墙：四周围墙封闭，仅在出口/入口处凿门洞；出口门嵌在外墙线上（左右侧门贴图旋转 90°）
 ## 操作：左键点击 / 拖拽指引目标点（角色自动寻走，撞墙停滞即停）；方向键备用
@@ -22,7 +22,7 @@ const HUD_H := 86.0          # 顶部栏高度
 
 # ===== 关卡 / 玩法 =====
 const BASE_CELLS := 10       # 第 1 关迷宫边长（格）
-const MAX_CELLS := 25        # 边长上限
+const MAX_AREA := 625       # 总格子数上限（=25×25，单维可超 25），达到后不再扩大
 const SUB := 8               # 每格细分：墙厚 1 细分 + 通道 7 细分（墙细、路宽）
 const PLAYER_R := 1.0        # 玩家碰撞半边长（细分单位，AABB 边长 2）
 const PLAYER_SPEED := 21.0   # 移动速度（细分/秒 ≈ 2.6 格/秒）
@@ -162,6 +162,38 @@ func _exit_button_pressed() -> void:
 
 
 ## ===== 新关卡 =====
+
+## 迷宫可用像素区（_layout 与扩盘方向判断共用）
+func _maze_area() -> Rect2:
+	var vp := get_viewport().get_visible_rect().size
+	return Rect2(12.0, HUD_H, vp.x - 24.0, vp.y - HUD_H - 12.0)
+
+
+## 关卡迷宫尺寸：第 1 关 10×10；每过 1 关扩 1 格，方向按屏幕剩余空间决定（avail = 可用像素区）——
+## 横向加一列不缩格子则优先加宽，否则纵向加一行不缩格子则加高；
+## 两边都要缩格子时选格子更大的方向继续扩（此时才真正缩小迷宫格子，尽量填满屏幕）；
+## 总格子数达到 MAX_AREA（=25×25=625，单维可超 25）后不再扩大
+## （细分网格 = 格数×SUB+1，判断与 _layout 的 sub_px 公式同源）
+func _level_dims(lv: int, avail: Vector2) -> Vector2i:
+	var w := BASE_CELLS
+	var h := BASE_CELLS
+	for i in lv - 1:
+		if w * h >= MAX_AREA:
+			break
+		var cur := minf(avail.x / (w * SUB + 1), avail.y / (h * SUB + 1))   # 当前细分像素
+		var cw := avail.x / ((w + 1) * SUB + 1)                             # 加一列后的细分像素
+		var ch := avail.y / ((h + 1) * SUB + 1)                             # 加一行后的细分像素
+		if cw >= cur:
+			w += 1
+		elif ch >= cur:
+			h += 1
+		elif cw >= ch:
+			w += 1
+		else:
+			h += 1
+	return Vector2i(w, h)
+
+
 func _new_level() -> void:
 	won = false
 	dragging = false
@@ -175,10 +207,10 @@ func _new_level() -> void:
 	level_start_score = score
 	level_score = 0
 	_last_time_shown = -1
-	# 每过 1 关长或宽轮流 +1：第 1 关 10×10，第 2 关 11×10，第 3 关 11×11……
-	var extra := mini(level - 1, (MAX_CELLS - BASE_CELLS) * 2)
-	cols = mini(BASE_CELLS + (extra + 1) / 2, MAX_CELLS)
-	rows = mini(BASE_CELLS + extra / 2, MAX_CELLS)
+	# 每过 1 关扩 1 格，方向按屏幕剩余空间决定（见 _level_dims）
+	var dims := _level_dims(level, _maze_area().size)
+	cols = dims.x
+	rows = dims.y
 	_gen_maze()
 	_build_solid()
 	_setup_timer()   # 按实际路程校准计时
@@ -628,7 +660,7 @@ func _layout() -> void:
 	_board_time.position = Vector2(cx + _board_level.size.x + 20.0, 14.0)
 	_board_score.position = Vector2(cx + _board_level.size.x + _board_time.size.x + 40.0, 14.0)
 	# 迷宫区域与细分像素
-	area = Rect2(12.0, HUD_H, _vp.x - 24.0, _vp.y - HUD_H - 12.0)
+	area = _maze_area()
 	sub_px = minf(area.size.x / float(gw), area.size.y / float(gh))
 	origin = area.get_center() - Vector2(gw, gh) * sub_px / 2.0
 	# 墙体合并矩形（px）

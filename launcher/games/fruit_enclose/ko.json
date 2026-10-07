@@ -1,0 +1,16 @@
+{
+	"game.name": "과일 포위",
+	"ui.close": "닫기",
+	"ui.records_empty": "기록이 없습니다",
+	"ui.your_score": "점수: %d",
+	"ui.top10": "톱 10",
+	"fe.target": "목표",
+	"fe.win": "레벨 %d 클리어!",
+	"fe.fail": "일치하지 않아요!",
+	"dev.prev": "이전 레벨",
+	"dev.next": "다음 레벨",
+	"dev.reveal": "힌트",
+	"dev.solve": "자동 클리어",
+	"dev.jump_lv": "이동",
+	"dev.jump": "실행"
+}

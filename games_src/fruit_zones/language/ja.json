@@ -1,0 +1,7 @@
+{
+    "game.name":  "フルーツゾーン",
+    "ui.close":  "閉じる",
+    "ui.records_empty":  "記録なし",
+    "ui.your_score":  "スコア：%d",
+    "ui.top10":  "トップ10"
+}

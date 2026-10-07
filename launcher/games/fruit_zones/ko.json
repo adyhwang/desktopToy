@@ -1,0 +1,7 @@
+{
+    "game.name":  "과일 구역",
+    "ui.close":  "닫기",
+    "ui.records_empty":  "기록이 없습니다",
+    "ui.your_score":  "점수: %d",
+    "ui.top10":  "톱 10"
+}

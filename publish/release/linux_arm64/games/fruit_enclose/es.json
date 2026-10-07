@@ -1,0 +1,16 @@
+{
+	"game.name": "Fruit Enclose",
+	"ui.close": "Cerrar",
+	"ui.records_empty": "Aún no hay récords",
+	"ui.your_score": "Tu puntuación: %d",
+	"ui.top10": "Top 10",
+	"fe.target": "Objetivo",
+	"fe.win": "¡Nivel %d superado!",
+	"fe.fail": "¡No coincide!",
+	"dev.prev": "Nivel anterior",
+	"dev.next": "Nivel siguiente",
+	"dev.reveal": "Mostrar solución",
+	"dev.solve": "Auto resolver",
+	"dev.jump_lv": "Ir al nivel",
+	"dev.jump": "Ir"
+}
