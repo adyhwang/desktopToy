@@ -1,0 +1,16 @@
+{
+	"game.name": "Fish Tank Escape",
+	"ui.close": "Close",
+	"ui.records_empty": "No records yet",
+	"ui.your_score": "Your score: %s",
+	"ui.top10": "High Scores",
+	"bd.time": "Time",
+	"bd.best": "Best",
+	"bd.win_title": "Escaped!",
+	"bd.level": "Level %s",
+	"bd.next": "Next Level",
+	"dev.time": "Time +60",
+	"dev.raise": "Raise cell",
+	"dev.win": "Escape now",
+	"dev.clear": "Clear blocks"
+}

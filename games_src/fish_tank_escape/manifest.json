@@ -1,0 +1,7 @@
+{
+	"id": "fish_tank_escape",
+	"name": "鱼缸逃生",
+	"icon": "assets/icon.png",
+	"entry": "scenes/entry.tscn",
+	"version": "1.0.0"
+}

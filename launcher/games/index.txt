@@ -6,6 +6,7 @@ dart.pck
 desk_wreck.pck
 fall_rescue.pck
 fish_hook.pck
+fish_tank_escape.pck
 flappy.pck
 fruit_count.pck
 fruit_enclose.pck

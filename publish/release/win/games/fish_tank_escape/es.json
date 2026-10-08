@@ -1,0 +1,16 @@
+{
+	"game.name": "Escape de la pecera",
+	"ui.close": "Cerrar",
+	"ui.records_empty": "Aún no hay récords",
+	"ui.your_score": "Tu puntuación: %s",
+	"ui.top10": "Clasificación",
+	"bd.time": "Tiempo",
+	"bd.best": "Mejor",
+	"bd.win_title": "¡Escapado!",
+	"bd.level": "Nivel %s",
+	"bd.next": "Siguiente nivel",
+	"dev.time": "+60 s",
+	"dev.raise": "Elevar celda",
+	"dev.win": "Escapar ya",
+	"dev.clear": "Borrar todo"
+}

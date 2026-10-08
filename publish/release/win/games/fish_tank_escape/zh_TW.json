@@ -1,0 +1,16 @@
+{
+	"game.name": "魚缸逃生",
+	"ui.close": "關閉",
+	"ui.records_empty": "暫無記錄",
+	"ui.your_score": "你的成績：%s",
+	"ui.top10": "高分榜",
+	"bd.time": "時間",
+	"bd.best": "最長",
+	"bd.win_title": "逃生成功！",
+	"bd.level": "第 %s 關",
+	"bd.next": "下一關",
+	"dev.time": "時間+60",
+	"dev.raise": "墊高一格",
+	"dev.win": "立即逃生",
+	"dev.clear": "清空方塊"
+}
