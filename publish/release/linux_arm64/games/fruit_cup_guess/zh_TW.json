@@ -1,0 +1,1 @@
+{"game.name":"猜水果","hud.level":"第 %d 關","hud.score":"得分 %d","mode.easy":"簡單","mode.hard":"困難","hint.target":"目標水果","popup.win_title":"猜對了！","popup.lose_title":"沒猜中","popup.round_gain":"本局得分 +%d","popup.round_score":"本局得分 %d","popup.total":"總分 %d","popup.replay":"再來一局","popup.next":"下一關","ui.top10":"高分榜","ui.close":"關閉","ui.records_empty":"暫無記錄","ui.your_score":"你的成績：%s"}
