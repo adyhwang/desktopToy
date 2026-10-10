@@ -312,12 +312,23 @@ func _refresh_desktop_snapshot() -> void:
 
 ## ===== 恢复后透明重放 =====
 ## Windows 已知问题：无框透明窗口最小化→恢复后，DWM 可能不再合成窗口 alpha（整窗变不透明黑；
-## BgLayer 此时隐藏，视觉即"黑屏、无透明、无快照"）。恢复时把 transparent 标志关→开，
-## 触发 DisplayServer 重建窗口样式与 DWM 关联；随后异步重跑黑屏自检——
-## 重放仍无效则自动降级快照背景，保证恢复后永不出纯黑窗
+## BgLayer 此时隐藏，视觉即"黑屏、无透明、无快照"）。恢复时三连手段：
+## ① transparent 标志关→开（触发 DisplayServer 重建窗口样式与 DWM 关联，值未变会被跳过故必须关开）；
+## ② hide→show 两个帧窗口（强制 DWM 销毁重建窗口合成面——最强兜底；透明正常时隐藏的 1-2 帧
+##    看到的还是同一桌面，视觉近乎无缝；标志开关在部分驱动上不生效，此步保证有效）；
+## ③ 异步重跑黑屏自检——仍无效则自动降级快照背景，保证恢复后永不出纯黑窗
 func _on_window_restored() -> void:
 	await get_tree().create_timer(0.2).timeout   # 等恢复动画/DWM 稳定后再重放
+	print("[Main] 窗口恢复：重放透明初始化（toggle + hide/show + 自检）")
 	_reapply_transparent_window()
+	var win := get_window()
+	win.hide()
+	await get_tree().process_frame
+	await get_tree().process_frame
+	win.show()
+	win.grab_focus()
+	if win.mode != Window.MODE_FULLSCREEN:
+		win.mode = Window.MODE_FULLSCREEN   # 恢复可能落在其他模式，强制回全屏
 	if not _custom_bg_enabled():
 		_self_check_transparent()   # 0.6s 后采样；仍黑则降级快照
 
