@@ -77,8 +77,31 @@ func _read_json_dict(path: String) -> Dictionary:
 	return data if data is Dictionary else {}
 
 
-## 取译文：当前语言字典 → 代码内兜底文案
+## —— 开发者模式文案（内置，不进外置语言文件）：中文 = zh_CN/zh_TW，其他语言用英文 ——
+const DEV_ZH := {
+	"dev.kill_all": "全部消灭",
+	"dev.tip_kill_all": "移除全部匪徒（不计分）",
+	"dev.life_up": "生命 +99",
+	"dev.tip_life_up": "增加 99 次剩余生命",
+	"dev.next_wave": "下一波",
+	"dev.tip_next_wave": "清空场地并开始下一波",
+	"dev.ammo": "全部弹药 +99",
+	"dev.tip_ammo": "每种弹药各加 99 发",
+	"dev.speed": "匪徒速度",
+	"dev.tip_speed": "匪徒移动速度倍率（作用于新生成者，并实时更新在场匪徒）",
+	"dev.spawn": "生成频率",
+	"dev.tip_spawn": "生成间隔倍率（越小越快）",
+	"dev.drop": "掉落率",
+	"dev.tip_drop": "击杀掉落概率（百分比）",
+}
+
+## 取译文：dev.* 走内置双语（中文查 DEV_ZH，非中文用代码内英文兜底，不读外置 json）；
+## 其余：当前语言字典 → 代码内兜底文案
 func t(key: String, fallback: String) -> String:
+	if key.begins_with("dev."):
+		if lang.begins_with("zh"):
+			return String(DEV_ZH.get(key, fallback))
+		return fallback
 	var v: Variant = _lang_cur.get(key)
 	return String(v) if v != null else fallback
 

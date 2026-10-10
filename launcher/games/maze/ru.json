@@ -1,1 +1,20 @@
-{"game.name":"Лабиринт","hud.level":"Уровень %d","hud.time":"Время %d","hud.score":"Очки %d","popup.win_title":"Лабиринт пройден!","popup.win_msg":"Уровень %d пройден, так держать!","popup.coins":"Монеты +%d","popup.time_bonus":"Бонус за время +%d","popup.total":"Всего очков %d","popup.best":"Рекорд %d","popup.next":"Следующий уровень","popup.replay":"Ещё раз","lb.title":"Рейтинг","ui.close":"Закрыть","ui.records_empty":"Записей пока нет","ui.your_score":"Ваши очки: %d","pig.escaped":"Свинья выбралась первой!","popup.pig_bonus":"Обогнал свинью +%d","dev.prev":"Пред. уровень","dev.next":"След. уровень","dev.jump_lv":"Уровень","dev.jump":"Перейти","dev.time":"Время +30","dev.tp":"К выходу"}
+{
+	"game.name": "Лабиринт",
+	"hud.level": "Уровень %d",
+	"hud.score": "Очки %d",
+	"hud.time": "Время %d",
+	"lb.title": "Рейтинг",
+	"pig.escaped": "Свинья выбралась первой!",
+	"popup.best": "Рекорд %d",
+	"popup.coins": "Монеты +%d",
+	"popup.next": "Следующий уровень",
+	"popup.pig_bonus": "Обогнал свинью +%d",
+	"popup.replay": "Ещё раз",
+	"popup.time_bonus": "Бонус за время +%d",
+	"popup.total": "Всего очков %d",
+	"popup.win_msg": "Уровень %d пройден, так держать!",
+	"popup.win_title": "Лабиринт пройден!",
+	"ui.close": "Закрыть",
+	"ui.records_empty": "Записей пока нет",
+	"ui.your_score": "Ваши очки: %d"
+}

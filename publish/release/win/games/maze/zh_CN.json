@@ -1,1 +1,20 @@
-{"game.name":"走迷宫","hud.level":"第 %d 关","hud.time":"时间 %d","hud.score":"得分 %d","popup.win_title":"迷宫通关！","popup.win_msg":"第 %d 关通关，继续加油！","popup.coins":"金币 +%d","popup.time_bonus":"时间奖励 +%d","popup.total":"本局总分 %d","popup.best":"最高分 %d","popup.next":"下一关","popup.replay":"重玩","lb.title":"排行榜","ui.close":"关闭","ui.records_empty":"暂无纪录","ui.your_score":"你的分数：%d","pig.escaped":"小猪先出迷宫啦！","popup.pig_bonus":"跑赢小猪 +%d","dev.prev":"上一关","dev.next":"下一关","dev.jump_lv":"跳到","dev.jump":"跳关","dev.time":"时间+30","dev.tp":"传送出口"}
+{
+	"game.name": "走迷宫",
+	"hud.level": "第 %d 关",
+	"hud.score": "得分 %d",
+	"hud.time": "时间 %d",
+	"lb.title": "排行榜",
+	"pig.escaped": "小猪先出迷宫啦！",
+	"popup.best": "最高分 %d",
+	"popup.coins": "金币 +%d",
+	"popup.next": "下一关",
+	"popup.pig_bonus": "跑赢小猪 +%d",
+	"popup.replay": "重玩",
+	"popup.time_bonus": "时间奖励 +%d",
+	"popup.total": "本局总分 %d",
+	"popup.win_msg": "第 %d 关通关，继续加油！",
+	"popup.win_title": "迷宫通关！",
+	"ui.close": "关闭",
+	"ui.records_empty": "暂无纪录",
+	"ui.your_score": "你的分数：%d"
+}

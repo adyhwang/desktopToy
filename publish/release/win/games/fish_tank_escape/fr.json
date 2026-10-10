@@ -1,16 +1,12 @@
 {
+	"bd.best": "Record",
+	"bd.level": "Niveau %s",
+	"bd.next": "Niveau suivant",
+	"bd.time": "Temps",
+	"bd.win_title": "Évadé !",
 	"game.name": "Évasion de l'aquarium",
 	"ui.close": "Fermer",
 	"ui.records_empty": "Aucun record",
-	"ui.your_score": "Votre score : %s",
 	"ui.top10": "Classement",
-	"bd.time": "Temps",
-	"bd.best": "Record",
-	"bd.win_title": "Évadé !",
-	"bd.level": "Niveau %s",
-	"bd.next": "Niveau suivant",
-	"dev.time": "+60 s",
-	"dev.raise": "Surélever",
-	"dev.win": "S'échapper",
-	"dev.clear": "Tout effacer"
+	"ui.your_score": "Votre score : %s"
 }

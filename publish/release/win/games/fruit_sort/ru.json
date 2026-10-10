@@ -1,0 +1,10 @@
+{
+	"game.name": "Сортировка фруктов",
+	"hud.best": "Рекорд %d",
+	"hud.score": "Счёт %d",
+	"ui.close": "Закрыть",
+	"ui.records_empty": "Записей пока нет",
+	"ui.top10": "Рейтинг",
+	"ui.upgrade": "Уровень повышен!",
+	"ui.your_score": "Ваш счёт: %s"
+}

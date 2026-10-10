@@ -7,7 +7,8 @@ class_name ScreenCapture
 
 ## 截取主屏，返回贴图；失败返回 null（调用方降级纯色背景）
 ## 主流程将全屏窗口固定在主屏（main.gd），快照屏与游戏显示屏始终一致
-static func capture() -> ImageTexture:
+## verbose=false 用于最小化期间定期重截（每 2s 一次，不刷日志）
+static func capture(verbose := true) -> ImageTexture:
 	if OS.has_feature("web"):
 		# Web：无截屏能力，直接走壁纸兜底（旁路 HTTP 优先，主包内置次之）
 		print("[Capture] Web 平台：跳过截屏链，尝试壁纸兜底 ...")
@@ -21,16 +22,19 @@ static func capture() -> ImageTexture:
 		return null
 	var img := DisplayServer.screen_get_image(0)
 	if img != null and not img.is_empty():
-		print("[Capture] 引擎截屏成功 %dx%d" % [img.get_width(), img.get_height()])
+		if verbose:
+			print("[Capture] 引擎截屏成功 %dx%d" % [img.get_width(), img.get_height()])
 		return ImageTexture.create_from_image(img)
-	print("[Capture] 引擎截屏失败，尝试系统截屏工具 ...")
+	if verbose:
+		print("[Capture] 引擎截屏失败，尝试系统截屏工具 ...")
 	img = await _capture_by_tools()
 	if img != null:
 		return ImageTexture.create_from_image(img)
 	img = _load_wallpaper()
 	if img != null:
 		return ImageTexture.create_from_image(img)
-	print("[Capture] 所有截屏方式均失败且无 wallpaper.png，启动后将为纯色背景")
+	if verbose:
+		print("[Capture] 所有截屏方式均失败且无 wallpaper.png，启动后将为纯色背景")
 	return null
 
 

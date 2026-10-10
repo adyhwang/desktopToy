@@ -59,14 +59,23 @@ var _fp_last_dir := ""         # 上次浏览目录（下次打开回位）
 var _fp_path_lbl: Label
 var _fp_list: ItemList
 var _card_ids := {}             # 已建卡游戏 id（game_ready 增量触发，去重防重复建卡）
+var _icon_view := "large"       # 图标查看方式：large=大图标卡 / small=小图标+右侧游戏名行
+var _icon_view_btns: Array = [] # 设置面板 [大图标/小图标] 按钮组
 
 const FP_EXTS := ["png", "jpg", "jpeg", "webp", "bmp"]
 
 
 func _ready() -> void:
 	get_viewport().size_changed.connect(_layout)
+	# 图标查看方式持久化（须在建卡前读取，_add_card 按其分支）
+	var cf := ConfigFile.new()
+	if cf.load(CFG_PATH) == OK:
+		_icon_view = String(cf.get_value("general", "icon_view", "large"))
+		if _icon_view != "small":
+			_icon_view = "large"
 	# 卡片入场动画要飞出容器顶（到 Banner 顶部），关闭滚动区裁剪，否则下落段被裁掉不可见
 	_icons_scroll.clip_contents = false
+	_icons.add_theme_constant_override("separation", 12 if _icon_view == "small" else 32)
 	for info in GameManager.games:
 		_add_card(info, false)
 	# 空态提示延后到扫描结束判定（加载进行中不闪 "No games"）
@@ -111,14 +120,18 @@ func _add_card(info: Dictionary, animated: bool) -> void:
 	if _card_ids.has(id):
 		return
 	_card_ids[id] = true
+	if _card_ids.size() == 1:
+		_empty_hint.visible = false
+		_icons.visible = true
+	# 小图标模式：小图 + 右侧游戏名行（无入场动画，直接入流）
+	if _icon_view == "small":
+		_icons.add_child(_make_small_card(info))
+		return
 	var card := GameCard.new_card(info)
 	card.set_meta("info", info)
 	card.tooltip_text = _game_name(info)
 	card.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND   # 悬停切手型指针
 	card.activated.connect(game_selected.emit)
-	if _card_ids.size() == 1:
-		_empty_hint.visible = false
-		_icons.visible = true
 	if not animated:
 		_icons.add_child(card)
 		return
@@ -163,6 +176,46 @@ func _finish_card_anim(card: GameCard) -> void:
 		card.z_index = 0
 
 
+## ===== 图标查看方式 =====
+
+## 小图标列表项（Windows 资源管理器"列表"视图）：小图 + 右侧游戏名，
+## 等宽列（长名截断显示 tooltip）+ 图标左对齐，HFlow 整行居中（整体居中）；
+## 扁平无边框，hover 金字；点击直接进游戏
+func _make_small_card(info: Dictionary) -> Button:
+	var b := Button.new()
+	b.text = _game_name(info)
+	b.icon = GameCard._load_icon(info)
+	b.add_theme_constant_override("icon_max_width", 40)
+	b.add_theme_constant_override("h_separation", 10)   # 图标与文字间距
+	b.alignment = HORIZONTAL_ALIGNMENT_LEFT
+	b.clip_text = true
+	b.custom_minimum_size = Vector2(220.0, 44.0)
+	b.focus_mode = Control.FOCUS_NONE
+	b.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+	b.set_meta("info", info)
+	for col in ["font_color", "font_hover_color", "font_focus_color", "font_pressed_color"]:
+		b.add_theme_color_override(col, Color.WHITE if col == "font_color" else COL_GOLD)
+	b.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.6))
+	b.add_theme_constant_override("outline_size", 6)
+	for st in ["normal", "hover", "pressed", "focus"]:
+		b.add_theme_stylebox_override(st, StyleBoxEmpty.new())
+	b.pressed.connect(game_selected.emit.bind(info))
+	return b
+
+
+## 切换查看方式：清空卡片流整体重建（设置面板实时调用）
+## 间距随模式切换：大图标卡 32 / 列表项紧凑 12（资源管理器列表观感）
+func _apply_icon_view() -> void:
+	_icons.add_theme_constant_override("separation", 12 if _icon_view == "small" else 32)
+	for c in _icons.get_children():
+		c.queue_free()
+	_card_ids.clear()
+	_icons.visible = not GameManager.games.is_empty()
+	_empty_hint.visible = GameManager.games.is_empty()
+	for info in GameManager.games:
+		_add_card(info, false)
+
+
 func _game_name(info: Dictionary) -> String:
 	var id := String(info.id)
 	var v := _read_game_name(id, L10n.language)
@@ -201,6 +254,8 @@ func _on_language_changed() -> void:
 			card = child.get_child(0) as GameCard   # 入场动画卡片包在 wrapper 里
 		if card != null:
 			card.tooltip_text = _game_name(card.get_meta("info"))
+		elif child is Button and child.has_meta("info"):
+			(child as Button).text = _game_name(child.get_meta("info"))   # 小图标行卡
 	if _about_layer != null:
 		_about_layer.queue_free()
 		_about_layer = null
@@ -416,6 +471,20 @@ func _build_option_layer() -> void:
 	_bgm_check.toggled.connect(_on_bgm_toggled)
 	vb.add_child(_bgm_check)
 
+	# 图标查看方式：大图标（当前风格）/ 小图标（小图 + 右侧游戏名）
+	var icon_row := HBoxContainer.new()
+	icon_row.add_theme_constant_override("separation", 10)
+	icon_row.add_child(_row_label(L10n.t("opt.icon_view", "Icon view"), "opt.icon_view", "Icon view"))
+	for i in 2:
+		var key := "opt.icon_large" if i == 0 else "opt.icon_small"
+		var fb := "Large icons" if i == 0 else "Small icons"
+		var b := _toggle_btn(L10n.t(key, fb))
+		b.pressed.connect(_on_icon_view_btn.bind(i))
+		_i18n_nodes.append([b, key, fb])
+		_icon_view_btns.append(b)
+		icon_row.add_child(b)
+	vb.add_child(icon_row)
+
 	vb.add_child(HSeparator.new())
 
 	# 自定义背景：勾选展开子面板（图片/纯色 + 填充方式，类系统桌面背景设置）
@@ -522,6 +591,7 @@ func _sync_options_ui() -> void:
 	_mark_color(cur_col)
 	var fill := String(cf.get_value("background", "fill", "cover")) if cf != null else "cover"
 	_mark_selected(_fill_btns, maxi(FILLS.find(fill), 0))
+	_mark_selected(_icon_view_btns, 0 if _icon_view == "large" else 1)
 	for i in _lang_btns.size():
 		var b: Button = _lang_btns[i]
 		_apply_btn_style(b, String(b.get_meta("lang")) == L10n.language)
@@ -579,6 +649,14 @@ func _on_volume_changed(v: float) -> void:
 
 func _on_bgm_toggled(on: bool) -> void:
 	_cfg_set("audio", "bgm_on", on)
+
+
+## 切换图标查看方式（大/小）：持久化 + 卡片流重建
+func _on_icon_view_btn(i: int) -> void:
+	_icon_view = "large" if i == 0 else "small"
+	_cfg_set("general", "icon_view", _icon_view)
+	_mark_selected(_icon_view_btns, i)
+	_apply_icon_view()
 
 
 func _on_bg_enable_toggled(on: bool) -> void:

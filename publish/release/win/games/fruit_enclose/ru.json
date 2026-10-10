@@ -1,16 +1,10 @@
 {
+	"fe.fail": "Не совпало!",
+	"fe.target": "Образец",
+	"fe.win": "Уровень %d пройден!",
 	"game.name": "Fruit Enclose",
 	"ui.close": "Закрыть",
 	"ui.records_empty": "Записей пока нет",
-	"ui.your_score": "Ваш результат: %d",
 	"ui.top10": "Топ 10",
-	"fe.target": "Образец",
-	"fe.win": "Уровень %d пройден!",
-	"fe.fail": "Не совпало!",
-	"dev.prev": "Предыдущий уровень",
-	"dev.next": "Следующий уровень",
-	"dev.reveal": "Подсказка",
-	"dev.solve": "Авто-решение",
-	"dev.jump_lv": "Переход к",
-	"dev.jump": "Перейти"
+	"ui.your_score": "Ваш результат: %d"
 }

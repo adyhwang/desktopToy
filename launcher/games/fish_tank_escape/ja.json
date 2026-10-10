@@ -1,16 +1,12 @@
 {
+	"bd.best": "最長",
+	"bd.level": "第%sステージ",
+	"bd.next": "次のステージ",
+	"bd.time": "時間",
+	"bd.win_title": "脱出成功！",
 	"game.name": "金魚鉢脱出",
 	"ui.close": "閉じる",
 	"ui.records_empty": "記録はまだありません",
-	"ui.your_score": "スコア：%s",
 	"ui.top10": "ランキング",
-	"bd.time": "時間",
-	"bd.best": "最長",
-	"bd.win_title": "脱出成功！",
-	"bd.level": "第%sステージ",
-	"bd.next": "次のステージ",
-	"dev.time": "+60秒",
-	"dev.raise": "1マス盛る",
-	"dev.win": "今すぐ脱出",
-	"dev.clear": "ブロック消去"
+	"ui.your_score": "スコア：%s"
 }

@@ -141,7 +141,7 @@ func _exit_button_pressed() -> void:
 func _setup_buttons() -> void:
 	_hbox = HBoxContainer.new()
 	_hbox.name = "TopButtons"
-	_hbox.add_theme_constant_override("separation", 8)
+	_hbox.add_theme_constant_override("separation", -8)
 	add_child(_hbox)
 	_hbox.process_mode = Node.PROCESS_MODE_ALWAYS   # 暂停中（排行榜/弹窗）顶栏按钮仍可点
 	var old_parent := _exit_btn.get_parent()   # tscn 节点迁入容器（原父为游戏根）
@@ -153,11 +153,19 @@ func _setup_buttons() -> void:
 	_bgm_btn = GameHud.make_button("")
 	_volume_btn = GameHud.make_button("")
 	_exit_btn.icon = hud.ui_icon("close.png")
+
+	# 最小化钮（关闭钮左侧）：点击最小化窗口（桌面 Win/Linux）
+	var min_btn := GameHud.make_button("")
+	min_btn.icon = hud.ui_icon("minimize.png")
+	min_btn.custom_minimum_size = Vector2(56.0, 56.0)
+	min_btn.size_flags_vertical = Control.SIZE_SHRINK_END
+	min_btn.add_theme_constant_override("icon_max_width", 32)
+	min_btn.pressed.connect(func() -> void: get_window().mode = Window.MODE_MINIMIZED)
 	_lb_btn.icon = hud.lb_icon()
 	_restart_btn.icon = hud.restart_icon()   # R 改循环箭头图标（同风格程序生成）
 	_bgm_btn.icon = hud.bgm_icon()
 	_volume_btn.icon = hud.volume_icon()
-	for b: Button in [_lb_btn, _bgm_btn, _volume_btn, _restart_btn, _exit_btn]:
+	for b: Button in [_lb_btn, _bgm_btn, _volume_btn, _restart_btn, min_btn, _exit_btn]:
 		_hbox.add_child(b)
 		b.custom_minimum_size = Vector2(56.0, 56.0)
 		b.size_flags_vertical = Control.SIZE_SHRINK_END   # 底部对齐

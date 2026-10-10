@@ -86,8 +86,35 @@ func _read_json_dict(path: String) -> Dictionary:
 	return data if data is Dictionary else {}
 
 
-## 取译文：当前语言字典 → 代码内兜底文案
+## —— 开发者模式文案（内置，不进外置语言文件）：中文 = zh_CN/zh_TW，其他语言用英文 ——
+const DEV_ZH := {
+	"dev.bite_now": "立即咬钩",
+	"dev.tip_bite_now": "立即咬钩：等待中时下一帧即触发咬钩",
+	"dev.land_now": "立即上岸",
+	"dev.tip_land_now": "立即上岸：把鱼拉到岸边进入获鱼展示",
+	"dev.rar_force": "强制稀有度",
+	"dev.tip_rar_force": "强制咬钩稀有度：点击/滚轮=下一个，右键=上一个（关闭 → 普通 → … → 垃圾）",
+	"dev.score": "得分 +100",
+	"dev.tip_score": "加 100 分并提交排行榜",
+	"dev.combo": "连击 x3",
+	"dev.tip_combo": "连击设为 x3",
+	"dev.bite_avg": "平均 5 秒咬钩",
+	"dev.tip_bite_avg": "咬钩频率设为约每 5 秒一次（倍率 5.0）",
+	"dev.bite_rate": "咬钩频率",
+	"dev.tip_bite_rate": "全局咬钩频率倍率（基础频率 × 鱼饵 × 饵料）",
+	"dev.fish_str": "鱼的力量",
+	"dev.tip_fish_str": "全局鱼力倍率（基础与爆发同时缩放）",
+	"dev.reel_speed": "收线速度",
+	"dev.tip_reel_speed": "收线速度倍率（靠岸进度速率）",
+}
+
+## 取译文：dev.* 走内置双语（中文查 DEV_ZH，非中文用代码内英文兜底，不读外置 json）；
+## 其余：当前语言字典 → 代码内兜底文案
 func t(key: String, fallback: String) -> String:
+	if key.begins_with("dev."):
+		if lang.begins_with("zh"):
+			return String(DEV_ZH.get(key, fallback))
+		return fallback
 	var v: Variant = _lang_cur.get(key)
 	return String(v) if v != null else fallback
 

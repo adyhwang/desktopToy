@@ -764,9 +764,17 @@ func _setup_buttons() -> void:
 	GameHud.style_button(_exit_btn)
 	_exit_btn.text = ""
 	_exit_btn.icon = hud.ui_icon("close.png")
+
+	# 最小化钮（关闭钮左侧）：点击最小化窗口（桌面 Win/Linux）
+	var min_btn := GameHud.make_button("")
+	min_btn.icon = hud.ui_icon("minimize.png")
+	min_btn.custom_minimum_size = Vector2(44.0, 56.0)
+	min_btn.size_flags_vertical = Control.SIZE_SHRINK_END
+	min_btn.add_theme_constant_override("icon_max_width", 32)
+	min_btn.pressed.connect(func() -> void: get_window().mode = Window.MODE_MINIMIZED)
 	_top_btns = HBoxContainer.new()
 	_top_btns.name = "TopButtons"
-	_top_btns.add_theme_constant_override("separation", 8)
+	_top_btns.add_theme_constant_override("separation", -8)
 	_top_btns.z_index = 150
 	$UI.add_child(_top_btns)   # CanvasLayer 屏幕坐标，不随镜头
 	_top_btns.process_mode = Node.PROCESS_MODE_ALWAYS   # 暂停中（排行榜弹窗）顶栏按钮仍可点
@@ -779,7 +787,7 @@ func _setup_buttons() -> void:
 	_restart_btn.icon = hud.restart_icon()
 	var old_parent := _exit_btn.get_parent()
 	old_parent.remove_child(_exit_btn)
-	for b: Control in [lb_btn, _volume_btn, _restart_btn, _exit_btn]:
+	for b: Control in [lb_btn, _volume_btn, _restart_btn, min_btn, _exit_btn]:
 		_top_btns.add_child(b)
 		b.custom_minimum_size = Vector2(44.0, 56.0)
 		b.size_flags_vertical = Control.SIZE_SHRINK_END

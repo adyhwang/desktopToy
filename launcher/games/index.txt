@@ -11,6 +11,7 @@ flappy.pck
 fruit_count.pck
 fruit_cup_guess.pck
 fruit_enclose.pck
+fruit_sort.pck
 hammer.pck
 maze.pck
 memory.pck

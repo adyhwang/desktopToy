@@ -4,7 +4,7 @@ extends TextureButton
 
 signal activated(info: Dictionary)
 
-const SIZE := 96.0
+const SIZE := 120.0
 const HOVER_SCALE := 1.08
 const HOVER_ALPHA := 0.6
 const HOVER_TIME := 0.12

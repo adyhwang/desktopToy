@@ -1,1 +1,11 @@
-{"game.name":"Башня блоков","hud.height":"Высота %s","hud.score":"Очки %d","lb.title":"Рейтинг","ui.close":"Закрыть","ui.records_empty":"Записей пока нет","ui.your_score":"Ваш результат: %d","fx.perfect":"Идеально! +%d","fx.good":"Отлично! +%d","dev.raise":"+5 м вверх","dev.next":"След. блок","dev.score":"Очки +100","dev.clear":"Очистить"}
+{
+	"fx.good": "Отлично! +%d",
+	"fx.perfect": "Идеально! +%d",
+	"game.name": "Башня блоков",
+	"hud.height": "Высота %s",
+	"hud.score": "Очки %d",
+	"lb.title": "Рейтинг",
+	"ui.close": "Закрыть",
+	"ui.records_empty": "Записей пока нет",
+	"ui.your_score": "Ваш результат: %d"
+}

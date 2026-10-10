@@ -1,16 +1,12 @@
 {
+	"bd.best": "Beste",
+	"bd.level": "Level %s",
+	"bd.next": "Nächstes Level",
+	"bd.time": "Zeit",
+	"bd.win_title": "Entkommen!",
 	"game.name": "Aquarienflucht",
 	"ui.close": "Schließen",
 	"ui.records_empty": "Noch keine Rekorde",
-	"ui.your_score": "Dein Ergebnis: %s",
 	"ui.top10": "Bestenliste",
-	"bd.time": "Zeit",
-	"bd.best": "Beste",
-	"bd.win_title": "Entkommen!",
-	"bd.level": "Level %s",
-	"bd.next": "Nächstes Level",
-	"dev.time": "+60 Sek.",
-	"dev.raise": "Zelle erhöhen",
-	"dev.win": "Sofort fliehen",
-	"dev.clear": "Alles löschen"
+	"ui.your_score": "Dein Ergebnis: %s"
 }

@@ -79,7 +79,6 @@ var _moved := {}                 # 打乱中已移动过的杯下标（保证目
 var _guess_i := -1               # 正在掀开/结果展示的杯下标
 var _floats: Array[Dictionary] = []  # {txt,col,pos,t}
 var _committed := false          # 本局总分是否已入榜
-var _last_rank := 0              # 提交入榜名次（失败弹窗高分榜高亮用）
 var _popup: Control = null
 var _alive_t := 0.0              # 脉冲动画计时
 
@@ -97,6 +96,7 @@ var _sfx_streams := {}
 var _sfx_players: Array = []
 var _bgm: AudioStreamPlayer
 var _hbox: HBoxContainer
+var _top_left: HBoxContainer
 var _mode_opt: OptionButton
 var _lb_btn: Button
 var _restart_btn: Button
@@ -154,7 +154,6 @@ func _new_run() -> void:
 	level = 1
 	total = 0
 	_committed = false
-	_last_rank = 0
 	_new_round()
 
 
@@ -486,7 +485,7 @@ func _commit_run() -> void:
 	if _committed:
 		return
 	hud.submit_score(total)
-	_last_rank = hud.commit_score()
+	hud.commit_score()
 	_committed = true
 
 
@@ -504,7 +503,6 @@ func _show_win_popup() -> void:
 	var row := _add_popup_row(vb)
 	_add_popup_btn(row, hud.t("popup.replay", "Play Again"), _on_replay_round)
 	_add_popup_btn(row, hud.t("popup.next", "Next Level"), _on_next_level)
-	_add_popup_btn(row, hud.t("ui.top10", "Leaderboard"), _on_lb_popup)
 	_finish_popup()
 
 
@@ -522,7 +520,6 @@ func _show_lose_popup() -> void:
 				hud.t("popup.total", "Total %d") % total], Color.WHITE, 0.032)
 	var row := _add_popup_row(vb)
 	_add_popup_btn(row, hud.t("popup.replay", "Play Again"), _on_new_run)
-	_add_popup_btn(row, hud.t("ui.top10", "Leaderboard"), _on_lb_popup)
 	_finish_popup()
 
 
@@ -598,11 +595,6 @@ func _on_new_run() -> void:        # 失败弹窗：重新开始（新的一局�
 	_new_run()
 
 
-func _on_lb_popup() -> void:       # 弹窗高分榜：已提交则高亮名次
-	var rank := _last_rank if _committed else 0
-	hud.show_leaderboard(self, hud.t("ui.top10", "Leaderboard"), total, rank)
-
-
 ## ===== 输入 =====
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -660,6 +652,9 @@ func _layout() -> void:
 	_hud_bar.position = Vector2((_vp.x - _hud_bar.size.x) * 0.5, 14.0)
 	_hbox.reset_size()
 	_hbox.position = Vector2(_vp.x - _hbox.size.x - 20.0, 14.0)
+	if _top_left != null:
+		_top_left.reset_size()
+		_top_left.position = Vector2(20.0, 14.0)
 	_refresh_hud()
 	queue_redraw()
 
@@ -675,11 +670,11 @@ func _refresh_hud() -> void:
 
 ## ===== 顶部按钮 =====
 
-## 右上角按钮排（HBox 容器）：模式下拉 + 排行榜 + 重开 + BGM + 音量 + ✕（tscn 已有）
+## 右上角按钮排（HBox 容器）：排行榜 + 重开 + BGM + 音量 + ✕（tscn 已有）；模式下拉在左上角
 func _setup_buttons() -> void:
 	_hbox = HBoxContainer.new()
 	_hbox.name = "TopButtons"
-	_hbox.add_theme_constant_override("separation", 8)
+	_hbox.add_theme_constant_override("separation", -8)
 	add_child(_hbox)
 	_hbox.process_mode = Node.PROCESS_MODE_ALWAYS   # 暂停中（排行榜/弹窗）顶栏按钮仍可点
 	var old_parent := _exit_btn.get_parent()   # tscn 节点迁入容器（原父为游戏根）
@@ -691,16 +686,34 @@ func _setup_buttons() -> void:
 	_mode_opt.add_item(hud.t("mode.hard", "Hard"))
 	_mode_opt.selected = 0 if mode == "easy" else 1
 	_mode_opt.item_selected.connect(_on_mode_selected)
+	# 左上角按钮组：模式下拉框（2026-10-10 用户定，避开右上 ✕ 列）
+	_top_left = HBoxContainer.new()
+	_top_left.name = "TopLeft"
+	_top_left.add_theme_constant_override("separation", -8)
+	add_child(_top_left)
+	_top_left.process_mode = Node.PROCESS_MODE_ALWAYS
+	_top_left.add_child(_mode_opt)
+	_mode_opt.custom_minimum_size = Vector2(56.0, 56.0)
+	_mode_opt.size_flags_vertical = Control.SIZE_SHRINK_END
+	_mode_opt.add_theme_constant_override("icon_max_width", 32)
 	_lb_btn = GameHud.make_button("")
 	_restart_btn = GameHud.make_button("")
 	_bgm_btn = GameHud.make_button("")
 	_volume_btn = GameHud.make_button("")
 	_exit_btn.icon = hud.ui_icon("close.png")
+
+	# 最小化钮（关闭钮左侧）：点击最小化窗口（桌面 Win/Linux）
+	var min_btn := GameHud.make_button("")
+	min_btn.icon = hud.ui_icon("minimize.png")
+	min_btn.custom_minimum_size = Vector2(56.0, 56.0)
+	min_btn.size_flags_vertical = Control.SIZE_SHRINK_END
+	min_btn.add_theme_constant_override("icon_max_width", 32)
+	min_btn.pressed.connect(func() -> void: get_window().mode = Window.MODE_MINIMIZED)
 	_lb_btn.icon = hud.lb_icon()
 	_restart_btn.icon = hud.restart_icon()
 	_bgm_btn.icon = hud.bgm_icon()
 	_volume_btn.icon = hud.volume_icon()
-	for b: Control in [_mode_opt, _lb_btn, _bgm_btn, _volume_btn, _restart_btn, _exit_btn]:
+	for b: Control in [_lb_btn, _bgm_btn, _volume_btn, _restart_btn, min_btn, _exit_btn]:
 		_hbox.add_child(b)
 		b.custom_minimum_size = Vector2(56.0, 56.0)
 		b.size_flags_vertical = Control.SIZE_SHRINK_END

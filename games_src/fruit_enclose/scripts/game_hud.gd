@@ -77,8 +77,23 @@ func _read_json_dict(path: String) -> Dictionary:
 	return data if data is Dictionary else {}
 
 
-## 取译文：当前语言字典 → 代码内兜底文案
+## —— 开发者模式文案（内置，不进外置语言文件）：中文 = zh_CN/zh_TW，其他语言用英文 ——
+const DEV_ZH := {
+	"dev.prev": "上一关",
+	"dev.next": "下一关",
+	"dev.reveal": "揭示答案",
+	"dev.solve": "自动解题",
+	"dev.jump_lv": "跳转到",
+	"dev.jump": "跳转",
+}
+
+## 取译文：dev.* 走内置双语（中文查 DEV_ZH，非中文用代码内英文兜底，不读外置 json）；
+## 其余：当前语言字典 → 代码内兜底文案
 func t(key: String, fallback: String) -> String:
+	if key.begins_with("dev."):
+		if lang.begins_with("zh"):
+			return String(DEV_ZH.get(key, fallback))
+		return fallback
 	var v: Variant = _lang_cur.get(key)
 	return String(v) if v != null else fallback
 

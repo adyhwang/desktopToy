@@ -80,6 +80,7 @@ var sel_rows := 4
 
 # UI
 var _top_btns: HBoxContainer
+var _top_left: HBoxContainer
 var _mode_opt: OptionButton
 var _count_opt: OptionButton
 var _hint_btn: Button
@@ -308,6 +309,9 @@ func _layout() -> void:
 	if _top_btns != null:
 		_top_btns.reset_size()
 		_top_btns.position = Vector2(_vp.x - _top_btns.size.x - 16.0, 14.0)
+	if _top_left != null:
+		_top_left.reset_size()
+		_top_left.position = Vector2(16.0, 14.0)
 	var btns_w := _top_btns.size.x if _top_btns != null else 0.0
 	var bw := _board_level.size.x + _board_count.size.x + 20.0
 	var cx := maxf(16.0, (_vp.x - btns_w) / 2.0 - bw / 2.0)
@@ -574,12 +578,27 @@ func _setup_buttons() -> void:
 	GameHud.style_button(_exit_btn)
 	_exit_btn.text = ""
 	_exit_btn.icon = hud.ui_icon("close.png")
+
+	# 最小化钮（关闭钮左侧）：点击最小化窗口（桌面 Win/Linux）
+	var min_btn := GameHud.make_button("")
+	min_btn.icon = hud.ui_icon("minimize.png")
+	min_btn.custom_minimum_size = Vector2(44.0, 56.0)
+	min_btn.size_flags_vertical = Control.SIZE_SHRINK_END
+	min_btn.add_theme_constant_override("icon_max_width", 32)
+	min_btn.pressed.connect(func() -> void: get_window().mode = Window.MODE_MINIMIZED)
 	_top_btns = HBoxContainer.new()
 	_top_btns.name = "TopButtons"
-	_top_btns.add_theme_constant_override("separation", 8)
+	_top_btns.add_theme_constant_override("separation", -8)
 	_top_btns.z_index = 150   # HUD 高于方块（块 z=1 / 拖动 z=100）
 	add_child(_top_btns)
 	_top_btns.process_mode = Node.PROCESS_MODE_ALWAYS   # 暂停中（排行榜/弹窗）顶栏按钮仍可点
+	# 左上角按钮组：2 个下拉框 + 提示钮（2026-10-10 用户定，避开右上 ✕ 列）
+	_top_left = HBoxContainer.new()
+	_top_left.name = "TopLeft"
+	_top_left.add_theme_constant_override("separation", -8)
+	_top_left.z_index = 150
+	add_child(_top_left)
+	_top_left.process_mode = Node.PROCESS_MODE_ALWAYS
 	_mode_opt = _make_option()
 	_mode_opt.add_item(hud.t("mode.classic", "Classic Blocks"))
 	_mode_opt.add_item(hud.t("mode.prism", "Prism Blocks"))
@@ -598,7 +617,12 @@ func _setup_buttons() -> void:
 	# 退出按钮从场景挂载点移入按钮组
 	var old_parent := _exit_btn.get_parent()
 	old_parent.remove_child(_exit_btn)
-	for b: Control in [_mode_opt, _count_opt, _hint_btn, bgm_btn, _volume_btn, _restart_btn, _exit_btn]:
+	for b: Control in [_mode_opt, _count_opt, _hint_btn]:
+		_top_left.add_child(b)
+		b.custom_minimum_size = Vector2(44.0, 56.0)
+		b.size_flags_vertical = Control.SIZE_SHRINK_END
+		b.add_theme_constant_override("icon_max_width", 32)
+	for b: Control in [bgm_btn, _volume_btn, _restart_btn, min_btn, _exit_btn]:
 		_top_btns.add_child(b)
 		b.custom_minimum_size = Vector2(44.0, 56.0)
 		b.size_flags_vertical = Control.SIZE_SHRINK_END

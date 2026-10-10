@@ -1,0 +1,10 @@
+{
+	"game.name": "Tri de Fruits",
+	"hud.best": "Record %d",
+	"hud.score": "Score %d",
+	"ui.close": "Fermer",
+	"ui.records_empty": "Aucun record",
+	"ui.top10": "Classement",
+	"ui.upgrade": "Niveau supérieur !",
+	"ui.your_score": "Votre score : %s"
+}

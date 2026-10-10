@@ -1,0 +1,10 @@
+{
+	"game.name": "Clasifica Frutas",
+	"hud.best": "Récord %d",
+	"hud.score": "Puntos %d",
+	"ui.close": "Cerrar",
+	"ui.records_empty": "Aún no hay registros",
+	"ui.top10": "Clasificación",
+	"ui.upgrade": "¡Sube el nivel!",
+	"ui.your_score": "Tu puntuación: %s"
+}

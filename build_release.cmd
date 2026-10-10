@@ -7,7 +7,8 @@ rem         publish\release\linux_x64\   (zip to ship, run DesktopToy)
 rem         publish\release\linux_arm64\ (zip to ship, run DesktopToy)
 rem         publish\release\web\         (deploy on any static HTTP server, open dt.html)
 rem Launch: in-app desktop snapshot at startup (window starts minimized), no launcher scripts needed
-rem Fallback: put wallpaper.png/jpg next to the binary for environments where screen capture fails
+rem Fallback: launcher\wallpaper.jpg is auto-copied next to the binary in every assemble step
+rem           (used when screen capture fails / transparency unavailable; replace freely to customize)
 rem Language files (launcher Language\ + per-game games_src\<id>\language\ -> games\<id>\) are copied in every assemble step
 setlocal
 set ROOT=%~dp0
@@ -84,6 +85,7 @@ if errorlevel 1 goto :err
 echo [Windows] Assembling distributable ...
 copy /y "%ROOT%launcher\games\*.pck" "%OUT%\games\" >nul
 call :copy_lang "%OUT%"
+copy /y "%ROOT%launcher\wallpaper.jpg" "%OUT%\" >nul
 if exist "%ROOT%tools\upx\upx.exe" (
   "%ROOT%tools\upx\upx.exe" --best --lzma "%OUT%\DesktopToy.exe" >nul
 ) else (
@@ -99,6 +101,7 @@ if errorlevel 1 goto :err
 echo [Linux x64] Assembling distributable ...
 copy /y "%ROOT%launcher\games\*.pck" "%OUT_X64%\games\" >nul
 call :copy_lang "%OUT_X64%"
+copy /y "%ROOT%launcher\wallpaper.jpg" "%OUT_X64%\" >nul
 copy /y "%ROOT%launcher\icon_app.png" "%OUT_X64%\icon.png" >nul
 copy /y "%ROOT%launcher\tools\install.sh" "%OUT_X64%\" >nul
 if exist "%ROOT%tools\upx\upx.exe" (
@@ -116,6 +119,7 @@ if errorlevel 1 goto :err
 echo [Linux arm64] Assembling distributable ...
 copy /y "%ROOT%launcher\games\*.pck" "%OUT_ARM%\games\" >nul
 call :copy_lang "%OUT_ARM%"
+copy /y "%ROOT%launcher\wallpaper.jpg" "%OUT_ARM%\" >nul
 copy /y "%ROOT%launcher\icon_app.png" "%OUT_ARM%\icon.png" >nul
 copy /y "%ROOT%launcher\tools\install.sh" "%OUT_ARM%\" >nul
 if exist "%ROOT%tools\upx\upx.exe" (
@@ -143,6 +147,7 @@ echo [Web] Deploying game packs + gzipping dt.wasm ...
 rem game pcks ship as separate files next to dt.html (launcher downloads them at startup)
 if not exist "%OUT_WEB%\games" mkdir "%OUT_WEB%\games"
 copy /y "%ROOT%launcher\games\*.pck" "%OUT_WEB%\games\" >nul
+copy /y "%ROOT%launcher\wallpaper.jpg" "%OUT_WEB%\" >nul
 rem dt.wasm (~37MB) exceeds the 25MB per-file limit: gzip it, the head_include
 rem fetch shim in dt.html decompresses it via DecompressionStream at load time
 powershell -NoProfile -Command "$i='%OUT_WEB%\dt.wasm';$o='%OUT_WEB%\dt.wasm.gz';$fs=[IO.File]::OpenRead($i);$gz=[IO.File]::Create($o);$gs=New-Object IO.Compression.GZipStream($gz,[IO.Compression.CompressionLevel]::Optimal);$fs.CopyTo($gs);$gs.Close();$fs.Close()"

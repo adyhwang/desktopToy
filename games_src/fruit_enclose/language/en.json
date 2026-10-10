@@ -1,16 +1,10 @@
 {
+	"fe.fail": "No match!",
+	"fe.target": "Target",
+	"fe.win": "Level %d cleared!",
 	"game.name": "Fruit Enclose",
 	"ui.close": "Close",
 	"ui.records_empty": "No records yet",
-	"ui.your_score": "Your score: %d",
 	"ui.top10": "Top 10",
-	"fe.target": "Target",
-	"fe.win": "Level %d cleared!",
-	"fe.fail": "No match!",
-	"dev.prev": "Prev Level",
-	"dev.next": "Next Level",
-	"dev.reveal": "Reveal",
-	"dev.solve": "Auto Solve",
-	"dev.jump_lv": "Jump to",
-	"dev.jump": "Jump"
+	"ui.your_score": "Your score: %d"
 }

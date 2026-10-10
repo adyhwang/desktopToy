@@ -77,8 +77,39 @@ func _read_json_dict(path: String) -> Dictionary:
 	return data if data is Dictionary else {}
 
 
-## 取译文：当前语言字典 → 代码内兜底文案
+## —— 开发者模式文案（内置，不进外置语言文件）：中文 = zh_CN/zh_TW，其他语言用英文 ——
+const DEV_ZH := {
+	"dev.life100": "生命 = 100",
+	"dev.tip_life100": "生命设为 100",
+	"dev.life_up": "生命 +1",
+	"dev.tip_life_up": "增加 1 条生命",
+	"dev.life_down": "生命 -1",
+	"dev.tip_life_down": "减少 1 条生命",
+	"dev.multi": "多球",
+	"dev.tip_multi": "多球：每个球分裂成 3 个，各自独立运动、持续存在直到离开场地",
+	"dev.pierce": "穿透球",
+	"dev.tip_pierce": "穿透球：球穿过砖块不反弹，沿途击碎（持续 %d 秒）",
+	"dev.fog": "迷雾",
+	"dev.tip_fog": "迷雾：中央砖块区域被半透明灰色遮罩覆盖（持续 %d 秒）",
+	"dev.invert": "反向操控",
+	"dev.tip_invert": "反向操控：鼠标 X/Y 轴与挡板移动方向反转（持续 %d 秒）",
+	"dev.clear_level": "清空关卡",
+	"dev.tip_clear_level": "清空关卡：立即移除全部砖块并触发清场奖励",
+	"dev.ball_speed": "球速",
+	"dev.tip_ball_speed": "球速倍率（叠加在减速/加速球效果之上）",
+	"dev.paddle_length": "挡板长度",
+	"dev.tip_paddle_length": "挡板长度倍率（叠加在加长/缩短挡板效果之上）",
+	"dev.drop_rate": "道具掉率",
+	"dev.tip_drop_rate": "道具掉落率（砖块被击碎后掉落道具的概率）",
+}
+
+## 取译文：dev.* 走内置双语（中文查 DEV_ZH，非中文用代码内英文兜底，不读外置 json）；
+## 其余：当前语言字典 → 代码内兜底文案
 func t(key: String, fallback: String) -> String:
+	if key.begins_with("dev."):
+		if lang.begins_with("zh"):
+			return String(DEV_ZH.get(key, fallback))
+		return fallback
 	var v: Variant = _lang_cur.get(key)
 	return String(v) if v != null else fallback
 

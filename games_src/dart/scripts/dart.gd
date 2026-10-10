@@ -615,7 +615,7 @@ func _setup_buttons() -> void:
 	# 容器统一等间距（8px）、按钮固定 56×56 底对齐、图标统一 32px 居中 —— 保证水平/垂直全对齐
 	_hbox = HBoxContainer.new()
 	_hbox.name = "TopButtons"
-	_hbox.add_theme_constant_override("separation", 8)
+	_hbox.add_theme_constant_override("separation", -8)
 	_hbox.process_mode = Node.PROCESS_MODE_ALWAYS   # 暂停中按钮仍可响应（鼠标悬停暂停游戏）
 	# 放大透明热区（ALWAYS）：准星晃动下鼠标实际位置常在按钮排矩形外，直接挂 HBox 的
 	# enter/exited 识别率很低（准星指到 ≠ 鼠标本体在按钮上）——热区比按钮排大一圈，
@@ -637,11 +637,19 @@ func _setup_buttons() -> void:
 	_bgm_btn = GameHud.make_button("")
 	_volume_btn = GameHud.make_button("")
 	_exit_btn.icon = hud.ui_icon("close.png")
+
+	# 最小化钮（关闭钮左侧）：点击最小化窗口（桌面 Win/Linux）
+	var min_btn := GameHud.make_button("")
+	min_btn.icon = hud.ui_icon("minimize.png")
+	min_btn.custom_minimum_size = Vector2(56.0, 56.0)
+	min_btn.size_flags_vertical = Control.SIZE_SHRINK_END
+	min_btn.add_theme_constant_override("icon_max_width", 32)
+	min_btn.pressed.connect(func() -> void: get_window().mode = Window.MODE_MINIMIZED)
 	_lb_btn.icon = hud.lb_icon()
 	_restart_btn.icon = hud.restart_icon()   # R 改循环箭头图标（同风格程序生成）
 	_bgm_btn.icon = hud.bgm_icon()
 	_volume_btn.icon = hud.volume_icon()
-	for b: Button in [_lb_btn, _bgm_btn, _volume_btn, _restart_btn, _exit_btn]:
+	for b: Button in [_lb_btn, _bgm_btn, _volume_btn, _restart_btn, min_btn, _exit_btn]:
 		_hbox.add_child(b)
 		b.custom_minimum_size = Vector2(56.0, 56.0)
 		b.size_flags_vertical = Control.SIZE_SHRINK_END   # 底部对齐

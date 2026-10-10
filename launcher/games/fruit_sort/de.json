@@ -1,0 +1,10 @@
+{
+	"game.name": "Obst-Sortieren",
+	"hud.best": "Rekord %d",
+	"hud.score": "Punkte %d",
+	"ui.close": "Schließen",
+	"ui.records_empty": "Noch keine Einträge",
+	"ui.top10": "Bestenliste",
+	"ui.upgrade": "Level Up!",
+	"ui.your_score": "Deine Punkte: %s"
+}

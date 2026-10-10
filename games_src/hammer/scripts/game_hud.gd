@@ -77,8 +77,43 @@ func _read_json_dict(path: String) -> Dictionary:
 	return data if data is Dictionary else {}
 
 
-## 取译文：当前语言字典 → 代码内兜底文案
+## —— 开发者模式文案（内置，不进外置语言文件）：中文 = zh_CN/zh_TW，其他语言用英文 ——
+const DEV_ZH := {
+	"dev.btn_life99": "生命 = 99",
+	"dev.tip_life99": "生命设为 99",
+	"dev.btn_life_up": "生命 +1",
+	"dev.tip_life_up": "增加 1 条生命",
+	"dev.btn_life_down": "生命 -1",
+	"dev.tip_life_down": "减少 1 条生命",
+	"dev.btn_big": "大锤",
+	"dev.tip_big": "立即激活大锤：打击范围 ×2，一击消灭任何害虫（持续 %d 秒）",
+	"dev.btn_dual": "双锤",
+	"dev.tip_dual": "立即激活双锤：副手锤增加第二个打击点（持续 %d 秒）",
+	"dev.btn_spray": "喷雾",
+	"dev.tip_spray": "立即激活杀虫喷雾：被喷到的害虫倒戈攻击同类（持续 %d 秒）",
+	"dev.btn_vacuum": "吸尘器",
+	"dev.tip_vacuum": "立即激活吸尘器：大范围吸走全部害虫（持续 %d 秒）",
+	"dev.btn_double": "双倍得分",
+	"dev.tip_double": "立即激活双倍得分：击杀得分 ×2（持续 %d 秒）",
+	"dev.btn_cat": "生成机器猫",
+	"dev.tip_cat": "立即生成一只机器猫：自动追捕最近的害虫",
+	"dev.btn_kill_all": "全部消灭",
+	"dev.tip_kill_all": "清空全场：所有害虫立即死亡，正常计分（含掉落）",
+	"dev.slider_speed": "害虫速度",
+	"dev.tip_speed": "害虫速度倍率（作用于新生成的害虫）",
+	"dev.slider_spawn": "生成频率",
+	"dev.tip_spawn": "生成间隔倍率（越小害虫生成越快）",
+	"dev.slider_drop": "道具掉率",
+	"dev.tip_drop": "道具掉落率（害虫被消灭后掉落道具的概率）",
+}
+
+## 取译文：dev.* 走内置双语（中文查 DEV_ZH，非中文用代码内英文兜底，不读外置 json）；
+## 其余：当前语言字典 → 代码内兜底文案
 func t(key: String, fallback: String) -> String:
+	if key.begins_with("dev."):
+		if lang.begins_with("zh"):
+			return String(DEV_ZH.get(key, fallback))
+		return fallback
 	var v: Variant = _lang_cur.get(key)
 	return String(v) if v != null else fallback
 

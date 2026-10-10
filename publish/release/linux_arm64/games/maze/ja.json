@@ -1,1 +1,20 @@
-{"game.name":"迷路","hud.level":"レベル %d","hud.time":"時間 %d","hud.score":"スコア %d","popup.win_title":"迷路クリア！","popup.win_msg":"レベル %d クリア、その調子！","popup.coins":"コイン +%d","popup.time_bonus":"時間ボーナス +%d","popup.total":"合計スコア %d","popup.best":"最高スコア %d","popup.next":"次のレベル","popup.replay":"もう一度","lb.title":"ランキング","ui.close":"閉じる","ui.records_empty":"記録はまだありません","ui.your_score":"あなたのスコア：%d","pig.escaped":"ブタが先に脱出した！","popup.pig_bonus":"ブタに勝って +%d","dev.prev":"前のレベル","dev.next":"次のレベル","dev.jump_lv":"移動先","dev.jump":"移動","dev.time":"時間+30","dev.tp":"出口へ転送"}
+{
+	"game.name": "迷路",
+	"hud.level": "レベル %d",
+	"hud.score": "スコア %d",
+	"hud.time": "時間 %d",
+	"lb.title": "ランキング",
+	"pig.escaped": "ブタが先に脱出した！",
+	"popup.best": "最高スコア %d",
+	"popup.coins": "コイン +%d",
+	"popup.next": "次のレベル",
+	"popup.pig_bonus": "ブタに勝って +%d",
+	"popup.replay": "もう一度",
+	"popup.time_bonus": "時間ボーナス +%d",
+	"popup.total": "合計スコア %d",
+	"popup.win_msg": "レベル %d クリア、その調子！",
+	"popup.win_title": "迷路クリア！",
+	"ui.close": "閉じる",
+	"ui.records_empty": "記録はまだありません",
+	"ui.your_score": "あなたのスコア：%d"
+}

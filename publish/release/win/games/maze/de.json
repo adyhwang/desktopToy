@@ -1,1 +1,20 @@
-{"game.name":"Labyrinth","hud.level":"Level %d","hud.time":"Zeit %d","hud.score":"Punkte %d","popup.win_title":"Labyrinth geschafft!","popup.win_msg":"Level %d geschafft, weiter so!","popup.coins":"Münzen +%d","popup.time_bonus":"Zeitbonus +%d","popup.total":"Gesamtpunkte %d","popup.best":"Bestwert %d","popup.next":"Nächstes Level","popup.replay":"Nochmal","lb.title":"Bestenliste","ui.close":"Schließen","ui.records_empty":"Noch keine Rekorde","ui.your_score":"Deine Punkte: %d","pig.escaped":"Das Schwein ist zuerst raus!","popup.pig_bonus":"Schwein geschlagen +%d","dev.prev":"Vorheriges Level","dev.next":"Nächstes Level","dev.jump_lv":"Zu Level","dev.jump":"Springen","dev.time":"Zeit +30","dev.tp":"Zum Ausgang"}
+{
+	"game.name": "Labyrinth",
+	"hud.level": "Level %d",
+	"hud.score": "Punkte %d",
+	"hud.time": "Zeit %d",
+	"lb.title": "Bestenliste",
+	"pig.escaped": "Das Schwein ist zuerst raus!",
+	"popup.best": "Bestwert %d",
+	"popup.coins": "Münzen +%d",
+	"popup.next": "Nächstes Level",
+	"popup.pig_bonus": "Schwein geschlagen +%d",
+	"popup.replay": "Nochmal",
+	"popup.time_bonus": "Zeitbonus +%d",
+	"popup.total": "Gesamtpunkte %d",
+	"popup.win_msg": "Level %d geschafft, weiter so!",
+	"popup.win_title": "Labyrinth geschafft!",
+	"ui.close": "Schließen",
+	"ui.records_empty": "Noch keine Rekorde",
+	"ui.your_score": "Deine Punkte: %d"
+}

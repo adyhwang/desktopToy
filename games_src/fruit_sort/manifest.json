@@ -1,0 +1,7 @@
+{
+	"id": "fruit_sort",
+	"name": "分拣水果",
+	"icon": "assets/icon.png",
+	"entry": "scenes/entry.tscn",
+	"version": "1.0.0"
+}

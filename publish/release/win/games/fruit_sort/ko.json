@@ -1,0 +1,10 @@
+{
+	"game.name": "과일 분류",
+	"hud.best": "최고 %d",
+	"hud.score": "점수 %d",
+	"ui.close": "닫기",
+	"ui.records_empty": "기록이 없습니다",
+	"ui.top10": "순위표",
+	"ui.upgrade": "레벨 업!",
+	"ui.your_score": "점수: %s"
+}

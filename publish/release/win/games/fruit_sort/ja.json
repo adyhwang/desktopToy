@@ -1,0 +1,10 @@
+{
+	"game.name": "フルーツソート",
+	"hud.best": "最高 %d",
+	"hud.score": "スコア %d",
+	"ui.close": "閉じる",
+	"ui.records_empty": "記録はまだありません",
+	"ui.top10": "ランキング",
+	"ui.upgrade": "レベルアップ！",
+	"ui.your_score": "スコア：%s"
+}

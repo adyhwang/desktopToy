@@ -1,0 +1,10 @@
+{
+	"game.name": "分拣水果",
+	"hud.best": "最高 %d",
+	"hud.score": "得分 %d",
+	"ui.close": "关闭",
+	"ui.records_empty": "暂无记录",
+	"ui.top10": "高分榜",
+	"ui.upgrade": "难度提升！",
+	"ui.your_score": "你的成绩：%s"
+}

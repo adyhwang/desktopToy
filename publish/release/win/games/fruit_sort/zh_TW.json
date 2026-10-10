@@ -1,0 +1,10 @@
+{
+	"game.name": "分揀水果",
+	"hud.best": "最高 %d",
+	"hud.score": "得分 %d",
+	"ui.close": "關閉",
+	"ui.records_empty": "暫無記錄",
+	"ui.top10": "高分榜",
+	"ui.upgrade": "難度提升！",
+	"ui.your_score": "你的成績：%s"
+}

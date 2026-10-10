@@ -1,16 +1,12 @@
 {
+	"bd.best": "최장",
+	"bd.level": "스테이지 %s",
+	"bd.next": "다음 스테이지",
+	"bd.time": "시간",
+	"bd.win_title": "탈출 성공!",
 	"game.name": "어항 탈출",
 	"ui.close": "닫기",
 	"ui.records_empty": "기록이 없습니다",
-	"ui.your_score": "점수: %s",
 	"ui.top10": "순위표",
-	"bd.time": "시간",
-	"bd.best": "최장",
-	"bd.win_title": "탈출 성공!",
-	"bd.level": "스테이지 %s",
-	"bd.next": "다음 스테이지",
-	"dev.time": "+60초",
-	"dev.raise": "한 칸 쌓기",
-	"dev.win": "즉시 탈출",
-	"dev.clear": "블록 지우기"
+	"ui.your_score": "점수: %s"
 }

@@ -1,1 +1,20 @@
-{"game.name":"Maze","hud.level":"Level %d","hud.time":"Time %d","hud.score":"Score %d","popup.win_title":"Maze Cleared!","popup.win_msg":"Level %d cleared. Keep going!","popup.coins":"Coins +%d","popup.time_bonus":"Time bonus +%d","popup.total":"Total score %d","popup.best":"Best %d","popup.next":"Next Level","popup.replay":"Replay","lb.title":"Leaderboard","ui.close":"Close","ui.records_empty":"No records yet","ui.your_score":"Your score: %d","pig.escaped":"The pig got out first!","popup.pig_bonus":"Beat the pig +%d","dev.prev":"Prev Level","dev.next":"Next Level","dev.jump_lv":"Jump to","dev.jump":"Jump","dev.time":"Time +30","dev.tp":"To Exit"}
+{
+	"game.name": "Maze",
+	"hud.level": "Level %d",
+	"hud.score": "Score %d",
+	"hud.time": "Time %d",
+	"lb.title": "Leaderboard",
+	"pig.escaped": "The pig got out first!",
+	"popup.best": "Best %d",
+	"popup.coins": "Coins +%d",
+	"popup.next": "Next Level",
+	"popup.pig_bonus": "Beat the pig +%d",
+	"popup.replay": "Replay",
+	"popup.time_bonus": "Time bonus +%d",
+	"popup.total": "Total score %d",
+	"popup.win_msg": "Level %d cleared. Keep going!",
+	"popup.win_title": "Maze Cleared!",
+	"ui.close": "Close",
+	"ui.records_empty": "No records yet",
+	"ui.your_score": "Your score: %d"
+}

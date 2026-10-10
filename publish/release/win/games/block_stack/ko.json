@@ -1,1 +1,11 @@
-{"game.name":"블록 쌓기","hud.height":"높이 %s","hud.score":"점수 %d","lb.title":"순위표","ui.close":"닫기","ui.records_empty":"기록 없음","ui.your_score":"내 점수: %d","fx.perfect":"완벽해요! +%d","fx.good":"잘했어요! +%d","dev.raise":"5m 올리기","dev.next":"다음 블록","dev.score":"점수+100","dev.clear":"쌓기 지우기"}
+{
+	"fx.good": "잘했어요! +%d",
+	"fx.perfect": "완벽해요! +%d",
+	"game.name": "블록 쌓기",
+	"hud.height": "높이 %s",
+	"hud.score": "점수 %d",
+	"lb.title": "순위표",
+	"ui.close": "닫기",
+	"ui.records_empty": "기록 없음",
+	"ui.your_score": "내 점수: %d"
+}

@@ -54,6 +54,9 @@ const COL_SKY := Color(0.62, 0.85, 0.95)
 const COL_SUN := Color(1.0, 0.84, 0.35)
 const COL_SUN_RAY := Color(1.0, 0.72, 0.30)
 const COL_CLOUD := Color(1, 1, 1)
+const COL_ZEP := Color(0.92, 0.45, 0.40)        # 飞艇气囊（珊瑚红）
+const COL_ZEP_HI := Color(0.98, 0.68, 0.60)     # 飞艇气囊高光
+const COL_ZEP_DARK := Color(0.72, 0.32, 0.30)   # 飞艇尾鳍/吊舱
 const COL_GRASS := Color(0.49, 0.76, 0.31)
 const COL_GRASS_L := Color(0.56, 0.82, 0.36)
 const COL_HILL := Color(0.60, 0.80, 0.42)
@@ -117,7 +120,7 @@ const BALLOON_COLS := [Color(0.90,0.40,0.40), Color(0.35,0.65,0.85), Color(0.95,
 const RATE_KEYS := ["ps.rating_fail", "ps.rating_good", "ps.rating_great", "ps.rating_perfect"]
 const RATE_COLS := [COL_R_FAIL, COL_R_GOOD, COL_R_GREAT, COL_R_PERFECT]
 const RATE_SCORES := [0, SCORE_GOOD, SCORE_GREAT, SCORE_PERFECT]
-const LANDMARKS := ["banyan", "tree", "bench", "kiosk", "lamp", "bed", "slide", "swing", "bin", "sign", "stone", "sun",
+const LANDMARKS := ["banyan", "tree", "bench", "kiosk", "lamp", "bed", "slide", "swing", "bin", "sign", "stone", "sun", "zeppelin",
 		"seesaw", "sandbox", "stall", "barrel", "umbrella", "stump", "log", "lake", "willow", "bridge", "fountain"]
 
 ## 目标图记录：一次拍照判定的全部依据（区域 + 逐元素快照）
@@ -622,8 +625,8 @@ func _mk_market(ox: float) -> void:
 	loop_b.append(ver[0])
 	_add_path(loop_b, 120.0)
 	var pb := _paths.size() - 1
-	# 太阳 / 山丘
-	_statics.append({"kind": "sun", "pos": Vector2(ox + 3600, 170), "rad": 150.0})
+	# 飞艇 / 山丘
+	_statics.append({"kind": "zeppelin", "pos": Vector2(ox + 3600, 170), "rad": 150.0})
 	for h in [[600, 48, 540, 85], [2100, 44, 600, 105], [3600, 50, 560, 95]]:
 		_hills.append({"pos": Vector2(ox + h[0], SKY_H + h[1]), "rx": h[2], "ry": h[3], "rad": h[2] + 30.0})
 	# 静态：售货亭 + 花坛四 + 长椅四 + 摊位/木桶/遮阳伞（无榕树无游乐设施）
@@ -688,8 +691,8 @@ func _mk_wild(ox: float) -> void:
 	sn.append(sn[0])
 	_add_path(sn, 130.0)
 	var pa := _paths.size() - 1
-	# 太阳 / 山丘
-	_statics.append({"kind": "sun", "pos": Vector2(ox + 2000, 160), "rad": 150.0})
+	# 飞艇 / 山丘
+	_statics.append({"kind": "zeppelin", "pos": Vector2(ox + 2000, 160), "rad": 150.0})
 	for h in [[1200, 46, 560, 95], [2600, 50, 620, 100], [3900, 42, 520, 85]]:
 		_hills.append({"pos": Vector2(ox + h[0], SKY_H + h[1]), "rx": h[2], "ry": h[3], "rad": h[2] + 30.0})
 	# 静态：密树八棵 + 树桩/枯木/蘑菇（无售货亭无游乐设施）
@@ -759,8 +762,8 @@ func _mk_lakeside(ox: float) -> void:
 	loop.append(fwd[0])
 	_add_path(loop, 140.0)
 	var pa := _paths.size() - 1
-	# 太阳 / 山丘
-	_statics.append({"kind": "sun", "pos": Vector2(ox + 1400, 170), "rad": 150.0})
+	# 飞艇 / 山丘
+	_statics.append({"kind": "zeppelin", "pos": Vector2(ox + 1400, 170), "rad": 150.0})
 	for h in [[800, 48, 560, 90], [2200, 44, 600, 100], [3600, 46, 540, 88]]:
 		_hills.append({"pos": Vector2(ox + h[0], SKY_H + h[1]), "rx": h[2], "ry": h[3], "rad": h[2] + 30.0})
 	# 大湖（先入列先绘制，桥/荷叶/芦苇/水禽盖其上）
@@ -1116,7 +1119,7 @@ func _on_volume() -> void:
 func _setup_buttons() -> void:
 	_hbox = HBoxContainer.new()
 	_hbox.name = "TopButtons"
-	_hbox.add_theme_constant_override("separation", 8)
+	_hbox.add_theme_constant_override("separation", -8)
 	add_child(_hbox)
 	_hbox.process_mode = Node.PROCESS_MODE_ALWAYS
 	var old_parent := _exit_btn.get_parent()
@@ -1128,11 +1131,19 @@ func _setup_buttons() -> void:
 	_bgm_btn = GameHud.make_button("")
 	_volume_btn = GameHud.make_button("")
 	_exit_btn.icon = hud.ui_icon("close.png")
+
+	# 最小化钮（关闭钮左侧）：点击最小化窗口（桌面 Win/Linux）
+	var min_btn := GameHud.make_button("")
+	min_btn.icon = hud.ui_icon("minimize.png")
+	min_btn.custom_minimum_size = Vector2(56.0, 56.0)
+	min_btn.size_flags_vertical = Control.SIZE_SHRINK_END
+	min_btn.add_theme_constant_override("icon_max_width", 32)
+	min_btn.pressed.connect(func() -> void: get_window().mode = Window.MODE_MINIMIZED)
 	_lb_btn.icon = hud.lb_icon()
 	_restart_btn.icon = hud.restart_icon()
 	_bgm_btn.icon = hud.bgm_icon()
 	_volume_btn.icon = hud.volume_icon()
-	for b: Button in [_lb_btn, _bgm_btn, _volume_btn, _restart_btn, _exit_btn]:
+	for b: Button in [_lb_btn, _bgm_btn, _volume_btn, _restart_btn, min_btn, _exit_btn]:
 		_hbox.add_child(b)
 		b.custom_minimum_size = Vector2(56.0, 56.0)
 		b.size_flags_vertical = Control.SIZE_SHRINK_END
@@ -1324,6 +1335,7 @@ func _draw_scene(p: Painter) -> void:
 			continue
 		match e.kind:
 			"sun": _d_sun(p, e.pos)
+			"zeppelin": _d_zeppelin(p, e.pos)
 			"banyan": _d_banyan(p, e)
 			"tree": _d_tree(p, e)
 			"bush": _d_bush(p, e)
@@ -1442,6 +1454,31 @@ func _d_sun(p: Painter, c: Vector2) -> void:
 		var a := TAU * i / 10.0
 		p.draw_line(c + Vector2.from_angle(a) * 86.0, c + Vector2.from_angle(a) * 116.0, COL_SUN_RAY, 7.0, true)
 	_circ(p, c, 62.0, COL_SUN)
+
+
+## 飞艇：椭圆气囊（珊瑚红+高光条）+ 上下尾鳍 + 吊舱（扁平卡通，同场景画风）
+func _d_zeppelin(p: Painter, c: Vector2) -> void:
+	var bag := PackedVector2Array()
+	for i in 28:
+		var a := TAU * i / 28.0
+		bag.append(c + Vector2(cos(a) * 96.0, sin(a) * 38.0))
+	p.draw_colored_polygon(bag, COL_ZEP)
+	var hi := PackedVector2Array()
+	for i in 20:
+		var a := TAU * i / 20.0
+		hi.append(c + Vector2(-14.0, -14.0) + Vector2(cos(a) * 52.0, sin(a) * 12.0))
+	p.draw_colored_polygon(hi, COL_ZEP_HI)   # 气囊左上高光
+	# 尾鳍（右端上下各一片）
+	p.draw_colored_polygon(PackedVector2Array([c + Vector2(70.0, -12.0), c + Vector2(118.0, -40.0),
+			c + Vector2(96.0, 6.0)]), COL_ZEP_DARK)
+	p.draw_colored_polygon(PackedVector2Array([c + Vector2(70.0, 12.0), c + Vector2(118.0, 40.0),
+			c + Vector2(96.0, -6.0)]), COL_ZEP_DARK)
+	# 吊索 + 吊舱
+	p.draw_line(c + Vector2(-16.0, 34.0), c + Vector2(-16.0, 46.0), COL_ZEP_DARK, 3.0, true)
+	p.draw_line(c + Vector2(16.0, 34.0), c + Vector2(16.0, 46.0), COL_ZEP_DARK, 3.0, true)
+	_rr(p, Rect2(c + Vector2(-26.0, 44.0), Vector2(52.0, 24.0)), 8.0, COL_ZEP_DARK)
+	p.draw_circle(c + Vector2(-14.0, 56.0), 4.0, COL_ZEP_HI)
+	p.draw_circle(c + Vector2(14.0, 56.0), 4.0, COL_ZEP_HI)
 
 
 func _d_cloud(p: Painter, pos: Vector2, s: float) -> void:

@@ -77,8 +77,33 @@ func _read_json_dict(path: String) -> Dictionary:
 	return data if data is Dictionary else {}
 
 
-## 取译文：当前语言字典 → 代码内兜底文案
+## —— 开发者模式文案（内置，不进外置语言文件）：中文 = zh_CN/zh_TW，其他语言用英文 ——
+const DEV_ZH := {
+	"dev.next_level": "下一关",
+	"dev.tip_next_level": "立即完成本关救援目标并进入下一关",
+	"dev.chance_up": "机会 +1",
+	"dev.tip_chance_up": "增加 1 次剩余机会",
+	"dev.chance_full": "机会 = 3",
+	"dev.tip_chance_full": "恢复剩余机会为 3",
+	"dev.stock_down": "股市 -10",
+	"dev.tip_stock_down": "股市立即下跌 10 点",
+	"dev.spawn_now": "立即出现",
+	"dev.tip_spawn_now": "跳过当前进楼延迟，立即前进",
+	"dev.cushion": "救生气垫长度",
+	"dev.tip_cushion": "救生气垫长度倍率",
+	"dev.queue": "排队人数",
+	"dev.tip_queue": "额外排队人数（在关卡目标基础上追加）",
+	"dev.fall_speed": "下落速度",
+	"dev.tip_fall_speed": "下落速度倍率（重力；跳跃轨迹求解同样受影响）",
+}
+
+## 取译文：dev.* 走内置双语（中文查 DEV_ZH，非中文用代码内英文兜底，不读外置 json）；
+## 其余：当前语言字典 → 代码内兜底文案
 func t(key: String, fallback: String) -> String:
+	if key.begins_with("dev."):
+		if lang.begins_with("zh"):
+			return String(DEV_ZH.get(key, fallback))
+		return fallback
 	var v: Variant = _lang_cur.get(key)
 	return String(v) if v != null else fallback
 

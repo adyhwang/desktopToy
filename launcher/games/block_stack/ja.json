@@ -1,1 +1,11 @@
-{"game.name":"ブロック積み","hud.height":"高さ %s","hud.score":"スコア %d","lb.title":"ランキング","ui.close":"閉じる","ui.records_empty":"記録なし","ui.your_score":"あなたのスコア: %d","fx.perfect":"パーフェクト！+%d","fx.good":"いいね！+%d","dev.raise":"5m持ち上げ","dev.next":"次のブロック","dev.score":"スコア+100","dev.clear":"積みを消す"}
+{
+	"fx.good": "いいね！+%d",
+	"fx.perfect": "パーフェクト！+%d",
+	"game.name": "ブロック積み",
+	"hud.height": "高さ %s",
+	"hud.score": "スコア %d",
+	"lb.title": "ランキング",
+	"ui.close": "閉じる",
+	"ui.records_empty": "記録なし",
+	"ui.your_score": "あなたのスコア: %d"
+}

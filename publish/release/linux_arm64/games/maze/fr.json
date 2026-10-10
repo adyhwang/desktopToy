@@ -1,1 +1,20 @@
-{"game.name":"Labyrinthe","hud.level":"Niveau %d","hud.time":"Temps %d","hud.score":"Score %d","popup.win_title":"Labyrinthe terminé !","popup.win_msg":"Niveau %d terminé, continuez comme ça !","popup.coins":"Pièces +%d","popup.time_bonus":"Bonus de temps +%d","popup.total":"Score total %d","popup.best":"Meilleur score %d","popup.next":"Niveau suivant","popup.replay":"Rejouer","lb.title":"Classement","ui.close":"Fermer","ui.records_empty":"Aucun record pour le moment","ui.your_score":"Votre score : %d","pig.escaped":"Le cochon est sorti premier !","popup.pig_bonus":"Cochon battu +%d","dev.prev":"Niveau précédent","dev.next":"Niveau suivant","dev.jump_lv":"Aller au","dev.jump":"Aller","dev.time":"Temps +30","dev.tp":"À la sortie"}
+{
+	"game.name": "Labyrinthe",
+	"hud.level": "Niveau %d",
+	"hud.score": "Score %d",
+	"hud.time": "Temps %d",
+	"lb.title": "Classement",
+	"pig.escaped": "Le cochon est sorti premier !",
+	"popup.best": "Meilleur score %d",
+	"popup.coins": "Pièces +%d",
+	"popup.next": "Niveau suivant",
+	"popup.pig_bonus": "Cochon battu +%d",
+	"popup.replay": "Rejouer",
+	"popup.time_bonus": "Bonus de temps +%d",
+	"popup.total": "Score total %d",
+	"popup.win_msg": "Niveau %d terminé, continuez comme ça !",
+	"popup.win_title": "Labyrinthe terminé !",
+	"ui.close": "Fermer",
+	"ui.records_empty": "Aucun record pour le moment",
+	"ui.your_score": "Votre score : %d"
+}

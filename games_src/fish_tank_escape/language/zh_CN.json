@@ -1,16 +1,12 @@
 {
+	"bd.best": "最长",
+	"bd.level": "第 %s 关",
+	"bd.next": "下一关",
+	"bd.time": "时间",
+	"bd.win_title": "逃生成功！",
 	"game.name": "鱼缸逃生",
 	"ui.close": "关闭",
 	"ui.records_empty": "暂无记录",
-	"ui.your_score": "你的成绩：%s",
 	"ui.top10": "高分榜",
-	"bd.time": "时间",
-	"bd.best": "最长",
-	"bd.win_title": "逃生成功！",
-	"bd.level": "第 %s 关",
-	"bd.next": "下一关",
-	"dev.time": "时间+60",
-	"dev.raise": "垫高一格",
-	"dev.win": "立即逃生",
-	"dev.clear": "清空方块"
+	"ui.your_score": "你的成绩：%s"
 }
