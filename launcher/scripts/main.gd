@@ -118,6 +118,8 @@ func _setup_transparent_window() -> void:
 ## 正常时透出真实桌面/视频，25 点全黑概率极低）。纯黑壁纸/黑屏保护会误判，代价仅是把
 ## "几乎一样的真实画面"换成快照，视觉无害。采样失败（Wayland 等）不降级——宁透明勿误伤
 func _self_check_transparent() -> void:
+	if _fallback_active:
+		return   # 已降级：BgLayer 恒可见不透明，无需再采样
 	await get_tree().create_timer(0.6).timeout
 	var img := DisplayServer.screen_get_image(0)
 	if img == null or img.is_empty():
@@ -287,6 +289,8 @@ func _process(delta: float) -> void:
 		var minimized := get_window().mode == Window.MODE_MINIMIZED
 		if minimized and not _was_minimized:
 			_recap_t = 0.8   # 刚最小化：等任务栏/合成器动画结束再首拍
+		elif not minimized and _was_minimized:
+			_on_window_restored()   # Windows 透明窗恢复后 DWM 可能停合成 alpha（整窗黑），重放透明
 		_was_minimized = minimized
 		if minimized:
 			_recap_t -= delta
@@ -304,6 +308,33 @@ func _refresh_desktop_snapshot() -> void:
 	if tex != null and get_window().mode == Window.MODE_MINIMIZED:
 		_desktop_tex = tex
 		apply_background_settings()   # 自定义背景关闭时立即透出新快照
+
+
+## ===== 恢复后透明重放 =====
+## Windows 已知问题：无框透明窗口最小化→恢复后，DWM 可能不再合成窗口 alpha（整窗变不透明黑；
+## BgLayer 此时隐藏，视觉即"黑屏、无透明、无快照"）。恢复时把 transparent 标志关→开，
+## 触发 DisplayServer 重建窗口样式与 DWM 关联；随后异步重跑黑屏自检——
+## 重放仍无效则自动降级快照背景，保证恢复后永不出纯黑窗
+func _on_window_restored() -> void:
+	await get_tree().create_timer(0.2).timeout   # 等恢复动画/DWM 稳定后再重放
+	_reapply_transparent_window()
+	if not _custom_bg_enabled():
+		_self_check_transparent()   # 0.6s 后采样；仍黑则降级快照
+
+
+func _reapply_transparent_window() -> void:
+	var win := get_window()
+	if win == null:
+		return
+	win.borderless = true
+	# 关→开各触发一次窗口样式/DWM 重应用（值未变直接设 true 会被跳过）
+	win.transparent = false
+	win.transparent = true
+	var vp := get_viewport()
+	if vp:
+		vp.transparent_bg = true
+		RenderingServer.viewport_set_transparent_background(vp.get_viewport_rid(), true)
+	DisplayServer.window_set_flag(DisplayServer.WINDOW_FLAG_TRANSPARENT, true, win.get_window_id())
 
 
 ## ===== 右下角进度浮字 =====
