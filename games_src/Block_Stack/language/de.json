@@ -6,6 +6,7 @@
 	"hud.score": "Punkte %d",
 	"lb.title": "Bestenliste",
 	"ui.close": "Schließen",
+	"ui.merging": "Statische Blöcke werden zusammengefügt...",
 	"ui.records_empty": "Noch keine Rekorde",
 	"ui.your_score": "Dein Ergebnis: %d"
 }

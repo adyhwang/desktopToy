@@ -8,7 +8,8 @@ extends "res://scripts/game_base.gd"  # 打包时自动改写为包前缀路径
 ## 高度：1 米 = 64px（2 格）；左侧垂直米尺标注堆叠高度 + 本局最佳金色旗标
 ## 物理：真实刚体重力/碰撞/倾倒，倾斜堆叠自然物理表现
 ## 开发者模式：排行榜面板 5 秒内点满 10 次 → 关闭后弹出 DEV 窗口（抬高5米/指定下一个方块/+100分/清空堆叠），
-## 性能：堆叠每升高 4 米，把该线以下已静止方块合并为静态刚体；镜头只随最高点向上平移（可缓慢回落），
+## 性能：堆叠每升高 10 米触发底层合并——先等全部方块静止（期间禁下放、冻结未碰撞方块、
+##       心跳声+浮字提醒），再合并该线以下方块为静态刚体；镜头只随最高点向上平移（可缓慢回落），
 ##       不缩放画面；落到可视范围下方的方块不再渲染
 ## 存档：复用 GameHud（排行榜分值 = 得分，附到达高度米数），最高分即时刷新，stop 时提交入榜
 ##       DEV 窗口常驻可拖动，浮于排行榜之上（z_index 250）
@@ -34,6 +35,11 @@ const SCORE_GOOD := 20         # 较好对齐奖励
 const SCORE_PERFECT := 50      # 精准对齐奖励
 const HEIGHT_BONUS := 2        # 落地时每 1 米高度附加分
 const MERGE_EVERY_M := 10     # 每升高 10 米触发一次底层合并
+const MERGE_HINT_EVERY := 1.4  # 合并等待期浮字提醒间隔（秒）
+const MERGE_STILL_VEL := 14.0  # 合并等待的静止判定速度阈值（比计分阈值严，消除可见抖动）
+const MERGE_STILL_ANG := 0.5   # 合并等待的静止判定角速度阈值（rad/s）
+const MERGE_STILL_TIME := 0.5  # 全部方块持续静止时长（秒）才允许合并（防速度波动混过单帧检查）
+const MERGE_WAIT_MAX := 8.0    # 合并等待最长时长（秒），超时定住抖动块强制合并防卡死
 const LOST_AFTER := 1.0        # 掉出屏幕/平台的方块 1 秒后销毁
 const STILL_VEL := 40.0        # 判定静止的速度阈值
 const STILL_ANG := 1.2         # 判定静止的角速度阈值
@@ -127,8 +133,13 @@ var ghost_pos := Vector2.ZERO
 var score := 0
 var height_m := 0.0
 var run_max_m := 0.0
-var milestone := 0             # 已触发的 4m 合并段数
+var milestone := 0             # 已触发的 10m 合并段数
 var _ms5_shown := 0            # 已提示过的 5m 里程碑
+var _merge_wait := false       # 合并等待中：等全部方块静止再合并（期间禁下放+心跳+浮字）
+var _merge_line := 0.0         # 本次待合并的分界线（世界 Y）
+var _merge_hint_t := 0.0       # 上次浮字提醒时刻
+var _merge_still_from := -1.0  # 全部方块开始持续静止的时刻（-1 = 有方块在动）
+var _merge_wait_t0 := 0.0      # 等待开始时刻（超时兜底用）
 
 # ===== 特效 =====
 var flashes: Array = []        # {pos, rot, size, t0, life, col}
@@ -152,6 +163,7 @@ var _volume_btn: Button
 var _sfx := {}
 var _sfx_players: Array = []
 var _bgm: AudioStreamPlayer
+var _heart_ap: AudioStreamPlayer   # 心跳声（合并等待期循环播放，程序化合成）
 
 # ===== 开发者模式（排行榜面板暗门：5 秒点满 10 次 → 关闭后弹出 DEV 窗口）=====
 var _dev_pending := false
@@ -202,6 +214,7 @@ func stop() -> void:
 	get_tree().paused = false
 	if _bgm != null:
 		_bgm.stop()
+	_stop_heartbeat()
 	hud.commit_score(int(round(run_max_m * 10.0)))   # 本局得分 + 最高堆叠高度（分米）入排行榜
 	print("[block_stack] stop, score=%d max_height=%.1fm" % [score, run_max_m])
 
@@ -278,7 +291,7 @@ func _spawn_held() -> void:
 
 
 func _drop_held() -> void:
-	if not held_active:
+	if not held_active or _merge_wait:   # 合并等待期禁止下放
 		return
 	held_active = false
 	held_spr.visible = false
@@ -522,21 +535,96 @@ func _tick_height() -> void:
 		_ms5_shown = ms5
 		floats.append({"pos": Vector2(platform_cx, top - 60.0), "text": "%d m" % (ms5 * 5),
 				"t0": _t, "life": 1.1, "col": COL_BEST, "fsize": 44})
-	# 堆叠达到阈值：该线以下已静止方块合并为静态刚体（减少刚体数量）
+	# 堆叠达到阈值：先等全部方块静止（禁下放+心跳+浮字），再合并为静态刚体
+	if _merge_wait:
+		_tick_merge_wait()
+		return
 	var ms := int(height_m / MERGE_EVERY_M)
 	if ms > milestone:
 		milestone = ms
-		_merge_below(base_top_y - ms * MERGE_EVERY_M * px_per_m)
+		_begin_merge_wait(base_top_y - ms * MERGE_EVERY_M * px_per_m)
+
+
+## 合并等待开始：冻结未碰撞任何物体的方块（含下落中）保持原地，心跳+浮字提醒
+func _begin_merge_wait(line_y: float) -> void:
+	_merge_wait = true
+	_merge_line = line_y
+	_merge_still_from = -1.0
+	_merge_wait_t0 = _t
+	for b: Dictionary in blocks:
+		if not is_instance_valid(b.body) or b.lost_at >= 0.0 or b.contact_t >= 0.0:
+			continue
+		var body: RigidBody2D = b.body
+		body.linear_velocity = Vector2.ZERO
+		body.angular_velocity = 0.0
+		body.freeze = true
+	_spawn_merge_hint()
+	if _heart_ap != null:
+		_heart_ap.play()
+
+
+## 合并等待期浮字提醒（固定屏幕上部位置，周期性刷新）
+func _spawn_merge_hint() -> void:
+	_merge_hint_t = _t
+	floats.append({"pos": Vector2(platform_cx, cam.position.y - _vp.y * 0.5 + HUD_H + 90.0),
+			"text": hud.t("ui.merging", "Merging static blocks..."),
+			"t0": _t, "life": 1.3, "col": COL_BEST, "fsize": 36})
+
+
+## 等待期：维持浮字节奏；全部已接触方块持续静止达标（或超时兜底）→ 执行合并并恢复
+func _tick_merge_wait() -> void:
+	if _t - _merge_hint_t >= MERGE_HINT_EVERY:
+		_spawn_merge_hint()
+	var all_still := true
+	for b: Dictionary in blocks:
+		if not is_instance_valid(b.body) or b.lost_at >= 0.0 or b.contact_t < 0.0:
+			continue   # 冻结的未碰撞方块视为静止
+		var body: RigidBody2D = b.body
+		if body.linear_velocity.length() > MERGE_STILL_VEL or absf(body.angular_velocity) > MERGE_STILL_ANG:
+			all_still = false
+			break
+	if all_still:
+		if _merge_still_from < 0.0:
+			_merge_still_from = _t
+	elif _merge_still_from >= 0.0:
+		_merge_still_from = -1.0   # 有方块在抖，持续静止计时清零重来
+	# 持续静止达标；或超时兜底：把合并线以下的抖动块原地定住再合并（防缓慢蠕动卡死下放）
+	if (_merge_still_from >= 0.0 and _t - _merge_still_from >= MERGE_STILL_TIME) \
+			or _t - _merge_wait_t0 > MERGE_WAIT_MAX:
+		for b: Dictionary in blocks:
+			if not is_instance_valid(b.body) or b.lost_at >= 0.0 or b.contact_t < 0.0:
+				continue
+			if _block_top_y(b) < _merge_line:
+				continue   # 只定住合并线以下的（线上方活跃块保持物理活动）
+			b.body.linear_velocity = Vector2.ZERO
+			b.body.angular_velocity = 0.0
+		_finish_merge_wait()
+
+
+## 合并完成：该线以下静止方块转静态，解冻未碰撞方块继续下落，恢复下放
+func _finish_merge_wait() -> void:
+	_merge_wait = false
+	_stop_heartbeat()
+	_merge_below(_merge_line)
+	for b: Dictionary in blocks:
+		if not is_instance_valid(b.body) or b.contact_t >= 0.0:
+			continue
+		var body: RigidBody2D = b.body
+		body.freeze = false
+		body.linear_velocity = Vector2(0, 160)   # 与 _drop_held 一致的初速
 
 
 ## 把 merge_line 以下（top_y 更大）已静止的方块转为静态刚体，贴图保留
+## 仅在合并等待结束（全部方块静止）后调用
 func _merge_below(line_y: float) -> void:
 	var margin := 30.0
 	for b: Dictionary in blocks:
 		if not is_instance_valid(b.body) or b.lost_at >= 0.0:
 			continue
 		var body: RigidBody2D = b.body
-		if not b.scored or body.linear_velocity.length() > STILL_VEL:
+		if b.contact_t < 0.0:   # 未碰撞的冻结方块不参与合并
+			continue
+		if body.linear_velocity.length() > MERGE_STILL_VEL or absf(body.angular_velocity) > MERGE_STILL_ANG:
 			continue
 		if _block_top_y(b) < line_y + margin:
 			continue
@@ -827,6 +915,8 @@ func _reset_run() -> void:
 	height_m = 0.0
 	run_max_m = 0.0
 	milestone = 0
+	_merge_wait = false
+	_stop_heartbeat()
 	_ms5_shown = 0
 	shake_amp = 0.0
 	hud.reset_run()
@@ -1042,6 +1132,8 @@ func _dev_clear_stack() -> void:
 	floats.clear()
 	dusts.clear()
 	milestone = 0
+	_merge_wait = false
+	_stop_heartbeat()
 	_ms5_shown = 0
 	height_m = 0.0
 	shake_amp = 0.0
@@ -1138,6 +1230,12 @@ func _init_sfx() -> void:
 	add_child(_bgm)
 	if hud.bgm_on:
 		_bgm.play()
+	# 心跳声（程序化合成，合并等待期循环播放）
+	_heart_ap = AudioStreamPlayer.new()
+	_heart_ap.stream = _make_heartbeat()
+	_heart_ap.volume_db = -8.0
+	_heart_ap.process_mode = Node.PROCESS_MODE_ALWAYS
+	add_child(_heart_ap)
 
 
 func _load_sfx(sname: String) -> AudioStream:
@@ -1166,3 +1264,34 @@ func _play_sfx(sname: String, pitch: float = 1.0) -> void:
 			ap.volume_db = SFX_DB
 			ap.play()
 			return
+
+
+func _stop_heartbeat() -> void:
+	if _heart_ap != null:
+		_heart_ap.stop()
+
+
+## 程序化合成心跳音："咚-咚" 双低频脉冲（约 55bpm），循环播放
+func _make_heartbeat() -> AudioStreamWAV:
+	var rate := 22050
+	var dur := 1.1
+	var n := int(rate * dur)
+	var bytes := PackedByteArray()
+	bytes.resize(n * 2)
+	for pulse: Array in [[0.0, 0.18, 1.0], [0.26, 0.14, 0.65]]:   # [起始秒, 时长秒, 音量]
+		var start := int(pulse[0] * rate)
+		var plen := int(pulse[1] * rate)
+		var amp: float = pulse[2]
+		for i in range(start, mini(start + plen, n)):
+			var k := float(i - start) / float(plen)
+			var s := sin(TAU * 58.0 * float(i - start) / rate) * (1.0 - k) * (1.0 - k)
+			bytes.encode_s16(i * 2, int(clampf(s * amp * 0.85, -1.0, 1.0) * 32000.0))
+	var wav := AudioStreamWAV.new()
+	wav.format = AudioStreamWAV.FORMAT_16_BITS
+	wav.mix_rate = rate
+	wav.stereo = false
+	wav.data = bytes
+	wav.loop_mode = AudioStreamWAV.LOOP_FORWARD
+	wav.loop_begin = 0
+	wav.loop_end = n
+	return wav
