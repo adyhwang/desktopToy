@@ -6,6 +6,7 @@
 	"hud.score": "スコア %d",
 	"lb.title": "ランキング",
 	"ui.close": "閉じる",
+	"ui.merging": "静的ブロックを合图中…",
 	"ui.records_empty": "記録なし",
 	"ui.your_score": "あなたのスコア: %d"
 }

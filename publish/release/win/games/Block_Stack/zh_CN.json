@@ -6,6 +6,7 @@
 	"hud.score": "得分 %d",
 	"lb.title": "排行榜",
 	"ui.close": "关闭",
+	"ui.merging": "正在合并静态方块…",
 	"ui.records_empty": "暂无记录",
 	"ui.your_score": "你的成绩：%d"
 }

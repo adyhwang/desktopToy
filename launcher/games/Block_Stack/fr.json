@@ -6,6 +6,7 @@
 	"hud.score": "Score %d",
 	"lb.title": "Classement",
 	"ui.close": "Fermer",
+	"ui.merging": "Fusion des blocs fixes...",
 	"ui.records_empty": "Aucun record",
 	"ui.your_score": "Votre score : %d"
 }

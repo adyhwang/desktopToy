@@ -6,6 +6,7 @@
 	"hud.score": "Puntos %d",
 	"lb.title": "Clasificación",
 	"ui.close": "Cerrar",
+	"ui.merging": "Fusionando bloques estáticos...",
 	"ui.records_empty": "Sin récords",
 	"ui.your_score": "Tu puntuación: %d"
 }

@@ -6,6 +6,7 @@
 	"hud.score": "점수 %d",
 	"lb.title": "순위표",
 	"ui.close": "닫기",
+	"ui.merging": "고정 블록 병합 중...",
 	"ui.records_empty": "기록 없음",
 	"ui.your_score": "내 점수: %d"
 }

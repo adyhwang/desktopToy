@@ -6,6 +6,7 @@
 	"hud.score": "Очки %d",
 	"lb.title": "Рейтинг",
 	"ui.close": "Закрыть",
+	"ui.merging": "Объединение статичных блоков...",
 	"ui.records_empty": "Записей пока нет",
 	"ui.your_score": "Ваш результат: %d"
 }
