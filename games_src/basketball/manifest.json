@@ -1,5 +1,5 @@
 {
-	"id": "basketball",
+	"id": "Basketball",
 	"name": "Basketball",
 	"icon": "assets/icon.png",
 	"entry": "scenes/entry.tscn",

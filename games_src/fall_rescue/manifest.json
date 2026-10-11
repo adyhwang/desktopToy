@@ -1,5 +1,5 @@
 {
-	"id": "fall_rescue",
+	"id": "Fall_Rescue",
 	"name": "Fall Rescue",
 	"icon": "assets/icon.png",
 	"entry": "scenes/entry.tscn",

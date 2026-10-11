@@ -1,5 +1,5 @@
 {
-	"id": "fish_tank_escape",
+	"id": "Fish_Tank_Escape",
 	"name": "鱼缸逃生",
 	"icon": "assets/icon.png",
 	"entry": "scenes/entry.tscn",

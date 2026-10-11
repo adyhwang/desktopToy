@@ -210,7 +210,7 @@ var _reticle_ctl: Control
 
 func start() -> void:
 	randomize()
-	hud = GameHud.new("desk_wreck")
+	hud = GameHud.new("Desk_Wreck")
 	get_viewport().size_changed.connect(_layout)
 	_load_textures()
 	_init_canvas()
@@ -272,7 +272,7 @@ func _load_textures() -> void:
 
 func _load_png(rel: String) -> Texture2D:
 	# pck 内原始 png 无导入资源 loader，统一按字节解码（编辑器期走 res:// 相对路径）
-	for p: String in ["res://games/desk_wreck/" + rel, "res://" + rel]:
+	for p: String in ["res://games/Desk_Wreck/" + rel, "res://" + rel]:
 		var f := FileAccess.open(p, FileAccess.READ)
 		if f != null:
 			var img := Image.new()
@@ -643,7 +643,7 @@ func _stamp_icons_set(base: Color, cache: Array) -> Array:
 	if not cache.is_empty():
 		return cache
 	var names: Array = []
-	var d := DirAccess.open("res://games/trash/assets/trash")
+	var d := DirAccess.open("res://games/Trash_Toss/assets/trash")
 	if d != null:
 		d.list_dir_begin()
 		var f := d.get_next()
@@ -658,8 +658,8 @@ func _stamp_icons_set(base: Color, cache: Array) -> Array:
 		var img := Image.create_empty(128, 128, false, Image.FORMAT_RGBA8)
 		# trash 素材来自其他 pck（启动器会挂载全部 games/*.pck，包内虚拟路径不支持 ..）
 		var src: Texture2D = null
-		for sp: String in ["res://games/trash/assets/trash/%s.png" % n,
-				"res://games/desk_wreck/assets/%s.png" % n]:
+		for sp: String in ["res://games/Trash_Toss/assets/trash/%s.png" % n,
+				"res://games/Desk_Wreck/assets/%s.png" % n]:
 			var ff := FileAccess.open(sp, FileAccess.READ)
 			if ff != null:
 				var probe := Image.new()
@@ -2150,7 +2150,7 @@ func _sfx_stream(parts: Array) -> AudioStreamWAV:
 
 ## 从 assets/sfx 载入真实音效文件（免费可商用授权，见 CREDITS.txt）；成功覆盖同名合成音
 func _load_sfx_file(key: String, fname: String) -> void:
-	for base: String in ["res://games/desk_wreck/assets/sfx/" + fname, "res://assets/sfx/" + fname]:
+	for base: String in ["res://games/Desk_Wreck/assets/sfx/" + fname, "res://assets/sfx/" + fname]:
 		var f := FileAccess.open(base, FileAccess.READ)
 		if f != null:
 			var bytes := f.get_buffer(f.get_length())
@@ -2169,7 +2169,7 @@ func _load_sfx_file(key: String, fname: String) -> void:
 ## 循环音效：assets/sfx 文件优先，缺失用合成流兜底，均建为循环播放器入 _sfx_loop
 func _load_loop_file(key: String, fname: String, synth: Array) -> void:
 	var st: AudioStream = null
-	for base: String in ["res://games/desk_wreck/assets/sfx/" + fname, "res://assets/sfx/" + fname]:
+	for base: String in ["res://games/Desk_Wreck/assets/sfx/" + fname, "res://assets/sfx/" + fname]:
 		var f := FileAccess.open(base, FileAccess.READ)
 		if f != null:
 			var bytes := f.get_buffer(f.get_length())
@@ -2241,7 +2241,7 @@ func _init_sfx() -> void:
 	_load_loop_file("tornado", "wind.ogg", [["n", 0.6, 0.4, 3.0]])
 	_load_loop_file("robot", "robot.mp3", [["t", 130.0, 126.0, 0.5, false, 0.22], ["n", 0.25, 0.1, 8.0]])
 	# 电锯/激光用真实录音（Mixkit 免费授权）：电锯=循环播放（按住播、松开停），激光=单发重触发
-	for base: String in ["res://games/desk_wreck/assets/sfx/saw.mp3", "res://assets/sfx/saw.mp3"]:
+	for base: String in ["res://games/Desk_Wreck/assets/sfx/saw.mp3", "res://assets/sfx/saw.mp3"]:
 		var sf := FileAccess.open(base, FileAccess.READ)
 		if sf != null:
 			var st := AudioStreamMP3.load_from_buffer(sf.get_buffer(sf.get_length()))
@@ -2252,14 +2252,14 @@ func _init_sfx() -> void:
 			add_child(p)
 			_sfx_loop["saw"] = p
 			break
-	for base: String in ["res://games/desk_wreck/assets/sfx/laser.mp3", "res://assets/sfx/laser.mp3"]:
+	for base: String in ["res://games/Desk_Wreck/assets/sfx/laser.mp3", "res://assets/sfx/laser.mp3"]:
 		var lf := FileAccess.open(base, FileAccess.READ)
 		if lf != null:
 			_sfx["laser"] = AudioStreamMP3.load_from_buffer(lf.get_buffer(lf.get_length()))
 			break
 	# 真实狗叫录音（Mixkit 免费授权）3 变体：小狗放置与行走期间随机播放，读取失败回退合成音
 	for i in 3:
-		for base: String in ["res://games/desk_wreck/assets/sfx/dog%d.mp3" % (i + 1), "res://assets/sfx/dog%d.mp3" % (i + 1)]:
+		for base: String in ["res://games/Desk_Wreck/assets/sfx/dog%d.mp3" % (i + 1), "res://assets/sfx/dog%d.mp3" % (i + 1)]:
 			var df := FileAccess.open(base, FileAccess.READ)
 			if df != null:
 				var dst := AudioStreamMP3.load_from_buffer(df.get_buffer(df.get_length()))
@@ -2271,7 +2271,7 @@ func _init_sfx() -> void:
 		add_child(p)
 		_sfx_players.append(p)
 	# BGM：低音量循环（读取失败则无 BGM，不影响玩法）
-	for base: String in ["res://games/desk_wreck/assets/sfx/bgm.mp3", "res://assets/sfx/bgm.mp3"]:
+	for base: String in ["res://games/Desk_Wreck/assets/sfx/bgm.mp3", "res://assets/sfx/bgm.mp3"]:
 		var bf := FileAccess.open(base, FileAccess.READ)
 		if bf != null:
 			var st := AudioStreamMP3.load_from_buffer(bf.get_buffer(bf.get_length()))

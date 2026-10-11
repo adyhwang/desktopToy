@@ -139,7 +139,7 @@ const SFX_POOL := 4
 
 func start() -> void:
 	randomize()
-	hud = GameHud.new("maze")
+	hud = GameHud.new("Maze")
 	get_viewport().size_changed.connect(_layout)
 	_setup_buttons()
 	_init_sfx()
@@ -1299,7 +1299,7 @@ func _load_textures() -> void:
 
 
 func _load_png(path: String) -> Texture2D:
-	for p: String in ["res://games/maze/" + path.trim_prefix("res://games/maze/"), path]:
+	for p: String in ["res://games/Maze/" + path.trim_prefix("res://games/Maze/"), path]:
 		var f := FileAccess.open(p, FileAccess.READ)
 		if f != null:
 			var img := Image.new()

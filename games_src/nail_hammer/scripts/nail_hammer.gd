@@ -119,7 +119,7 @@ var _volume_btn: Button
 
 func start() -> void:
 	randomize()
-	hud = GameHud.new("nail_hammer")
+	hud = GameHud.new("Nail_Hammer")
 	get_viewport().size_changed.connect(_layout)
 	_load_textures()
 	_setup_buttons()   # 先建按钮再布局（_layout 会定位，null 会报错中断）
@@ -838,7 +838,7 @@ func _setup_buttons() -> void:
 func _init_sfx() -> void:
 	var files := {"hit": "hit.wav", "perfect": "perfect.wav", "miss": "miss.wav"}
 	for sname: String in files:
-		for base in ["res://games/nail_hammer/assets/sfx/", "res://assets/sfx/"]:
+		for base in ["res://games/Nail_Hammer/assets/sfx/", "res://assets/sfx/"]:
 			var path: String = base + files[sname]
 			if ResourceLoader.exists(path):
 				_sfx_streams[sname] = load(path)
@@ -852,7 +852,7 @@ func _init_sfx() -> void:
 		add_child(p)
 		_sfx_players.append(p)
 	# BGM：复用铁锤打害虫 BGM（低音量循环，跟随 GameHud [audio] bgm_on）
-	for base in ["res://games/nail_hammer/assets/sfx/bgm.mp3", "res://assets/sfx/bgm.mp3"]:
+	for base in ["res://games/Nail_Hammer/assets/sfx/bgm.mp3", "res://assets/sfx/bgm.mp3"]:
 		var bf := FileAccess.open(base, FileAccess.READ)
 		if bf != null:
 			var st := AudioStreamMP3.load_from_buffer(bf.get_buffer(bf.get_length()))
@@ -880,7 +880,7 @@ func _play_sfx(sfx_name: String, volume_db: float = 0.0) -> void:
 ## 贴图加载：pck 内 png 未走导入流程，字节解码（双路径兼容）
 func _load_textures() -> void:
 	for entry: Array in [["nails/nail_straight.png", "nail"], ["nails/nail_bent.png", "bent"], ["hammer_idle.png", "hammer"]]:
-		for base in ["res://games/nail_hammer/assets/", "res://assets/"]:
+		for base in ["res://games/Nail_Hammer/assets/", "res://assets/"]:
 			var path: String = base + entry[0]
 			if ResourceLoader.exists(path):
 				_set_tex(entry[1], load(path))

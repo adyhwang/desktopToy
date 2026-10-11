@@ -7,12 +7,13 @@ extends "res://scripts/game_base.gd"  # 打包时自动改写为包前缀路径
 
 const GameHud := preload("res://scripts/game_hud.gd")
 
-const FRUITS := ["apple", "banana", "carrot", "grape", "orange", "peach", "pear", "Pineapple", "strawberry", "watermelon"]
+const FRUITS := ["apple", "green_apple", "banana", "blueberry", "cherry", "grape", "lemon", "mango", "orange", "peach", "pear", "pineapple", "strawberry", "tomato", "bell_pepper"]
 const BOARD_MIN := 6        # 第 1 关 6×6
 const BOARD_CELLS := 400    # 总格子数上限（=20×20，单维可超 20），达到后不再扩大
 const REGIONS_MIN := 3      # 第 1 关切 3 个区域
 const REGIONS_MAX := 10      # 区域数上限
-const KINDS_BASE := 3       # 种类数 = 3 + 关卡（夹 4..10）：第 1 关 4 种，第 7 关起满 10 种
+const KINDS_BASE := 3       # 种类数 = 3 + 关卡（夹 4..KINDS_MAX）：第 1 关 4 种，第 7 关起满 10 种
+const KINDS_MAX := 10       # 种类上限（沿用原设计难度；素材池 15 种靠每关洗牌轮换）
 const TOP_H := 86.0         # 顶栏高度（棋盘从其下开始布局）
 const MARGIN := 14.0        # 棋盘区边距
 const HIGHLIGHT_T := 0.5    # 点击后区域高亮边框时长（s），到时判定
@@ -47,6 +48,7 @@ var score := 0
 var cols := BOARD_MIN
 var rows := BOARD_MIN
 var kinds := 4
+var _pool: Array = []                     # 本关水果子集（从 FRUITS 洗牌取前 kinds 个，15 种轮换）
 var zone_count := REGIONS_MIN
 var zones := PackedInt32Array()           # rows*cols 个区域 id（0..zone_count-1），行优先
 var target_zone := -1                     # 水果最多的区域（生成时保证唯一最大）
@@ -81,7 +83,7 @@ var _volume_btn: Button
 
 func start() -> void:
 	randomize()
-	hud = GameHud.new("fruit_count")
+	hud = GameHud.new("Fruit_Count")
 	get_viewport().size_changed.connect(_layout)
 	_load_textures()
 	_setup_buttons()   # 先建按钮再布局（_layout 会定位，null 会报错中断）
@@ -159,7 +161,10 @@ func _gen_level() -> void:
 	cols = dims.x
 	rows = dims.y
 	zone_count = REGIONS_MIN + mini(REGIONS_MAX - REGIONS_MIN, level / 2)
-	kinds = clampi(KINDS_BASE + level, 4, FRUITS.size())
+	kinds = clampi(KINDS_BASE + level, 4, KINDS_MAX)
+	_pool = FRUITS.duplicate()
+	_pool.shuffle()
+	_pool.resize(kinds)
 	zones = _gen_zones(cols, rows, zone_count)
 	var sizes := _zone_sizes(zones, zone_count)
 	target_zone = sizes.find(sizes.max())   # _gen_zones 保证唯一最大
@@ -605,7 +610,7 @@ func _draw() -> void:
 			var f: int = grid[y * cols + x]
 			if f < 0:
 				continue
-			var tex: Texture2D = _texs[FRUITS[f]]
+			var tex: Texture2D = _texs[_pool[f]]
 			if tex == null:
 				continue
 			var r := Rect2(_origin + Vector2(x, y) * _cell, Vector2.ONE * _cell)
@@ -620,7 +625,7 @@ func _draw() -> void:
 	# 消失动画水果：向上位移 + 渐透明
 	for a in _vanish_anims:
 		var k: float = clampf(a.t / VANISH_DUR, 0.0, 1.0)
-		var tex: Texture2D = _texs[FRUITS[a.fruit]]
+		var tex: Texture2D = _texs[_pool[a.fruit]]
 		if tex == null:
 			continue
 		var ip := _cell * 0.12
@@ -697,7 +702,7 @@ func _spawn_popup(text: String, col: Color, pos: Vector2) -> void:
 func _init_sfx() -> void:
 	var files := {"win": "win.wav", "fail": "fail.wav"}
 	for sname: String in files:
-		for base in ["res://games/fruit_count/assets/sfx/", "res://assets/sfx/"]:
+		for base in ["res://games/Fruit_Count/assets/sfx/", "res://assets/sfx/"]:
 			var path: String = base + files[sname]
 			if ResourceLoader.exists(path):
 				_sfx_streams[sname] = load(path)
@@ -711,7 +716,7 @@ func _init_sfx() -> void:
 		add_child(p)
 		_sfx_players.append(p)
 	# BGM：复用围住水果的水果主题（低音量循环，跟随 GameHud [audio] bgm_on）
-	for base in ["res://games/fruit_count/assets/sfx/bgm.mp3", "res://assets/sfx/bgm.mp3"]:
+	for base in ["res://games/Fruit_Count/assets/sfx/bgm.mp3", "res://assets/sfx/bgm.mp3"]:
 		var bf := FileAccess.open(base, FileAccess.READ)
 		if bf != null:
 			var st := AudioStreamMP3.load_from_buffer(bf.get_buffer(bf.get_length()))
@@ -740,7 +745,7 @@ func _play_sfx(sfx_name: String, volume_db: float = 0.0) -> void:
 ## 水果贴图加载：pck 内 png 未走导入流程，字节解码（双路径兼容）
 func _load_textures() -> void:
 	for fname: String in FRUITS:
-		for base in ["res://games/fruit_count/assets/fruits/", "res://assets/fruits/"]:
+		for base in ["res://games/Fruit_Count/assets/fruits/", "res://assets/fruits/"]:
 			var path: String = base + fname + ".png"
 			if ResourceLoader.exists(path):
 				_texs[fname] = load(path)

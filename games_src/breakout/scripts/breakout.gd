@@ -264,7 +264,7 @@ class PowerUp extends Node2D:
 # ===== 生命周期 =====
 
 func start() -> void:
-	hud = GameHud.new("breakout")
+	hud = GameHud.new("Breakout")
 	get_viewport().size_changed.connect(_layout)
 	_load_textures()
 	_init_sfx()
@@ -299,7 +299,7 @@ func _load_textures() -> void:
 
 func _load_png(path: String) -> Texture2D:
 	# pck 内原始 png 无导入资源 loader，统一按字节解码（编辑器期走 res:// 相对路径）
-	for p: String in ["res://games/breakout/" + path.trim_prefix("res://"), path]:
+	for p: String in ["res://games/Breakout/" + path.trim_prefix("res://"), path]:
 		var f := FileAccess.open(p, FileAccess.READ)
 		if f != null:
 			var img := Image.new()
@@ -349,7 +349,7 @@ func _init_sfx() -> void:
 		add_child(p)
 		_sfx_players.append(p)
 	# BGM：低音量循环（读取失败则无 BGM，不影响玩法）
-	for base: String in ["res://games/breakout/assets/sfx/bgm.mp3", "res://assets/sfx/bgm.mp3"]:
+	for base: String in ["res://games/Breakout/assets/sfx/bgm.mp3", "res://assets/sfx/bgm.mp3"]:
 		var bf := FileAccess.open(base, FileAccess.READ)
 		if bf != null:
 			var st := AudioStreamMP3.load_from_buffer(bf.get_buffer(bf.get_length()))
@@ -652,7 +652,7 @@ func _read_level_lines(lv: int) -> Array:
 	var paths: Array = []
 	if not OS.has_feature("editor"):
 		paths.append(OS.get_executable_path().get_base_dir().path_join("levels/level_%02d.txt" % lv))
-	paths.append_array(["res://games/breakout/levels/level_%02d.txt" % lv, "res://levels/level_%02d.txt" % lv])
+	paths.append_array(["res://games/Breakout/levels/level_%02d.txt" % lv, "res://levels/level_%02d.txt" % lv])
 	for p: String in paths:
 		var f := FileAccess.open(p, FileAccess.READ)
 		if f == null:

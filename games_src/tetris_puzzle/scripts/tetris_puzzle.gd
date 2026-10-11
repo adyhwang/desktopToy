@@ -10,7 +10,7 @@ const Piece := preload("res://scripts/piece.gd")
 const GameHud := preload("res://scripts/game_hud.gd")
 
 # ===== 存档 =====
-const SEC := "tetris_puzzle"
+const SEC := "Tetris_Puzzle"
 
 # ===== 布局 =====
 const HUD_H := 86.0          # 顶部栏高度
@@ -100,7 +100,7 @@ var _bgm: AudioStreamPlayer
 
 func start() -> void:
 	randomize()
-	hud = GameHud.new("tetris_puzzle")
+	hud = GameHud.new("Tetris_Puzzle")
 	_load_save()
 	get_viewport().size_changed.connect(_layout)
 	_setup_buttons()

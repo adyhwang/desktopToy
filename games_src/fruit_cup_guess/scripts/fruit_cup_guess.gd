@@ -11,15 +11,14 @@ extends "res://scripts/game_base.gd"  # 打包时自动改写为包前缀路径
 const GameHud := preload("res://scripts/game_hud.gd")
 
 # —— 可配置核心参数 ——
-const FRUITS_POOL := ["apple", "banana", "carrot", "grape", "orange",
-		"peach", "pear", "Pineapple", "strawberry", "watermelon"]
+const FRUITS_POOL := ["apple", "green_apple", "banana", "blueberry", "cherry", "grape", "lemon", "mango", "orange", "peach", "pear", "pineapple", "strawberry", "tomato", "bell_pepper"]
 const CUPS_START := 3            # 初始纸杯数（第 1 关）
 const CUPS_MAX := 5              # 纸杯数上限
 const SHUFFLES_START := 3        # 初始每局交换次数
 const SHUFFLES_MAX := 7
 const SCORE_FACTOR := 1.0        # 猜中得分 = 剩余纸杯数 × SCORE_FACTOR
 const WRONG_PENALTY := 1         # 猜错扣分
-const SEC := "fruit_cup_guess"   # settings.cfg 模式持久化节名
+const SEC := "Fruit_Cup_Guess"   # settings.cfg 模式持久化节名
 
 # —— 动画节奏（s）——
 const DEAL_TIME := 0.45          # 纸杯入场（错峰落下）
@@ -111,7 +110,7 @@ var _volume_btn: Button
 
 func start() -> void:
 	randomize()
-	hud = GameHud.new("fruit_cup_guess")
+	hud = GameHud.new("Fruit_Cup_Guess")
 	_load_mode()
 	get_viewport().size_changed.connect(_layout)
 	_load_textures()
@@ -969,7 +968,7 @@ func _load_textures() -> void:
 
 ## pck 内 png 字节解码（不走导入流程）；双路径兼容编辑器直跑
 func _load_png(rel: String) -> Texture2D:
-	for base in ["res://games/fruit_cup_guess/", "res://"]:
+	for base in ["res://games/Fruit_Cup_Guess/", "res://"]:
 		var f := FileAccess.open(base + rel, FileAccess.READ)
 		if f != null:
 			var img := Image.new()
@@ -984,7 +983,7 @@ func _init_sfx() -> void:
 	var files := {"slide": "slide.wav", "flip": "flip.wav", "correct": "correct.wav",
 			"wrong": "wrong.wav", "win": "win.wav", "lose": "lose.wav"}
 	for sname: String in files:
-		for base in ["res://games/fruit_cup_guess/assets/sfx/", "res://assets/sfx/"]:
+		for base in ["res://games/Fruit_Cup_Guess/assets/sfx/", "res://assets/sfx/"]:
 			var path: String = base + files[sname]
 			if ResourceLoader.exists(path):
 				_sfx_streams[sname] = load(path)
@@ -999,7 +998,7 @@ func _init_sfx() -> void:
 		add_child(p)
 		_sfx_players.append(p)
 	# BGM：复用合集 BGM（低音量循环，跟随 GameHud [audio] bgm_on）
-	for base in ["res://games/fruit_cup_guess/assets/sfx/bgm.mp3", "res://assets/sfx/bgm.mp3"]:
+	for base in ["res://games/Fruit_Cup_Guess/assets/sfx/bgm.mp3", "res://assets/sfx/bgm.mp3"]:
 		var bf := FileAccess.open(base, FileAccess.READ)
 		if bf != null:
 			var st := AudioStreamMP3.load_from_buffer(bf.get_buffer(bf.get_length()))

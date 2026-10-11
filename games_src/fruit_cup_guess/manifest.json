@@ -1,5 +1,5 @@
 {
-	"id": "fruit_cup_guess",
+	"id": "Fruit_Cup_Guess",
 	"name": "猜水果",
 	"icon": "assets/icon.png",
 	"entry": "scenes/entry.tscn",

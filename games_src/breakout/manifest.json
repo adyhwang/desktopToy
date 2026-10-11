@@ -1,5 +1,5 @@
 {
-	"id": "breakout",
+	"id": "Breakout",
 	"name": "Breakout",
 	"icon": "assets/icon.png",
 	"entry": "scenes/entry.tscn",

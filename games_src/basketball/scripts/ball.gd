@@ -7,7 +7,7 @@ var _tex: Texture2D
 
 func _ready() -> void:
 	# 原始 png 字节解码（pck 内未走导入流程）；第二条路径供编辑器直接打开本工程预览
-	for p in ["res://games/basketball/assets/ball.png", "res://assets/ball.png"]:
+	for p in ["res://games/Basketball/assets/ball.png", "res://assets/ball.png"]:
 		var f := FileAccess.open(p, FileAccess.READ)
 		if f != null:
 			var img := Image.new()

@@ -1,5 +1,5 @@
 {
-	"id": "fruit_sort",
+	"id": "Fruit_Sort",
 	"name": "分拣水果",
 	"icon": "assets/icon.png",
 	"entry": "scenes/entry.tscn",

@@ -14,7 +14,7 @@ const BACK_RECT_OFF := Vector2(-0.4766, -0.5651) # 左上角 (11-255)/512, (53-4
 const BACK_RECT_SIZE := Vector2(0.9531, 0.5651)  # (499-11)/512, (439-53)/683
 const SHAKE_AMPS := [-2.5, 2.0, -1.0, 0.5, 0.0]  # 进球筐体晃动振幅序列（px，逐次衰减；原 [-7,6,-4,2,0] 减半）
 
-var tex_paths: Array = ["res://games/basketball/assets/hoop_front.png", "res://assets/hoop_front.png"]:  # 主控按层配置
+var tex_paths: Array = ["res://games/Basketball/assets/hoop_front.png", "res://assets/hoop_front.png"]:  # 主控按层配置
 	set(v):
 		if v == tex_paths:
 			return   # _layout 每次窗口变化都会重赋值，内容相同不重复解码

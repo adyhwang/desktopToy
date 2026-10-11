@@ -13,8 +13,7 @@ extends "res://scripts/game_base.gd"  # 打包时自动改写为包前缀路径
 const GameHud := preload("res://scripts/game_hud.gd")
 
 # —— 可配置核心参数 ——
-const FRUITS_POOL := ["apple", "banana", "carrot", "grape", "orange",
-		"peach", "pear", "Pineapple", "strawberry", "watermelon"]
+const FRUITS_POOL := ["apple", "green_apple", "banana", "blueberry", "cherry", "grape", "lemon", "mango", "orange", "peach", "pear", "pineapple", "strawberry", "tomato", "bell_pepper"]
 const KINDS_START := 2            # 起步水果种类（=花篮数，跷跷板 1+2 层共 3 块）
 const KINDS_MAX := 3              # 种类上限（升 3 层 3 篮：1+2+3 共 6 块）
 const UPGRADE_AT := 8             # 正确分拣数达到后升 3 层（1+2+3 共 6 板，篮/水果同步升 3）
@@ -119,7 +118,7 @@ var _dev_drag := false
 
 func start() -> void:
 	randomize()
-	hud = GameHud.new("fruit_sort")
+	hud = GameHud.new("Fruit_Sort")
 	get_viewport().size_changed.connect(_layout)
 	_load_textures()
 	_setup_buttons()
@@ -1197,7 +1196,7 @@ func _load_textures() -> void:
 
 ## pck 内 png 字节解码（不走导入流程）；双路径兼容编辑器直跑
 func _load_png(rel: String) -> Texture2D:
-	for base in ["res://games/fruit_sort/", "res://"]:
+	for base in ["res://games/Fruit_Sort/", "res://"]:
 		var f := FileAccess.open(base + rel, FileAccess.READ)
 		if f != null:
 			var img := Image.new()
@@ -1212,7 +1211,7 @@ func _init_sfx() -> void:
 	var files := {"spawn": "slide.wav", "bounce": "flip.wav", "correct": "correct.wav",
 			"wrong": "wrong.wav", "record": "win.wav"}
 	for sname: String in files:
-		for base in ["res://games/fruit_sort/assets/sfx/", "res://assets/sfx/"]:
+		for base in ["res://games/Fruit_Sort/assets/sfx/", "res://assets/sfx/"]:
 			var path: String = base + files[sname]
 			if ResourceLoader.exists(path):
 				_sfx_streams[sname] = load(path)
@@ -1227,7 +1226,7 @@ func _init_sfx() -> void:
 		add_child(p)
 		_sfx_players.append(p)
 	# BGM：复用合集 BGM（低音量循环，跟随 GameHud [audio] bgm_on）
-	for base in ["res://games/fruit_sort/assets/sfx/bgm.mp3", "res://assets/sfx/bgm.mp3"]:
+	for base in ["res://games/Fruit_Sort/assets/sfx/bgm.mp3", "res://assets/sfx/bgm.mp3"]:
 		var bf := FileAccess.open(base, FileAccess.READ)
 		if bf != null:
 			var st := AudioStreamMP3.load_from_buffer(bf.get_buffer(bf.get_length()))

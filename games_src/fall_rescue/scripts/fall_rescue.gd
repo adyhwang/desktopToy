@@ -132,7 +132,7 @@ var _volume_btn: Button
 
 func start() -> void:
 	randomize()
-	hud = GameHud.new("fall_rescue")
+	hud = GameHud.new("Fall_Rescue")
 	get_viewport().size_changed.connect(_layout)
 	_setup_buttons()
 	_load_textures()
@@ -946,7 +946,7 @@ func _load_textures() -> void:
 
 ## png 双路径字节解码（pck 内未走导入流程；第二条供编辑器直接预览）
 func _load_png(fname: String) -> Texture2D:
-	for base in ["res://games/fall_rescue/assets/", "res://assets/"]:
+	for base in ["res://games/Fall_Rescue/assets/", "res://assets/"]:
 		var f := FileAccess.open(base + fname, FileAccess.READ)
 		if f != null:
 			var img := Image.new()
@@ -959,7 +959,7 @@ func _load_png(fname: String) -> Texture2D:
 func _init_sfx() -> void:
 	var files := {"catch": "catch.mp3", "thud": "thud.mp3", "bad": "bad.mp3"}
 	for sfx_name: String in files:
-		for base in ["res://games/fall_rescue/assets/sfx/", "res://assets/sfx/"]:
+		for base in ["res://games/Fall_Rescue/assets/sfx/", "res://assets/sfx/"]:
 			var path: String = base + files[sfx_name]
 			if ResourceLoader.exists(path):
 				_sfx_streams[sfx_name] = load(path)
@@ -972,7 +972,7 @@ func _init_sfx() -> void:
 		var p := AudioStreamPlayer.new()
 		add_child(p)
 		_sfx_players.append(p)
-	for base in ["res://games/fall_rescue/assets/sfx/bgm.mp3", "res://assets/sfx/bgm.mp3"]:
+	for base in ["res://games/Fall_Rescue/assets/sfx/bgm.mp3", "res://assets/sfx/bgm.mp3"]:
 		var bf := FileAccess.open(base, FileAccess.READ)
 		if bf != null:
 			var st := AudioStreamMP3.load_from_buffer(bf.get_buffer(bf.get_length()))

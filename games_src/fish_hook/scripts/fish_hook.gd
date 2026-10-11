@@ -318,7 +318,7 @@ var _dev_reel_mult := 1.0        # 收线速度全局倍率
 
 func start() -> void:
 	randomize()
-	hud = GameHud.new("fish_hook")
+	hud = GameHud.new("Fish_Hook")
 	get_viewport().size_changed.connect(_layout)
 	_load_textures()
 	_setup_buttons()
@@ -375,7 +375,7 @@ func _load_textures() -> void:
 
 func _load_png(rel: String) -> Texture2D:
 	# pck 内原始 png 无导入资源 loader，统一按字节解码（编辑器期走 res:// 相对路径）
-	for p: String in ["res://games/fish_hook/" + rel, "res://" + rel]:
+	for p: String in ["res://games/Fish_Hook/" + rel, "res://" + rel]:
 		var f := FileAccess.open(p, FileAccess.READ)
 		if f != null:
 			var img := Image.new()
@@ -1885,7 +1885,7 @@ func _sfx_stream(parts: Array) -> AudioStreamWAV:
 
 ## 加载下载的真实音效（免版权/已授权，assets/sfx/），覆盖同名合成音效；ogg/wav/mp3 字节解码
 func _load_sfx_file(key: String, fname: String) -> void:
-	for base: String in ["res://games/fish_hook/assets/sfx/" + fname, "res://assets/sfx/" + fname]:
+	for base: String in ["res://games/Fish_Hook/assets/sfx/" + fname, "res://assets/sfx/" + fname]:
 		var f := FileAccess.open(base, FileAccess.READ)
 		if f == null:
 			continue
@@ -1935,7 +1935,7 @@ func _init_sfx() -> void:
 		add_child(p)
 		_sfx_players.append(p)
 	# BGM：低音量循环（读取失败则无 BGM）
-	for base: String in ["res://games/fish_hook/assets/sfx/bgm.mp3", "res://assets/sfx/bgm.mp3"]:
+	for base: String in ["res://games/Fish_Hook/assets/sfx/bgm.mp3", "res://assets/sfx/bgm.mp3"]:
 		var bf := FileAccess.open(base, FileAccess.READ)
 		if bf != null:
 			var st := AudioStreamMP3.load_from_buffer(bf.get_buffer(bf.get_length()))

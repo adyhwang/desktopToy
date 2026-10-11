@@ -123,7 +123,7 @@ var _volume_btn: Button
 
 func start() -> void:
 	randomize()
-	hud = GameHud.new("fish_tank_escape")
+	hud = GameHud.new("Fish_Tank_Escape")
 	get_viewport().size_changed.connect(_layout)
 	_load_textures()
 	_setup_buttons()   # 先建按钮再布局（_layout 会定位）
@@ -1134,7 +1134,7 @@ func _load_textures() -> void:
 
 ## pck 内 png 字节解码（不走导入流程）；双路径兼容编辑器直跑
 func _load_png(rel: String) -> Texture2D:
-	for base in ["res://games/fish_tank_escape/", "res://"]:
+	for base in ["res://games/Fish_Tank_Escape/", "res://"]:
 		var f := FileAccess.open(base + rel, FileAccess.READ)
 		if f != null:
 			var img := Image.new()
@@ -1148,7 +1148,7 @@ func _load_png(rel: String) -> Texture2D:
 func _init_sfx() -> void:
 	var files := {"land": "land.wav", "hit": "hit.wav", "over": "over.wav", "scream": "scream.wav", "win": "win.wav"}
 	for sname: String in files:
-		for base in ["res://games/fish_tank_escape/assets/sfx/", "res://assets/sfx/"]:
+		for base in ["res://games/Fish_Tank_Escape/assets/sfx/", "res://assets/sfx/"]:
 			var path: String = base + files[sname]
 			if ResourceLoader.exists(path):
 				_sfx_streams[sname] = load(path)
@@ -1162,7 +1162,7 @@ func _init_sfx() -> void:
 		add_child(p)
 		_sfx_players.append(p)
 	# BGM：复用合集 BGM（低音量循环，跟随 GameHud [audio] bgm_on）
-	for base in ["res://games/fish_tank_escape/assets/sfx/bgm.mp3", "res://assets/sfx/bgm.mp3"]:
+	for base in ["res://games/Fish_Tank_Escape/assets/sfx/bgm.mp3", "res://assets/sfx/bgm.mp3"]:
 		var bf := FileAccess.open(base, FileAccess.READ)
 		if bf != null:
 			var st := AudioStreamMP3.load_from_buffer(bf.get_buffer(bf.get_length()))

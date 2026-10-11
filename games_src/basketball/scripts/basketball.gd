@@ -98,7 +98,7 @@ var _hbox: HBoxContainer          # 右上角按钮排容器（等间距/底对�
 
 
 func start() -> void:
-	hud = GameHud.new("basketball")
+	hud = GameHud.new("Basketball")
 	get_viewport().size_changed.connect(_layout)
 	_setup_buttons()   # 先建按钮再布局（_layout 会设置按钮位置，null 会报错中断）
 	_layout()
@@ -231,7 +231,7 @@ func _init_sfx() -> void:
 	var files := {"board_hit": "board_hit.mp3", "rim_hit": "rim_hit.mp3", "score": "score.mp3",
 			"cheer": "crowd_cheer.mp3", "aww": "crowd_aww.mp3"}
 	for name: String in files:
-		for base in ["res://games/basketball/assets/sfx/", "res://assets/sfx/"]:
+		for base in ["res://games/Basketball/assets/sfx/", "res://assets/sfx/"]:
 			var path: String = base + files[name]
 			if ResourceLoader.exists(path):
 				_sfx_streams[name] = load(path)
@@ -245,7 +245,7 @@ func _init_sfx() -> void:
 		add_child(p)
 		_sfx_players.append(p)
 	# BGM：低音量循环（读取失败则无 BGM，不影响玩法）
-	for base in ["res://games/basketball/assets/sfx/bgm.mp3", "res://assets/sfx/bgm.mp3"]:
+	for base in ["res://games/Basketball/assets/sfx/bgm.mp3", "res://assets/sfx/bgm.mp3"]:
 		var bf := FileAccess.open(base, FileAccess.READ)
 		if bf != null:
 			var st := AudioStreamMP3.load_from_buffer(bf.get_buffer(bf.get_length()))
@@ -276,8 +276,8 @@ func _layout() -> void:
 	_ball_r = m * BALL_R_RATIO
 	_g = GRAVITY_RATIO * vp.y / (FLIGHT_T * FLIGHT_T)
 	# 篮筐双层：front=筐圈+网（原点=筐口平面，判定线），back=背板（原点=背板底缘，抬升布置在筐口上方）
-	_hoop_front.tex_paths = ["res://games/basketball/assets/hoop_front.png", "res://assets/hoop_front.png"]
-	_hoop_back.tex_paths = ["res://games/basketball/assets/hoop_back.png", "res://assets/hoop_back.png"]
+	_hoop_front.tex_paths = ["res://games/Basketball/assets/hoop_front.png", "res://assets/hoop_front.png"]
+	_hoop_back.tex_paths = ["res://games/Basketball/assets/hoop_back.png", "res://assets/hoop_back.png"]
 	_hoop_back.is_back = true
 	var rim_pos := Vector2(vp.x * HOOP_POS_RATIO.x, vp.y * HOOP_POS_RATIO.y)
 	_hoop_front.base_position = rim_pos

@@ -1,5 +1,5 @@
 {
-	"id": "tetris_puzzle",
+	"id": "Tetris_Puzzle",
 	"name": "Tetris Puzzle",
 	"icon": "assets/icon.png",
 	"entry": "scenes/entry.tscn",

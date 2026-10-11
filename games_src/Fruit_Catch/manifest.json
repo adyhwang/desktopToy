@@ -1,0 +1,7 @@
+{
+	"id": "Fruit_Catch",
+	"name": "Fruit Catch",
+	"icon": "assets/icon.png",
+	"entry": "scenes/entry.tscn",
+	"version": "1.0.0"
+}

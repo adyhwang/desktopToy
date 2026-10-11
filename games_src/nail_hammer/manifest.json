@@ -1,5 +1,5 @@
 {
-	"id": "nail_hammer",
+	"id": "Nail_Hammer",
 	"name": "Nail Hammer",
 	"icon": "assets/icon.png",
 	"entry": "scenes/entry.tscn",

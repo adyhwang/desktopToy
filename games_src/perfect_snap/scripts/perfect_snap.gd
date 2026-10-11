@@ -121,7 +121,11 @@ const RATE_KEYS := ["ps.rating_fail", "ps.rating_good", "ps.rating_great", "ps.r
 const RATE_COLS := [COL_R_FAIL, COL_R_GOOD, COL_R_GREAT, COL_R_PERFECT]
 const RATE_SCORES := [0, SCORE_GOOD, SCORE_GREAT, SCORE_PERFECT]
 const LANDMARKS := ["banyan", "tree", "bench", "kiosk", "lamp", "bed", "slide", "swing", "bin", "sign", "stone", "sun", "zeppelin",
-		"seesaw", "sandbox", "stall", "barrel", "umbrella", "stump", "log", "lake", "willow", "bridge", "fountain"]
+		"seesaw", "sandbox", "stall", "barrel", "umbrella", "stump", "log", "lake", "willow", "bridge", "fountain",
+		"owl", "dove", "parrot", "chick", "robin", "flamingo"]
+
+## 静态鸟（OpenMoji 贴图，assets/birds/）：kind → 绘制高度（世界 px）
+const BIRD_STATICS := {"owl": 115.0, "dove": 90.0, "parrot": 100.0, "chick": 65.0, "robin": 68.0, "flamingo": 150.0}
 
 ## 目标图记录：一次拍照判定的全部依据（区域 + 逐元素快照）
 class Target:
@@ -157,8 +161,8 @@ var _paths: Array = []              # {pts, cum, len, w}
 var _statics: Array = []            # 静态元素
 var _hills: Array = []
 var _patches: Array = []
-var _daisies: Array = []
 var _dyns: Array = []               # 动态元素（t 累计，st 为当帧状态缓存）
+var _bird_texs := {}                # 静态鸟贴图（kind → Texture2D）
 var _target: Target
 var _last_center := Vector2(-1e9, -1e9)
 var _world: Painter
@@ -194,8 +198,9 @@ var _volume_btn: Button
 
 func start() -> void:
 	randomize()
-	hud = GameHud.new("perfect_snap")
+	hud = GameHud.new("Perfect_Snap")
 	get_viewport().size_changed.connect(_layout)
+	_load_bird_statics()
 	_build_park()
 	_setup_painters()
 	_setup_buttons()          # 先建按钮再布局（_layout 会定位）
@@ -426,7 +431,7 @@ func _dyn_state(e: Dictionary, ph: float) -> Dictionary:
 			return st
 		"orbit_kid":
 			var a := TAU * fposmod(ph, 1.0)
-			var pos: Vector2 = e.c + Vector2(cos(a) * e.r, sin(a) * e.r * 0.55)
+			var pos: Vector2 = e.c + Vector2(cos(a) * e.r, sin(a) * e.r * e.get("ky", 0.55))
 			var face := -signf(sin(a))
 			return {"pos": pos, "face": face if face != 0.0 else 1.0, "walk": fposmod(ph * 10.0, 1.0)}
 		"swing_kid":
@@ -490,12 +495,10 @@ func _mk_section(ox: float, sec: int) -> void:
 			_mk_wild(ox)         # 野趣区：密林 + 双石 + 蜿蜒 S 形路径
 		3:
 			_mk_lakeside(ox)     # 湖畔区：大湖 + 石桥喷泉 + 垂柳芦苇 + 水禽
-	# —— 草地斑块 / 雏菊（数量各区不同）——
+	# —— 草地斑块 ——
 	for i in [14, 12, 16, 13][sec]:
 		_patches.append({"pos": Vector2(randf_range(ox + 150, ox + SECTION_W - 150), randf_range(SKY_H + 130, PARK_H - 120)),
 				"rx": randf_range(90, 220), "ry": randf_range(26, 55), "rad": 230.0})
-	for i in [26, 22, 30, 26][sec]:
-		_daisies.append({"pos": Vector2(randf_range(ox + 120, ox + SECTION_W - 120), randf_range(SKY_H + 140, PARK_H - 90)), "rad": 16.0})
 	# —— 天空动态（每区随机位置；周期均为 60 的约数且 ≤10s）——
 	for i in 4:
 		_dyns.append({"kind": "cloud", "period": 6.0 if i % 2 == 0 else 10.0, "t": randf() * 10.0,
@@ -541,9 +544,9 @@ func _mk_playground(ox: float) -> void:
 	_statics.append({"kind": "sun", "pos": Vector2(ox + 700, 170), "rad": 150.0})
 	for h in [[900, 50, 520, 90], [2300, 42, 640, 110], [3500, 46, 560, 95]]:
 		_hills.append({"pos": Vector2(ox + h[0], SKY_H + h[1]), "rx": h[2], "ry": h[3], "rad": h[2] + 30.0})
-	# 静态：榕树 + 树灌 + 长椅 + 游乐设施
-	_statics.append({"kind": "banyan", "pos": Vector2(_jit(ox + 620), _jit(1250)), "rad": 340.0})
-	for t in [[1400, 1080, 1.35], [2380, 1100, 1.2], [3700, 1780, 1.3], [300, 1900, 1.15], [2520, 2210, 1.0],
+	# 静态：榕树（固定坐标：绕树小孩/猫头鹰按此锚定）+ 树灌 + 长椅 + 游乐设施
+	_statics.append({"kind": "banyan", "pos": Vector2(ox + 620, 1250), "rad": 340.0})
+	for t in [[1400, 1080, 1.35], [2380, 1100, 1.2], [3700, 1780, 1.3], [300, 1900, 1.15], [2450, 2220, 1.0],
 			[1980, 990, 1.05], [3300, 1150, 1.1]]:
 		_statics.append({"kind": "tree", "pos": Vector2(_jit(ox + t[0]), _jit(t[1])), "s": t[2], "rad": 130.0 * t[2]})
 	for b in [[880, 1230, 1.0], [1720, 1150, 0.85], [2900, 1180, 0.9], [3820, 1980, 1.0], [1200, 2260, 0.8],
@@ -574,17 +577,19 @@ func _mk_playground(ox: float) -> void:
 	_mk_visitor(pa, 1, 60.0, 92.0)
 	_mk_visitor(pa, -1, 30.0, 86.0)
 	_mk_visitor(pa, -1, 60.0, 90.0)
-	_dyns.append({"kind": "kite", "period": 20.0, "t": randf() * 20.0, "c": Vector2(ox + 1800, SKY_H + 420), "r": 240.0,
+	# 风筝：轨道整体抬到树冠上空（最高树冠顶 y≈735），不穿树冠
+	_dyns.append({"kind": "kite", "period": 20.0, "t": randf() * 20.0, "c": Vector2(ox + 1800, 700), "r": 130.0,
 			"col": KITE_COLS[randi() % KITE_COLS.size()], "rad": 90.0, "st": {}})
 	_dyns.append({"kind": "pigeon", "period": 12.0, "t": randf() * 12.0, "c": Vector2(ox + 1250, 1620), "r": 70.0,
 			"rad": 45.0, "st": {}})
 	_dyns.append({"kind": "pigeon", "period": 20.0, "t": randf() * 20.0, "c": Vector2(ox + 3450, 2080), "r": 85.0,
 			"rad": 45.0, "st": {}})
-	_dyns.append({"kind": "dog", "period": 20.0, "t": randf() * 20.0, "c": Vector2(ox + 2900, 2060), "r": 420.0,
+	_dyns.append({"kind": "dog", "period": 20.0, "t": randf() * 20.0, "c": Vector2(ox + 2900, 2110), "r": 300.0,
 			"col": DOG_COLS[randi() % DOG_COLS.size()], "rad": 70.0, "st": {}})
 	_dyns.append({"kind": "cat", "period": 30.0, "t": randf() * 30.0, "a": Vector2(ox + 2560, 1980), "b": Vector2(ox + 2800, 2090),
 			"col": Color(0.60, 0.55, 0.52), "rad": 55.0, "st": {}})
-	_dyns.append({"kind": "orbit_kid", "period": 60.0, "t": randf() * 60.0, "c": Vector2(ox + 620, 1250), "r": 330.0,
+	# 绕树小孩：ky 压扁纵幅，椭圆顶始终低于榕树冠底（y≈1158），只在树前草地绕行
+	_dyns.append({"kind": "orbit_kid", "period": 60.0, "t": randf() * 60.0, "c": Vector2(ox + 620, 1280), "r": 330.0, "ky": 0.25,
 			"shirt": SHIRTS[2], "skin": SKINS[0], "rad": 70.0, "st": {}})
 	_dyns.append({"kind": "swing_kid", "period": 2.0, "t": randf() * 2.0, "pivot": Vector2(ox + 1560, 1905), "rope": 130.0,
 			"shirt": SHIRTS[4], "skin": SKINS[0], "rad": 110.0, "st": {}})
@@ -600,6 +605,11 @@ func _mk_playground(ox: float) -> void:
 			"col": Color(1.0, 0.72, 0.25), "flap_mul": 2.0, "rad": 45.0, "st": {}})
 	_dyns.append({"kind": "butterfly", "period": 20.0, "t": randf() * 20.0, "c": Vector2(ox + 3200, 1450), "r": 80.0,
 			"col": Color(0.30, 0.70, 0.70), "flap_mul": 2.0, "rad": 45.0, "st": {}})
+	# 静态鸟：猫头鹰(榕树冠)/白鸽(灯柱顶)/小鸡(花坛边草地)/知更鸟(长椅背)
+	_mk_bird_static("owl", Vector2(ox + 690, 985))
+	_mk_bird_static("dove", Vector2(ox + 450, 1488))
+	_mk_bird_static("chick", Vector2(ox + 1390, 1475))
+	_mk_bird_static("robin", Vector2(ox + 2350, 1654))
 
 
 ## —— 分区 1：市集区（售货亭 + 花市三坛 + 环路带南北支路）——
@@ -678,6 +688,9 @@ func _mk_market(ox: float) -> void:
 			"rad": 45.0, "st": {}})
 	_dyns.append({"kind": "pigeon", "period": 12.0, "t": randf() * 12.0, "c": Vector2(ox + 1200, 2100), "r": 60.0,
 			"rad": 45.0, "st": {}})
+	# 静态鸟：鹦鹉(售货亭雨棚)/知更鸟(南围栏横杆)
+	_mk_bird_static("parrot", Vector2(ox + 3260, 1202))
+	_mk_bird_static("robin", Vector2(ox + 600, 2266))
 
 
 ## —— 分区 2：野趣区（密林七树 + 双石 + 蜿蜒 S 形路径）——
@@ -695,10 +708,11 @@ func _mk_wild(ox: float) -> void:
 	_statics.append({"kind": "zeppelin", "pos": Vector2(ox + 2000, 160), "rad": 150.0})
 	for h in [[1200, 46, 560, 95], [2600, 50, 620, 100], [3900, 42, 520, 85]]:
 		_hills.append({"pos": Vector2(ox + h[0], SKY_H + h[1]), "rx": h[2], "ry": h[3], "rad": h[2] + 30.0})
-	# 静态：密树八棵 + 树桩/枯木/蘑菇（无售货亭无游乐设施）
-	for t in [[400, 1150, 1.3], [1100, 1050, 1.1], [1900, 1120, 1.35], [2650, 1080, 1.1], [3350, 1150, 1.2], [650, 2150, 1.15], [3050, 2230, 1.0],
+	# 静态：密树八棵（绕树小孩锚定的那棵固定坐标）+ 树桩/枯木/蘑菇（无售货亭无游乐设施）
+	for t in [[400, 1150, 1.3], [1100, 1050, 1.1], [2650, 1080, 1.1], [3350, 1150, 1.2], [650, 2150, 1.15], [3050, 2230, 1.0],
 			[2450, 2260, 1.05]]:
 		_statics.append({"kind": "tree", "pos": Vector2(_jit(ox + t[0]), _jit(t[1])), "s": t[2], "rad": 130.0 * t[2]})
+	_statics.append({"kind": "tree", "pos": Vector2(ox + 1900, 1120), "s": 1.35, "rad": 175.0})
 	for b in [[800, 1350, 0.9], [2200, 1300, 0.85], [3000, 1400, 1.0], [3700, 1350, 0.9],
 			[1500, 2270, 0.95], [3500, 2200, 0.9]]:
 		_statics.append({"kind": "bush", "pos": Vector2(_jit(ox + b[0]), _jit(b[1])), "s": b[2], "rad": 70.0 * b[2]})
@@ -731,7 +745,8 @@ func _mk_wild(ox: float) -> void:
 			"col": DOG_COLS[randi() % DOG_COLS.size()], "rad": 70.0, "st": {}})
 	_dyns.append({"kind": "cat", "period": 30.0, "t": randf() * 30.0, "a": Vector2(ox + 2500, 1850), "b": Vector2(ox + 2750, 1980),
 			"col": Color(0.55, 0.45, 0.38), "rad": 55.0, "st": {}})
-	_dyns.append({"kind": "orbit_kid", "period": 60.0, "t": randf() * 60.0, "c": Vector2(ox + 1900, 1120), "r": 300.0,
+	# 绕树小孩：ky 压扁纵幅 + 圆心下移，椭圆顶低于锚定树冠底（y≈1061），只在树前绕行
+	_dyns.append({"kind": "orbit_kid", "period": 60.0, "t": randf() * 60.0, "c": Vector2(ox + 1900, 1190), "r": 300.0, "ky": 0.25,
 			"shirt": SHIRTS[5], "skin": SKINS[2], "rad": 70.0, "st": {}})
 	_dyns.append({"kind": "bee", "period": 10.0, "t": randf() * 10.0, "c": Vector2(ox + 1800, 1420), "r": 85.0,
 			"flap_mul": 3.0, "rad": 45.0, "st": {}})
@@ -747,6 +762,10 @@ func _mk_wild(ox: float) -> void:
 			"rad": 40.0, "st": {}})
 	_dyns.append({"kind": "squirrel", "period": 20.0, "t": randf() * 20.0, "c": Vector2(ox + 2200, 1500), "r": 110.0,
 			"rad": 40.0, "st": {}})
+	# 静态鸟：猫头鹰(锚定树冠)/小鸡(树桩顶)/白鸽(路牌顶)
+	_mk_bird_static("owl", Vector2(ox + 1930, 970))
+	_mk_bird_static("chick", Vector2(ox + 800, 1822))
+	_mk_bird_static("dove", Vector2(ox + 2620, 1666))
 
 
 ## —— 分区 3：湖畔区（大湖 + 石桥喷泉 + 垂柳芦苇 + 水禽，元素种类与其余三区互斥）——
@@ -782,12 +801,13 @@ func _mk_lakeside(ox: float) -> void:
 	for b in [[750, 1200, 0.9], [1700, 1150, 0.85], [2600, 1200, 0.95], [3500, 1350, 0.9], [500, 2100, 0.85],
 			[3900, 1900, 0.8]]:
 		_statics.append({"kind": "bush", "pos": Vector2(_jit(ox + b[0]), _jit(b[1])), "s": b[2], "rad": 70.0 * b[2]})
+	# 花坛（地面平铺）先于长椅/路灯，避免土面盖住家具
+	_mk_bed(Vector2(ox + 1450, 1240), 160.0, 62.0)
+	_mk_bed(Vector2(ox + 3150, 1230), 155.0, 60.0)
 	for bn in [[1500, 1330, 1.0], [2700, 1330, -1.0]]:
 		_statics.append({"kind": "bench", "pos": Vector2(ox + bn[0], bn[1]), "flip": bn[2], "rad": 80.0})
 	for l in [[900, 1350], [2100, 1320], [3300, 1350]]:
 		_statics.append({"kind": "lamp", "pos": Vector2(ox + l[0], l[1]), "rad": 90.0})
-	_mk_bed(Vector2(ox + 1450, 1240), 160.0, 62.0)
-	_mk_bed(Vector2(ox + 3150, 1230), 155.0, 60.0)
 	_statics.append({"kind": "bin", "pos": Vector2(ox + 1900, 1300), "rad": 50.0})
 	_statics.append({"kind": "sign", "pos": Vector2(ox + 3600, 1450), "rad": 70.0})
 	_statics.append({"kind": "stone", "pos": Vector2(ox + 2350, 1250), "rad": 110.0})
@@ -805,6 +825,8 @@ func _mk_lakeside(ox: float) -> void:
 			"col": Color(0.30, 0.70, 0.75), "flap_mul": 4.0, "rad": 45.0, "st": {}})
 	_dyns.append({"kind": "dragonfly", "period": 10.0, "t": randf() * 10.0, "c": Vector2(ox + 2400, 1750), "r": 60.0,
 			"col": Color(0.55, 0.75, 0.30), "flap_mul": 4.0, "rad": 45.0, "st": {}})
+	# 静态鸟：火烈鸟(湖畔浅水)
+	_mk_bird_static("flamingo", Vector2(ox + 900, 2140))
 
 
 func _mk_bed(pos: Vector2, rx: float, ry: float) -> void:
@@ -814,6 +836,23 @@ func _mk_bed(pos: Vector2, rx: float, ry: float) -> void:
 		var rr := randf_range(0.35, 0.85)
 		fs.append({"o": Vector2(cos(a) * rx * rr, sin(a) * ry * rr), "c": FLOWERS[randi() % FLOWERS.size()]})
 	_statics.append({"kind": "bed", "pos": pos, "rx": rx, "ry": ry, "flowers": fs, "rad": maxf(rx, ry) + 40.0})
+
+
+## 静态鸟（OpenMoji 贴图，pos=落脚点脚底对齐）
+func _mk_bird_static(kind: String, pos: Vector2) -> void:
+	_statics.append({"kind": kind, "pos": pos, "rad": BIRD_STATICS[kind] * 0.8})
+
+
+## 静态鸟贴图：pck 内 png 不走导入，运行时字节解码
+func _load_bird_statics() -> void:
+	for kind: String in BIRD_STATICS:
+		var path := "res://games/Perfect_Snap/assets/birds/%s.png" % kind
+		if not FileAccess.file_exists(path):
+			push_warning("缺少静态鸟贴图: " + path)
+			continue
+		var img := Image.new()
+		if img.load_png_from_buffer(FileAccess.get_file_as_bytes(path)) == OK:
+			_bird_texs[kind] = ImageTexture.create_from_image(img)
 
 
 ## ===== 目标图 =====
@@ -1310,7 +1349,7 @@ func _draw_scene(p: Painter) -> void:
 			"bird": _d_bird(p, st.pos, st.face, st.flap, e.col)
 			"plane": _d_plane(p, st.pos, st.face, st.ang, st.prop)
 			"hotair": _d_hotair(p, st.pos, st.sway, e.col)
-	# 远山 / 草地 / 斑块 / 雏菊
+	# 远山 / 草地 / 斑块
 	for h in _hills:
 		if _vis(p, h.pos, h.rad):
 			_elli(p, h.pos, h.rx, h.ry, COL_HILL, 0.0)
@@ -1318,10 +1357,6 @@ func _draw_scene(p: Painter) -> void:
 	for pa in _patches:
 		if _vis(p, pa.pos, pa.rad):
 			_elli(p, pa.pos, pa.rx, pa.ry, COL_GRASS_L, 0.0)
-	for d in _daisies:
-		if _vis(p, d.pos, 16.0):
-			p.draw_circle(d.pos, 4.5, Color(1, 1, 1, 0.9))
-			p.draw_circle(d.pos, 1.8, Color(1.0, 0.85, 0.25))
 	# 路径
 	for pa in _paths:
 		var pts: PackedVector2Array = pa.pts
@@ -1363,6 +1398,7 @@ func _draw_scene(p: Painter) -> void:
 			"lily": _d_lily(p, e)
 			"fountain": _d_fountain(p, e)
 			"reed": _d_reed(p, e)
+			"owl", "dove", "parrot", "chick", "robin", "flamingo": _d_bird_static(p, e)
 	# 动态元素（地面层；云与天空元素已在上面绘制）
 	for i in _dyns.size():
 		var e: Dictionary = _dyns[i]
@@ -1876,6 +1912,18 @@ func _d_reed(p: Painter, e: Dictionary) -> void:
 		_elli(p, o + Vector2(bx + sway, -h - 7.0 * s), 3.2 * s, 9.0 * s, COL_REED.darkened(0.18), 0.0)
 
 
+## 静态鸟（OpenMoji 素材）：脚底对齐 pos；地面鸟（小鸡/火烈鸟）加投影
+func _d_bird_static(p: Painter, e: Dictionary) -> void:
+	var tex: Texture2D = _bird_texs.get(e.kind)
+	if tex == null:
+		return
+	var h: float = BIRD_STATICS[e.kind]
+	var w: float = h * tex.get_width() / tex.get_height()
+	if e.kind == "chick" or e.kind == "flamingo":
+		_shadow(p, e.pos, w * 0.3)
+	p.draw_texture_rect(tex, Rect2(e.pos + Vector2(-w * 0.5, -h), Vector2(w, h)), false)
+
+
 ## —— 新增动态元素（第四轮丰富化）——
 
 func _d_kite(p: Painter, pos: Vector2, ang: float, face: float, col: Color) -> void:
@@ -2207,7 +2255,7 @@ func _spawn_particles(pos: Vector2) -> void:
 func _init_sfx() -> void:
 	var files := {"shutter": "shutter.wav", "win": "win.wav", "fail": "fail.wav"}
 	for sname: String in files:
-		for base in ["res://games/perfect_snap/assets/sfx/", "res://assets/sfx/"]:
+		for base in ["res://games/Perfect_Snap/assets/sfx/", "res://assets/sfx/"]:
 			var path: String = base + files[sname]
 			if ResourceLoader.exists(path):
 				_sfx_streams[sname] = load(path)
@@ -2221,7 +2269,7 @@ func _init_sfx() -> void:
 		add_child(pl)
 		_sfx_players.append(pl)
 	# BGM：复用合集通用 BGM（低音量循环，跟随 GameHud [audio] bgm_on）
-	for base in ["res://games/perfect_snap/assets/sfx/bgm.mp3", "res://assets/sfx/bgm.mp3"]:
+	for base in ["res://games/Perfect_Snap/assets/sfx/bgm.mp3", "res://assets/sfx/bgm.mp3"]:
 		var bf := FileAccess.open(base, FileAccess.READ)
 		if bf != null:
 			var st := AudioStreamMP3.load_from_buffer(bf.get_buffer(bf.get_length()))

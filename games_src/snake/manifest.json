@@ -1,5 +1,5 @@
 {
-	"id": "snake",
+	"id": "Snake",
 	"name": "Snake",
 	"icon": "assets/icon.png",
 	"entry": "scenes/entry.tscn",

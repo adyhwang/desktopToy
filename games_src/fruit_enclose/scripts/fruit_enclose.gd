@@ -8,10 +8,11 @@ extends "res://scripts/game_base.gd"  # 打包时自动改写为包前缀路径
 
 const GameHud := preload("res://scripts/game_hud.gd")
 
-const FRUITS := ["apple", "banana", "carrot", "grape", "orange", "peach", "pear", "Pineapple", "strawberry", "watermelon"]
+const FRUITS := ["apple", "green_apple", "banana", "blueberry", "cherry", "grape", "lemon", "mango", "orange", "peach", "pear", "pineapple", "strawberry", "tomato", "bell_pepper"]
 const BOARD_MIN := 6        # 第 1 关 6×6
 const BOARD_CELLS := 400    # 总格子数上限（=20×20，单维可超 20），达到后不再扩大
-const KINDS_BASE := 3       # 种类数 = 3 + 关卡（夹 4..10）：第 1 关 4 种，第 7 关起满 10 种
+const KINDS_BASE := 3       # 种类数 = 3 + 关卡（夹 4..KINDS_MAX）：第 1 关 4 种，第 7 关起满 10 种
+const KINDS_MAX := 10       # 种类上限（沿用原设计难度；素材池 15 种靠每关洗牌轮换）
 const TOP_H := 86.0         # 顶栏高度（棋盘从其下开始布局）
 const MARGIN := 14.0        # 棋盘区边距
 const HOLD_MS := 500        # 长按提交判定：按住方框不动的时长 ms
@@ -40,7 +41,8 @@ var level := 1
 var cols := BOARD_MIN
 var rows := BOARD_MIN
 var kinds := 4
-var grid: Array[int] = []                 # rows*cols 个水果索引（FRUITS 下标），行优先
+var _pool: Array = []                     # 本关水果子集（从 FRUITS 洗牌取前 kinds 个，15 种轮换）
+var grid: Array[int] = []                 # rows*cols 个水果索引（_pool 下标），行优先
 var pattern: Array[int] = [0, 0, 0, 0]    # 目标样板 2×2（行优先）
 var _texs := {}                           # 水果名 → Texture2D
 var _cell := 60.0
@@ -86,7 +88,7 @@ var _dev_hint_t := -1.0                 # >0：提示高亮倒计时
 
 func start() -> void:
 	randomize()
-	hud = GameHud.new("fruit_enclose")
+	hud = GameHud.new("Fruit_Enclose")
 	get_viewport().size_changed.connect(_layout)
 	_load_textures()
 	_setup_buttons()   # 先建按钮再布局（_layout 会定位，null 会报错中断）
@@ -191,7 +193,10 @@ func _gen_level() -> void:
 	var dims := _board_dims(level, _board_avail())
 	cols = dims.x
 	rows = dims.y
-	kinds = clampi(KINDS_BASE + level, 4, FRUITS.size())
+	kinds = clampi(KINDS_BASE + level, 4, KINDS_MAX)
+	_pool = FRUITS.duplicate()
+	_pool.shuffle()
+	_pool.resize(kinds)
 	for i in 4:
 		pattern[i] = randi() % kinds
 	if pattern[0] == pattern[1] and pattern[1] == pattern[2] and pattern[2] == pattern[3]:
@@ -420,7 +425,7 @@ func _setup_preview() -> void:
 func _update_preview() -> void:
 	for i in 4:
 		var tr: TextureRect = _pv_rects[i]
-		tr.texture = _texs[FRUITS[pattern[i]]]
+		tr.texture = _texs[_pool[pattern[i]]]
 
 
 ## ===== 布局 =====
@@ -492,7 +497,7 @@ func _draw() -> void:
 			var r := Rect2(_origin + Vector2(x, y) * _cell, Vector2.ONE * _cell)
 			if (x + y) % 2 == 0:
 				draw_rect(r, COL_CHECKER, true)
-			var tex: Texture2D = _texs[FRUITS[grid[y * cols + x]]]
+			var tex: Texture2D = _texs[_pool[grid[y * cols + x]]]
 			if tex != null:
 				var ip := _cell * 0.12
 				draw_texture_rect(tex, Rect2(r.position + Vector2(ip, ip), Vector2.ONE * (_cell - ip * 2.0)), false)
@@ -575,7 +580,7 @@ func _spawn_popup(text: String, col: Color) -> void:
 func _init_sfx() -> void:
 	var files := {"win": "win.wav", "fail": "fail.wav"}
 	for sname: String in files:
-		for base in ["res://games/fruit_enclose/assets/sfx/", "res://assets/sfx/"]:
+		for base in ["res://games/Fruit_Enclose/assets/sfx/", "res://assets/sfx/"]:
 			var path: String = base + files[sname]
 			if ResourceLoader.exists(path):
 				_sfx_streams[sname] = load(path)
@@ -589,7 +594,7 @@ func _init_sfx() -> void:
 		add_child(p)
 		_sfx_players.append(p)
 	# BGM：复用接水果的水果主题（低音量循环，跟随 GameHud [audio] bgm_on）
-	for base in ["res://games/fruit_enclose/assets/sfx/bgm.mp3", "res://assets/sfx/bgm.mp3"]:
+	for base in ["res://games/Fruit_Enclose/assets/sfx/bgm.mp3", "res://assets/sfx/bgm.mp3"]:
 		var bf := FileAccess.open(base, FileAccess.READ)
 		if bf != null:
 			var st := AudioStreamMP3.load_from_buffer(bf.get_buffer(bf.get_length()))
@@ -810,7 +815,7 @@ func _find_solution() -> Vector2i:
 ## 水果贴图加载：pck 内 png 未走导入流程，字节解码（双路径兼容）
 func _load_textures() -> void:
 	for fname: String in FRUITS:
-		for base in ["res://games/fruit_enclose/assets/fruits/", "res://assets/fruits/"]:
+		for base in ["res://games/Fruit_Enclose/assets/fruits/", "res://assets/fruits/"]:
 			var path: String = base + fname + ".png"
 			if ResourceLoader.exists(path):
 				_texs[fname] = load(path)

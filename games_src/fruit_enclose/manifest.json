@@ -1,5 +1,5 @@
 {
-	"id": "fruit_enclose",
+	"id": "Fruit_Enclose",
 	"name": "Fruit Enclose",
 	"icon": "assets/icon.png",
 	"entry": "scenes/entry.tscn",

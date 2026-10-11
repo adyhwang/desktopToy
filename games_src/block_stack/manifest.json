@@ -1,5 +1,5 @@
 {
-	"id": "block_stack",
+	"id": "Block_Stack",
 	"name": "Block Stack",
 	"icon": "assets/icon.png",
 	"entry": "scenes/entry.tscn",

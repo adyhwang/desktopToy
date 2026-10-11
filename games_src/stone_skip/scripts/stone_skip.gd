@@ -121,7 +121,7 @@ var _select_layer: Control
 
 func start() -> void:
 	randomize()
-	hud = GameHud.new("stone_skip")
+	hud = GameHud.new("Stone_Skip")
 	get_viewport().size_changed.connect(_layout)
 	_load_textures()
 	_setup_buttons()
@@ -157,7 +157,7 @@ func _load_textures() -> void:
 
 func _load_png(rel: String) -> Texture2D:
 	# pck 内原始 png 无导入资源 loader，统一按字节解码（编辑器期走 res:// 相对路径）
-	for p: String in ["res://games/stone_skip/" + rel, "res://" + rel]:
+	for p: String in ["res://games/Stone_Skip/" + rel, "res://" + rel]:
 		var f := FileAccess.open(p, FileAccess.READ)
 		if f != null:
 			var img := Image.new()
@@ -1050,7 +1050,7 @@ func _init_sfx() -> void:
 	_sfx["pick"] = _sfx_stream([["t", 520.0, 780.0, 0.09, false, 0.35]])
 	_sfx["record"] = _sfx_stream([["t", 523.0, 523.0, 0.09, false, 0.35], ["t", 659.0, 659.0, 0.09, false, 0.35], ["t", 784.0, 784.0, 0.18, false, 0.4]])
 	# 掌声（取自投篮游戏 crowd_cheer.mp3）：pck 内 mp3 无导入资源，字节解码（双路径）
-	for base: String in ["res://games/stone_skip/assets/sfx/crowd_cheer.mp3", "res://assets/sfx/crowd_cheer.mp3"]:
+	for base: String in ["res://games/Stone_Skip/assets/sfx/crowd_cheer.mp3", "res://assets/sfx/crowd_cheer.mp3"]:
 		var cf := FileAccess.open(base, FileAccess.READ)
 		if cf != null:
 			_sfx_mp3["cheer"] = AudioStreamMP3.load_from_buffer(cf.get_buffer(cf.get_length()))
@@ -1060,7 +1060,7 @@ func _init_sfx() -> void:
 		add_child(p)
 		_sfx_players.append(p)
 	# BGM：低音量循环（与其他游戏共用曲目；读取失败则无 BGM）
-	for base: String in ["res://games/stone_skip/assets/sfx/bgm.mp3", "res://assets/sfx/bgm.mp3"]:
+	for base: String in ["res://games/Stone_Skip/assets/sfx/bgm.mp3", "res://assets/sfx/bgm.mp3"]:
 		var bf := FileAccess.open(base, FileAccess.READ)
 		if bf != null:
 			var st := AudioStreamMP3.load_from_buffer(bf.get_buffer(bf.get_length()))

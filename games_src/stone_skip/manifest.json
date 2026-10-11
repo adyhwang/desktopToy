@@ -1,5 +1,5 @@
 {
-	"id": "stone_skip",
+	"id": "Stone_Skip",
 	"name": "Stone Skip",
 	"icon": "assets/icon.png",
 	"entry": "scenes/entry.tscn",

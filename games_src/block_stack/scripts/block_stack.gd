@@ -169,7 +169,7 @@ var _dev_next_id := ""      # 强制下一个生成的方块 id（"" = 随机）
 
 func start() -> void:
 	randomize()
-	hud = GameHud.new("block_stack")
+	hud = GameHud.new("Block_Stack")
 	get_viewport().size_changed.connect(_layout)
 	_setup_buttons()
 	_init_sfx()
@@ -1086,7 +1086,7 @@ func _block_half_h(b: Dictionary) -> float:
 
 ## ===== 贴图加载（pck 内 png 字节解码；双路径兼容编辑器直跑）=====
 func _load_png(rel: String) -> Texture2D:
-	for p: String in ["res://games/block_stack/" + rel, "res://" + rel]:
+	for p: String in ["res://games/Block_Stack/" + rel, "res://" + rel]:
 		var f := FileAccess.open(p, FileAccess.READ)
 		if f != null:
 			var img := Image.new()
@@ -1142,7 +1142,7 @@ func _init_sfx() -> void:
 
 func _load_sfx(sname: String) -> AudioStream:
 	for ext: String in [".wav", ".ogg", ".mp3"]:
-		for p: String in ["res://games/block_stack/assets/sfx/" + sname + ext, "res://assets/sfx/" + sname + ext]:
+		for p: String in ["res://games/Block_Stack/assets/sfx/" + sname + ext, "res://assets/sfx/" + sname + ext]:
 			var f := FileAccess.open(p, FileAccess.READ)
 			if f == null:
 				continue

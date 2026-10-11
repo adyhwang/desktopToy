@@ -1,5 +1,5 @@
 {
-	"id": "fish_hook",
+	"id": "Fish_Hook",
 	"name": "Fish Hook",
 	"icon": "assets/icon.png",
 	"entry": "scenes/entry.tscn",

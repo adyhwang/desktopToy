@@ -117,7 +117,7 @@ var _hbox: HBoxContainer
 
 
 func start() -> void:
-	hud = GameHud.new("snake")
+	hud = GameHud.new("Snake")
 	_low_fx = OS.has_feature("web_android") or OS.has_feature("web_ios")
 	get_viewport().size_changed.connect(_layout)
 	_setup_buttons()
@@ -168,7 +168,7 @@ func _load_textures() -> void:
 
 func _load_png(path: String) -> Texture2D:
 	# pck 内原始 png 无导入资源 loader，统一按字节解码
-	for p: String in ["res://games/snake/" + path.trim_prefix("res://"), path]:
+	for p: String in ["res://games/Snake/" + path.trim_prefix("res://"), path]:
 		var f := FileAccess.open(p, FileAccess.READ)
 		if f != null:
 			var img := Image.new()
