@@ -1,0 +1,7 @@
+{
+	"id": "Face_Puzzle",
+	"name": "Face Puzzle",
+	"icon": "assets/icon.png",
+	"entry": "scenes/entry.tscn",
+	"version": "1.0.0"
+}

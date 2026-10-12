@@ -3,6 +3,7 @@ Block_Stack.pck
 Breakout.pck
 Darts.pck
 Desk_Wreck.pck
+Face_Puzzle.pck
 Fall_Rescue.pck
 Fish_Hook.pck
 Fish_Tank_Escape.pck
